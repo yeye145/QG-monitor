@@ -1,1 +1,6 @@
-
+spring:
+  datasource:
+    url: jdbc:opengauss://47.113.224.195:5432/postgres?currentSchema=pmp
+    username: gaussdb
+    password: MyPassword@123
+    driver-class-name: org.opengauss.Driver
