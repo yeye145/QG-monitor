@@ -11,7 +11,7 @@
     <!-- 控制台输出（带ANSI彩色） -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){blue} %clr(%-5level){green} %clr(%logger{36}.%M){cyan}:%L - %msg%n</pattern>
+            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){blue} %clr(%-5level){highlight} %clr(%logger{36}.%M){cyan}:%L - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>

@@ -21,12 +21,12 @@ public class AlertRuleController {
      * @return
      */
     @GetMapping("/selectByType")
-    public Result selectByType(@RequestParam String errorType) {
-        return alertRuleService.selectByType(errorType);
+    public Result selectByType(@RequestParam String errorType, @RequestParam String env) {
+        return alertRuleService.selectByType(errorType, env);
     }
 
     /**
-     * 修改报警阈值
+     * 修改报警阈值（添加与修改）
      * @param alertRule
      * @return
      */
@@ -34,4 +34,6 @@ public class AlertRuleController {
     public Result updateThreshold(@RequestBody AlertRule alertRule) {
         return alertRuleService.updateThreshold(alertRule);
     }
+
+
 }

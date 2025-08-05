@@ -12,6 +12,6 @@ public class AlertRuleServiceTest {
 
     @Test
     public void testSelectByType() {
-        System.out.println(alertRuleService.selectByType("NullPointException"));
+        System.out.println(alertRuleService.selectByType("NullPointException", "dev"));
     }
 }

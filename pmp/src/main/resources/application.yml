@@ -5,3 +5,10 @@ spring:
     password: MyPassword@123
     driver-class-name: org.opengauss.Driver
     type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      validation-query: select 1
+      test-while-idle: true
+
+
+server:
+  port: 8080
