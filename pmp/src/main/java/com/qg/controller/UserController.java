@@ -3,7 +3,8 @@ package com.qg.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.qg.domain.Result;
 import com.qg.domain.Users;
-import com.qg.dto.UsersDto;
+import com.qg.dto.RegisterDTO;
+import com.qg.dto.UsersDTO;
 import com.qg.service.UsersService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,31 @@ public class UserController {
         }
         Long id = user.getId();
 
-        map.put("user", BeanUtil.copyProperties(user, UsersDto.class));
+        map.put("user", BeanUtil.copyProperties(user, UsersDTO.class));
         return new Result(SUCCESS, map, "登录成功");
+    }
+
+    /**
+     * 用户注册
+     * @param registerDTO
+     * @return
+     */
+    @PostMapping("/register")
+    public Result register(@RequestBody RegisterDTO registerDTO) {
+        System.out.println("开始注册用户");
+        System.out.println("RegisterDTO: " + registerDTO);
+        return usersService.register(registerDTO.getUsers(), registerDTO.getCode().trim());
+    }
+
+    /**
+     * 发送验证码到邮箱
+     * @param email
+     * @return
+     */
+    @GetMapping("/sendCodeByEmail")
+    public Result sendCodeByEmail(@RequestParam("email") String email) {
+        System.out.println(email);
+        // 发送验证码到邮箱
+        return usersService.sendCodeByEmail(email);
     }
 }

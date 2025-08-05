@@ -1,11 +1,13 @@
 package com.qg.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 @Data
-public class UsersDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class UsersDTO {
     private Long id;
     private String username;
     private int role;
