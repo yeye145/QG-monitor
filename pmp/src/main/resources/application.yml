@@ -5,10 +5,32 @@ spring:
     password: MyPassword@123
     driver-class-name: org.opengauss.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-    druid:
-      validation-query: select 1
-      test-while-idle: true
-
+  data:
+    redis:
+      host: 47.113.224.195
+      port: 6379
+      password: qg@studio@2022
+      timeout: 5000ms  # 连接超时和读写超时时间
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s
+        shutdown-timeout: 0ms  # 优雅关闭连接
+      database: 2
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 2864201368@qq.com
+    password: onehhunksqknddfc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 
 server:
   port: 8080
