@@ -19,4 +19,5 @@ public class Log {
     private String detail;
     private String ip;
     private LocalDateTime createdTime;
+    private String env;
 }

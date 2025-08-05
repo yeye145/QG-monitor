@@ -20,4 +20,5 @@ public class Error {
     private String userAgent;
     private String url;
     private String breadcrumbs;
+    private String env;
 }

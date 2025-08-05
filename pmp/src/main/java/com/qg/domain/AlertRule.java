@@ -1,8 +1,7 @@
 package com.qg.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 
 @Data
 @AllArgsConstructor
@@ -11,4 +10,6 @@ public class AlertRule {
     private Long id;
     private String errorType;
     private Integer threshold;
+    private String env;
+
 }

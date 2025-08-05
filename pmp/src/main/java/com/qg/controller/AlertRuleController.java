@@ -1,10 +1,13 @@
 package com.qg.controller;
 
+import com.qg.domain.AlertRule;
+import com.qg.domain.Result;
 import com.qg.service.AlertRuleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Tag(name ="告警规则")
 @RestController
 @RequestMapping("/alertRules")
 public class AlertRuleController {
@@ -12,5 +15,23 @@ public class AlertRuleController {
     @Autowired
     private AlertRuleService alertRuleService;
 
+    /**
+     * 根据错误类型查询报警规则
+     * @param errorType
+     * @return
+     */
+    @GetMapping("/selectByType")
+    public Result selectByType(@RequestParam String errorType) {
+        return alertRuleService.selectByType(errorType);
+    }
 
+    /**
+     * 修改报警阈值
+     * @param alertRule
+     * @return
+     */
+    @PutMapping("/updateThreshold")
+    public Result updateThreshold(@RequestBody AlertRule alertRule) {
+        return alertRuleService.updateThreshold(alertRule);
+    }
 }
