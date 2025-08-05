@@ -6,10 +6,7 @@ import com.qg.service.AlertRuleService;
 import com.qg.service.ErrorService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,8 +18,23 @@ public class ErrorController {
     @Autowired
     private ErrorService errorService;
 
+    /**
+     * 添加错误信息
+     * @param errorList 错误信息列表
+     * @return 添加结果
+     */
     @PostMapping("/addError")
     public Result addError(@RequestBody List<Error> errorList) {
         return errorService.addError(errorList);
+    }
+
+    /**
+     * 根据环境与项目id查询错误信息
+     * @param env
+     * @return
+     */
+    @GetMapping("/selectByEnvProjectModule")
+    public Result selectByEnv(@RequestParam String env, @RequestParam String projectId, @RequestParam(required = false) Long moduleId) {
+        return errorService.selectByEnv(env, projectId, moduleId);
     }
 }

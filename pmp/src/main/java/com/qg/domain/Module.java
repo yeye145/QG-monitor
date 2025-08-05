@@ -16,7 +16,6 @@ public class Module {
     private Long id;
     private String projectId;
     private String moduleName;
-    private boolean isActive;
     private LocalDateTime createdTime;
     private LocalDateTime deletedTime;
 }
