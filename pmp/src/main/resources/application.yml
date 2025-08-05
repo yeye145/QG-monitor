@@ -5,6 +5,7 @@ spring:
     password: MyPassword@123
     driver-class-name: org.opengauss.Driver
     type: com.alibaba.druid.pool.DruidDataSource
+
   data:
     redis:
       host: 47.113.224.195

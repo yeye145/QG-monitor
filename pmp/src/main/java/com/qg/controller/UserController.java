@@ -7,13 +7,14 @@ import com.qg.dto.RegisterDTO;
 import com.qg.dto.UsersDTO;
 import com.qg.service.UsersService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 import static com.qg.domain.Code.*;
-
+@Slf4j
 @Tag(name ="用户个人信息")
 @RestController
 @RequestMapping("/users")
@@ -52,8 +53,8 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result register(@RequestBody RegisterDTO registerDTO) {
-        System.out.println("开始注册用户");
-        System.out.println("RegisterDTO: " + registerDTO);
+        log.info("开始注册用户");
+        log.info("RegisterDTO: {}", registerDTO);
         return usersService.register(registerDTO.getUsers(), registerDTO.getCode().trim());
     }
 
