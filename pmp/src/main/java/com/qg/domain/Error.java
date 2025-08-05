@@ -15,7 +15,7 @@ public class Error {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     private String platform;
-    private Long projectId;
+    private String projectId;
     private String type;
     private LocalDateTime timestamp;
     private String message;
@@ -24,4 +24,5 @@ public class Error {
     private String url;
     private String breadcrumbs;
     private String env;
+    private Long moduleId;
 }
