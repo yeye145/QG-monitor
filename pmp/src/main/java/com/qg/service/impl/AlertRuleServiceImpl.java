@@ -8,8 +8,6 @@ import com.qg.domain.Result;
 import com.qg.mapper.AlertRuleMapper;
 import com.qg.service.AlertRuleService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,14 +21,15 @@ public class AlertRuleServiceImpl implements AlertRuleService {
 
 
     @Override
-    public Result selectByType(String errorType) {
+    public Result selectByType(String errorType, String env) {
         // 参数校验
-        if (errorType == null || errorType.trim().isEmpty()) {
+        if (errorType == null || errorType.trim().isEmpty() || env == null || env.trim().isEmpty()) {
             return new Result(Code.BAD_REQUEST, "错误类型不能为空");
         }
         try {
             LambdaQueryWrapper<AlertRule> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AlertRule::getErrorType, errorType.trim());
+            queryWrapper.eq(AlertRule::getErrorType, errorType.trim())
+                    .eq(AlertRule::getEnv, env.trim());
             AlertRule alertRule = alertRuleMapper.selectOne(queryWrapper);
             if (alertRule == null) {
                 log.info("未找到错误类型对应的规则: {}", errorType);
@@ -55,11 +54,13 @@ public class AlertRuleServiceImpl implements AlertRuleService {
             boolean result = alertRuleMapper.selectCount(
                     new LambdaQueryWrapper<AlertRule>()
                             .eq(AlertRule::getErrorType, alertRule.getErrorType())
+                            .eq(AlertRule::getEnv, alertRule.getEnv())
             ) > 0;
             if (result) {
                 // 只更新 threshold 字段
                 LambdaUpdateWrapper<AlertRule> updateWrapper = new LambdaUpdateWrapper<>();
                 updateWrapper.eq(AlertRule::getErrorType, alertRule.getErrorType())
+                        .eq(AlertRule::getEnv, alertRule.getEnv())
                         .set(AlertRule::getThreshold, alertRule.getThreshold());
                 alertRuleMapper.update(null, updateWrapper);
                 return new Result(Code.SUCCESS, "更新成功");
