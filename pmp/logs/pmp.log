@@ -780,3 +780,73 @@ Caused by: org.opengauss.util.PSQLException: [192.168.1.161:62249/47.113.224.195
 2025-08-05 10:22:49.786 [http-nio-8080-exec-4] DEBUG c.q.m.AlertRuleMapper.selectList.debug:135 - ==> Parameters: NullPointException(String)
 2025-08-05 10:22:49.808 [http-nio-8080-exec-4] DEBUG c.q.m.AlertRuleMapper.selectList.debug:135 - <==      Total: 1
 2025-08-05 10:22:49.808 [http-nio-8080-exec-4] DEBUG c.q.s.impl.AlertRuleServiceImpl.selectByType:39 - 成功查询错误类型规则: NullPointException
+2025-08-05 11:24:59.638 [main] INFO  com.qg.PmpApplication.logStarting:53 - Starting PmpApplication using Java 21.0.6 with PID 63220 (D:\大学\工作室\暑假训练营\QG-monitor\pmp\target\classes started by ASUS in D:\大学\工作室\暑假训练营\QG-monitor\pmp)
+2025-08-05 11:24:59.639 [main] DEBUG com.qg.PmpApplication.logStarting:54 - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-05 11:24:59.640 [main] INFO  com.qg.PmpApplication.logStartupProfileInfo:652 - No active profile set, falling back to 1 default profile: "default"
+2025-08-05 11:25:00.223 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:294 - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-05 11:25:00.224 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:145 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-05 11:25:00.240 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:213 - Finished Spring Data repository scanning in 5 ms. Found 0 Redis repository interfaces.
+2025-08-05 11:25:00.562 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize:111 - Tomcat initialized with port 8080 (http)
+2025-08-05 11:25:00.571 [main] INFO  o.a.catalina.core.StandardService.log:168 - Starting service [Tomcat]
+2025-08-05 11:25:00.572 [main] INFO  o.a.catalina.core.StandardEngine.log:168 - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-05 11:25:00.610 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log:168 - Initializing Spring embedded WebApplicationContext
+2025-08-05 11:25:00.610 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:301 - Root WebApplicationContext: initialization completed in 937 ms
+2025-08-05 11:25:01.155 [main] INFO  o.s.v.b.OptionalValidatorFactoryBean.afterPropertiesSet:48 - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2025-08-05 11:25:01.421 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start:243 - Tomcat started on port 8080 (http) with context path '/'
+2025-08-05 11:25:01.426 [main] INFO  com.qg.PmpApplication.logStarted:59 - Started PmpApplication in 2.189 seconds (process running for 2.745)
+2025-08-05 11:32:31.454 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-05 11:32:31.490 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown:76 - Graceful shutdown complete
+2025-08-05 11:32:31.602 [SpringApplicationShutdownHook] INFO  c.alibaba.druid.pool.DruidDataSource.close:2204 - {dataSource-0} closing ...
+2025-08-05 11:32:36.746 [main] INFO  com.qg.PmpApplication.logStarting:53 - Starting PmpApplication using Java 21.0.6 with PID 53968 (D:\大学\工作室\暑假训练营\QG-monitor\pmp\target\classes started by ASUS in D:\大学\工作室\暑假训练营\QG-monitor\pmp)
+2025-08-05 11:32:36.747 [main] DEBUG com.qg.PmpApplication.logStarting:54 - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-05 11:32:36.748 [main] INFO  com.qg.PmpApplication.logStartupProfileInfo:652 - No active profile set, falling back to 1 default profile: "default"
+2025-08-05 11:32:37.310 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:294 - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-05 11:32:37.311 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:145 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-05 11:32:37.327 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:213 - Finished Spring Data repository scanning in 5 ms. Found 0 Redis repository interfaces.
+2025-08-05 11:32:38.573 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize:111 - Tomcat initialized with port 8080 (http)
+2025-08-05 11:32:38.599 [main] INFO  o.a.catalina.core.StandardService.log:168 - Starting service [Tomcat]
+2025-08-05 11:32:38.599 [main] INFO  o.a.catalina.core.StandardEngine.log:168 - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-05 11:32:38.638 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log:168 - Initializing Spring embedded WebApplicationContext
+2025-08-05 11:32:38.638 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:301 - Root WebApplicationContext: initialization completed in 1864 ms
+2025-08-05 11:32:39.186 [main] INFO  o.s.v.b.OptionalValidatorFactoryBean.afterPropertiesSet:48 - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2025-08-05 11:32:39.547 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start:243 - Tomcat started on port 8080 (http) with context path '/'
+2025-08-05 11:32:39.553 [main] INFO  com.qg.PmpApplication.logStarted:59 - Started PmpApplication in 3.234 seconds (process running for 3.639)
+2025-08-05 11:33:01.908 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-05 11:33:01.912 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown:76 - Graceful shutdown complete
+2025-08-05 11:33:01.926 [SpringApplicationShutdownHook] INFO  c.alibaba.druid.pool.DruidDataSource.close:2204 - {dataSource-0} closing ...
+2025-08-05 11:58:30.569 [main] INFO  com.qg.PmpApplication.logStarting:53 - Starting PmpApplication using Java 21.0.6 with PID 26816 (D:\大学\工作室\暑假训练营\QG-monitor\pmp\target\classes started by ASUS in D:\大学\工作室\暑假训练营\QG-monitor\pmp)
+2025-08-05 11:58:30.570 [main] DEBUG com.qg.PmpApplication.logStarting:54 - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-05 11:58:30.571 [main] INFO  com.qg.PmpApplication.logStartupProfileInfo:652 - No active profile set, falling back to 1 default profile: "default"
+2025-08-05 11:58:31.064 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:294 - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-05 11:58:31.065 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:145 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-05 11:58:31.084 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:213 - Finished Spring Data repository scanning in 6 ms. Found 0 Redis repository interfaces.
+2025-08-05 11:58:31.400 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize:111 - Tomcat initialized with port 8080 (http)
+2025-08-05 11:58:31.410 [main] INFO  o.a.catalina.core.StandardService.log:168 - Starting service [Tomcat]
+2025-08-05 11:58:31.410 [main] INFO  o.a.catalina.core.StandardEngine.log:168 - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-05 11:58:31.448 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log:168 - Initializing Spring embedded WebApplicationContext
+2025-08-05 11:58:31.449 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:301 - Root WebApplicationContext: initialization completed in 849 ms
+2025-08-05 11:58:31.985 [main] INFO  o.s.v.b.OptionalValidatorFactoryBean.afterPropertiesSet:48 - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2025-08-05 11:58:32.290 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start:243 - Tomcat started on port 8080 (http) with context path '/'
+2025-08-05 11:58:32.295 [main] INFO  com.qg.PmpApplication.logStarted:59 - Started PmpApplication in 2.147 seconds (process running for 2.691)
+2025-08-05 12:13:02.889 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-05 12:13:02.964 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown:76 - Graceful shutdown complete
+2025-08-05 12:13:03.164 [SpringApplicationShutdownHook] INFO  c.alibaba.druid.pool.DruidDataSource.close:2204 - {dataSource-0} closing ...
+2025-08-05 16:30:53.681 [main] INFO  com.qg.PmpApplication.logStarting:53 - Starting PmpApplication using Java 21.0.6 with PID 69712 (D:\大学\工作室\暑假训练营\QG-monitor\pmp\target\classes started by ASUS in D:\大学\工作室\暑假训练营\QG-monitor\pmp)
+2025-08-05 16:30:53.683 [main] DEBUG com.qg.PmpApplication.logStarting:54 - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-05 16:30:53.683 [main] INFO  com.qg.PmpApplication.logStartupProfileInfo:652 - No active profile set, falling back to 1 default profile: "default"
+2025-08-05 16:30:54.210 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.multipleStoresDetected:294 - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-05 16:30:54.212 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:145 - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-05 16:30:54.229 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate.registerRepositoriesIn:213 - Finished Spring Data repository scanning in 6 ms. Found 0 Redis repository interfaces.
+2025-08-05 16:30:54.589 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.initialize:111 - Tomcat initialized with port 8080 (http)
+2025-08-05 16:30:54.600 [main] INFO  o.a.catalina.core.StandardService.log:168 - Starting service [Tomcat]
+2025-08-05 16:30:54.601 [main] INFO  o.a.catalina.core.StandardEngine.log:168 - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-05 16:30:54.635 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log:168 - Initializing Spring embedded WebApplicationContext
+2025-08-05 16:30:54.635 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext:301 - Root WebApplicationContext: initialization completed in 924 ms
+2025-08-05 16:30:55.175 [main] INFO  o.s.v.b.OptionalValidatorFactoryBean.afterPropertiesSet:48 - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2025-08-05 16:30:55.430 [main] WARN  c.b.m.core.metadata.TableInfoHelper.initTableFields:376 - Can not find table primary key in Class: "com.qg.domain.Project".
+2025-08-05 16:30:55.431 [main] WARN  c.b.m.c.injector.DefaultSqlInjector.getMethodList:56 - class com.qg.domain.Project ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-05 16:30:55.458 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer.start:243 - Tomcat started on port 8080 (http) with context path '/'
+2025-08-05 16:30:55.463 [main] INFO  com.qg.PmpApplication.logStarted:59 - Started PmpApplication in 2.213 seconds (process running for 2.713)
+2025-08-05 16:31:05.438 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown.shutDownGracefully:54 - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-05 16:31:05.442 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown.doShutdown:76 - Graceful shutdown complete
+2025-08-05 16:31:05.453 [SpringApplicationShutdownHook] INFO  c.alibaba.druid.pool.DruidDataSource.close:2204 - {dataSource-0} closing ...

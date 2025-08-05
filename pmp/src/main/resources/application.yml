@@ -4,6 +4,7 @@ spring:
     username: gaussdb
     password: MyPassword@123
     driver-class-name: org.opengauss.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
 
   data:
     redis:
@@ -31,5 +32,5 @@ spring:
           starttls:
             enable: true
             required: true
-   type: com.alibaba.druid.pool.DruidDataSource
+
 
