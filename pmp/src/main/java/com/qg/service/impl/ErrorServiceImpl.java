@@ -79,13 +79,8 @@ public class ErrorServiceImpl implements ErrorService {
                     existingError.setEvent(existingError.getEvent() + 1);
                     existingError.setTimestamp(LocalDateTime.now());
                     existingError.setMessage(error.getMessage());
-                    existingError.setStack(error.getStack());
-                    existingError.setBreadcrumbs(error.getBreadcrumbs());
-                    existingError.setUrl(error.getUrl());
-                    existingError.setUserAgent(error.getUserAgent());
 
                     updatedErrors.add(existingError);
-                    broadcastErrors.add(existingError);
 
                     log.debug("更新错误次数，错误ID: {}, 新次数: {}", existingError.getId(), existingError.getEvent());
                 } else {
@@ -96,11 +91,6 @@ public class ErrorServiceImpl implements ErrorService {
 
                     log.debug("插入新错误: {}", error);
                 }
-            }
-
-            // 向WebSocket客户端广播错误信息
-            if (!broadcastErrors.isEmpty()) {
-                broadcastNewErrors(broadcastErrors);
             }
 
             log.info("处理错误信息完成，总数量: {}，新增: {} 条，更新: {} 条",
