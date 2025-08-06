@@ -25,4 +25,8 @@ public class Error {
     private String breadcrumbs;
     private String env;
     private Long moduleId;
+    // 发生次数
+    private Integer event;
+    // 是否已处理
+    private Integer isHandled;
 }
