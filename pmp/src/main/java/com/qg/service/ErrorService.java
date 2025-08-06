@@ -8,5 +8,5 @@ import java.util.List;
 public interface ErrorService {
     Result addError(List<Error> errorList);
 
-    Result selectByEnv(String env, String projectId, Long moduleId);
+    Result selectByEnvProjectModule(String env, String projectId, Long moduleId);
 }

@@ -29,12 +29,12 @@ public class ErrorController {
     }
 
     /**
-     * 根据环境与项目id查询错误信息
+     * 根据环境与项目id与模块id查询错误信息
      * @param env
      * @return
      */
     @GetMapping("/selectByEnvProjectModule")
-    public Result selectByEnv(@RequestParam String env, @RequestParam String projectId, @RequestParam(required = false) Long moduleId) {
-        return errorService.selectByEnv(env, projectId, moduleId);
+    public Result selectByEnvProjectModule(@RequestParam String env, @RequestParam String projectId, @RequestParam(required = false) Long moduleId) {
+        return errorService.selectByEnvProjectModule(env, projectId, moduleId);
     }
 }

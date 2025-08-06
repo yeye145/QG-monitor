@@ -16,20 +16,20 @@
         </encoder>
     </appender>
 
-    <!-- 文件日志（带滚动归档） -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/${APP_NAME}.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>7</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-    </appender>
+<!--    &lt;!&ndash; 文件日志（带滚动归档） &ndash;&gt;-->
+<!--    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <file>${LOG_HOME}/${APP_NAME}.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>${LOG_HOME}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>-->
+<!--            <maxFileSize>100MB</maxFileSize>-->
+<!--            <maxHistory>7</maxHistory>-->
+<!--            <totalSizeCap>1GB</totalSizeCap>-->
+<!--        </rollingPolicy>-->
+<!--        <encoder>-->
+<!--            <pattern>${LOG_PATTERN}</pattern>-->
+<!--            <charset>UTF-8</charset>-->
+<!--        </encoder>-->
+<!--    </appender>-->
 
     <!-- SQL日志单独输出 -->
     <appender name="SQL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
