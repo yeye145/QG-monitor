@@ -8,6 +8,7 @@ import com.qg.domain.Result;
 import com.qg.mapper.ErrorMapper;
 import com.qg.mapper.ProjectMapper;
 import com.qg.service.ErrorService;
+import com.qg.websocket.UnifiedWebSocketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -35,6 +36,9 @@ public class ErrorServiceImpl implements ErrorService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    private UnifiedWebSocketHandler webSocketHandler;
+
     @Override
     @Transactional
     public Result addError(List<Error> errorList) {
@@ -47,6 +51,7 @@ public class ErrorServiceImpl implements ErrorService {
         try {
             log.debug("开始批量保存，数据量: {}", errorList.size());
             List<Error> nonDuplicateErrors = new ArrayList<>();
+            List<Error> broadcastErrors = new ArrayList<>(); // 用于广播的新错误
 
             for (Error error : errorList) {
                 if (error == null) continue;
@@ -63,6 +68,7 @@ public class ErrorServiceImpl implements ErrorService {
                 stringRedisTemplate.opsForValue().set(
                         redisKey, error.getMessage(), Duration.ofMinutes(MAX_ERROR_TIME));
                 nonDuplicateErrors.add(error);
+                broadcastErrors.add(error); // 记录需要广播的错误
             }
 
             // 批量插入非重复错误
@@ -70,6 +76,12 @@ public class ErrorServiceImpl implements ErrorService {
             for (Error error : nonDuplicateErrors) {
                 successCount += errorMapper.insert(error);
             }
+
+            // 向WebSocket客户端广播新错误
+            if (!broadcastErrors.isEmpty()) {
+                broadcastNewErrors(broadcastErrors);
+            }
+
             log.info("添加错误信息完成，总数量: {}，新增: {} 条，重复: {} 条",
                     errorList.size(), successCount, errorList.size() - successCount);
             return new Result(Code.SUCCESS, "添加错误信息成功");
@@ -89,6 +101,21 @@ public class ErrorServiceImpl implements ErrorService {
                 error.getType(),
                 error.getEnv(),
                 error.getPlatform());
+    }
+
+    /**
+     * 广播新错误给WebSocket客户端
+     */
+    private void broadcastNewErrors(List<Error> errors) {
+        try {
+            // 创建 Result 对象
+            Result result = new Result(Code.SUCCESS, errors, "新增错误信息");
+
+            // 使用统一的WebSocket处理器发送错误信息
+            webSocketHandler.sendMessageByType("error", result);
+        } catch (Exception e) {
+            log.error("广播错误信息失败", e);
+        }
     }
 
 
@@ -125,4 +152,22 @@ public class ErrorServiceImpl implements ErrorService {
             return new Result(Code.INTERNAL_ERROR, "查询错误信息失败: " + e.getMessage());
         }
     }
+
+    @Override
+    public Result selectById(Long id) {
+        if (id == null) {
+            log.error("查询错误信息失败，参数为空");
+            return new Result(Code.BAD_REQUEST, "查询错误信息失败，参数为空");
+        }
+        try {
+            Error error = errorMapper.selectById(id);
+            log.info("成功查询错误: {}", error);
+            return new Result(Code.SUCCESS, error, "查询成功");
+        } catch (Exception e) {
+            log.error("查询错误失败，参数: {}", id, e);
+            return new Result(Code.INTERNAL_ERROR, "查询错误失败: " + e.getMessage());
+        }
+    }
+
+
 }

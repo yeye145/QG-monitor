@@ -9,4 +9,6 @@ public interface ErrorService {
     Result addError(List<Error> errorList);
 
     Result selectByEnvProjectModule(String env, String projectId, Long moduleId);
+
+    Result selectById(Long id);
 }

@@ -37,4 +37,14 @@ public class ErrorController {
     public Result selectByEnvProjectModule(@RequestParam String env, @RequestParam String projectId, @RequestParam(required = false) Long moduleId) {
         return errorService.selectByEnvProjectModule(env, projectId, moduleId);
     }
+
+    /**
+     * 根据id查询错误信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/selectById")
+    public Result selectById(@RequestParam Long id) {
+        return errorService.selectById(id);
+    }
 }
