@@ -38,7 +38,7 @@ public class RoleServiceImpl implements RoleService {
             return new Result(Code.NOT_FOUND, "该用户未加入该项目");
         }
         //更新用户权限
-        return roleMapper.updateById(role) == 1 ? new Result(Code.CREATED, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
+        return roleMapper.update(role, lqw) == 1 ? new Result(Code.CREATED, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
     }
 
     @Override
@@ -77,5 +77,14 @@ public class RoleServiceImpl implements RoleService {
             return new Result(Code.NOT_FOUND, "该用户未加入任何项目");
         }
         return new Result(Code.SUCCESS,list,"查询成功");
+    }
+
+    //查询该项目该用户的角色与权限
+    @Override
+    public Result getRole(String userId, String projectId) {
+        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Role::getUserId, userId).eq(Role::getProjectId, projectId);
+        Role role = roleMapper.selectOne(lqw);
+        return role == null ? new Result(Code.NOT_FOUND, "该项目下无此用户") : new Result(Code.SUCCESS, role, "查询成功");
     }
 }
