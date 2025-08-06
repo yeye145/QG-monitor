@@ -8,4 +8,8 @@ import java.util.List;
 public interface PerformanceService {
 
     Result addPerformance(List<Performance> performance);
+
+    Result selectByProjectId(String projectId);
+
+    Result selectByEnvProjectId(String env, String projectId);
 }
