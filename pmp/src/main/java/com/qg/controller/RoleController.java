@@ -61,13 +61,14 @@ public class RoleController {
     }
 
     /**
-     * 查看个人已加入项目
+     * 个人与项目关联
      * @param userId
+     * @param projectId
      * @return
      */
-    @GetMapping("/getProListByUserId")
-    public Result getProListByUserId(@RequestParam String userId) {
-        return roleService.getProListByUserId(userId);
+    @GetMapping("/getRole")
+    public Result getRole(@RequestParam String userId, @RequestParam String projectId) {
+        return roleService.getRole(userId, projectId);
     }
 
 }
