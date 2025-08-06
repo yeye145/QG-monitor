@@ -43,8 +43,8 @@ public class ErrorController {
      * @param id
      * @return
      */
-    @GetMapping("/selectById")
-    public Result selectById(@RequestParam Long id) {
+    @GetMapping("/selectById/{id}")
+    public Result selectById(@PathVariable Long id) {
         return errorService.selectById(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.qg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.Code;
 import com.qg.domain.Error;
 import com.qg.domain.Project;
@@ -11,17 +12,12 @@ import com.qg.service.ErrorService;
 import com.qg.websocket.UnifiedWebSocketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.qg.utils.RedisConstants.ERROR_REPEAT_KEY;
-import static com.qg.utils.RedisConstants.MAX_ERROR_TIME;
-
 
 @Slf4j
 @Service
@@ -32,9 +28,6 @@ public class ErrorServiceImpl implements ErrorService {
 
     @Autowired
     private ProjectMapper projectMapper;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private UnifiedWebSocketHandler webSocketHandler;
@@ -49,42 +42,70 @@ public class ErrorServiceImpl implements ErrorService {
         }
 
         try {
-            log.debug("开始批量保存，数据量: {}", errorList.size());
-            List<Error> nonDuplicateErrors = new ArrayList<>();
-            List<Error> broadcastErrors = new ArrayList<>(); // 用于广播的新错误
+            log.debug("开始处理错误信息，数据量: {}", errorList.size());
+            List<Error> updatedErrors = new ArrayList<>();  // 已存在的错误（更新次数）
+            List<Error> newErrors = new ArrayList<>();      // 新的错误（插入）
+            List<Error> broadcastErrors = new ArrayList<>(); // 需要广播的错误
 
             for (Error error : errorList) {
                 if (error == null) continue;
-                String errorKey = generateErrorKey(error);
-                String redisKey = ERROR_REPEAT_KEY + errorKey;
 
-                // 检查 Redis 中是否存在（10分钟过期）
-                Boolean hasKey = stringRedisTemplate.hasKey(redisKey);
-                if (Boolean.TRUE.equals(hasKey)) {
-                    log.debug("跳过重复错误: {}", error);
-                    continue;
+                // 根据项目ID、错误类型、环境、平台查找是否已存在相同错误
+                LambdaQueryWrapper<Error> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(Error::getProjectId, error.getProjectId())
+                        .eq(Error::getType, error.getType())
+                        .eq(Error::getEnv, error.getEnv())
+                        .eq(Error::getPlatform, error.getPlatform())
+                        .orderByDesc(Error::getTimestamp)
+                        .last("LIMIT 1");
+
+                Error existingError = errorMapper.selectOne(queryWrapper);
+
+                if (existingError != null) {
+                    // 错误已存在，更新发生次数和时间戳
+                    LambdaUpdateWrapper<Error> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(Error::getId, existingError.getId())
+                            .set(Error::getEvent, existingError.getEvent() + 1)
+                            .set(Error::getTimestamp, LocalDateTime.now())
+                            .set(Error::getMessage, error.getMessage())
+                            .set(Error::getStack, error.getStack())
+                            .set(Error::getBreadcrumbs, error.getBreadcrumbs())
+                            .set(Error::getUrl, error.getUrl())
+                            .set(Error::getUserAgent, error.getUserAgent()); // 更新错误信息
+
+                    errorMapper.update(null, updateWrapper);
+
+                    // 更新后的错误信息用于广播
+                    existingError.setEvent(existingError.getEvent() + 1);
+                    existingError.setTimestamp(LocalDateTime.now());
+                    existingError.setMessage(error.getMessage());
+                    existingError.setStack(error.getStack());
+                    existingError.setBreadcrumbs(error.getBreadcrumbs());
+                    existingError.setUrl(error.getUrl());
+                    existingError.setUserAgent(error.getUserAgent());
+
+                    updatedErrors.add(existingError);
+                    broadcastErrors.add(existingError);
+
+                    log.debug("更新错误次数，错误ID: {}, 新次数: {}", existingError.getId(), existingError.getEvent());
+                } else {
+                    // 错误不存在，插入
+                    errorMapper.insert(error);
+                    newErrors.add(error);
+                    broadcastErrors.add(error);
+
+                    log.debug("插入新错误: {}", error);
                 }
-                // 记录到 Redis（10分钟过期）
-                stringRedisTemplate.opsForValue().set(
-                        redisKey, error.getMessage(), Duration.ofMinutes(MAX_ERROR_TIME));
-                nonDuplicateErrors.add(error);
-                broadcastErrors.add(error); // 记录需要广播的错误
             }
 
-            // 批量插入非重复错误
-            int successCount = 0;
-            for (Error error : nonDuplicateErrors) {
-                successCount += errorMapper.insert(error);
-            }
-
-            // 向WebSocket客户端广播新错误
+            // 向WebSocket客户端广播错误信息
             if (!broadcastErrors.isEmpty()) {
                 broadcastNewErrors(broadcastErrors);
             }
 
-            log.info("添加错误信息完成，总数量: {}，新增: {} 条，重复: {} 条",
-                    errorList.size(), successCount, errorList.size() - successCount);
-            return new Result(Code.SUCCESS, "添加错误信息成功");
+            log.info("处理错误信息完成，总数量: {}，新增: {} 条，更新: {} 条",
+                    errorList.size(), newErrors.size(), updatedErrors.size());
+            return new Result(Code.SUCCESS, "处理错误信息成功");
         } catch (Exception e) {
             log.error("添加错误信息失败，错误信息: {}", errorList, e);
             return new Result(Code.INTERNAL_ERROR, "添加错误信息失败: " + e.getMessage());
