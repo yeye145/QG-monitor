@@ -14,5 +14,6 @@ public class AlertRule {
     private String errorType;
     private Integer threshold;
     private String env;
+    private String projectId;
 
 }

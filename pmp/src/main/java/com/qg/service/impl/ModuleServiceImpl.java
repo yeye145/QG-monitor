@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.Code;
 import com.qg.domain.Module;
+import com.qg.domain.Project;
 import com.qg.domain.Result;
 import com.qg.mapper.ModuleMapper;
+import com.qg.mapper.ProjectMapper;
 import com.qg.service.ModuleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class ModuleServiceImpl implements ModuleService {
     @Autowired
     private ModuleMapper moduleMapper;
 
+    @Autowired
+    private ProjectMapper projectMapper;
+
     @Override
     public Result addModule(Module module) {
         log.info("添加模块: {}", module);
@@ -35,7 +40,12 @@ public class ModuleServiceImpl implements ModuleService {
         }
 
         // 判断项目id是否存在
-
+        Project project = projectMapper.selectOne(new LambdaQueryWrapper<Project>()
+                .eq(Project::getUuid, module.getProjectId()));
+        if (project == null) {
+            log.error("添加模块失败，项目id不存在");
+            return new Result(Code.NOT_FOUND, "添加模块失败，项目id不存在");
+        }
 
         try {
             boolean result = moduleMapper.insert(module) > 0;
@@ -57,6 +67,13 @@ public class ModuleServiceImpl implements ModuleService {
         if (projectId == null || projectId.isEmpty()) {
             log.error("查询模块失败，参数为空");
             return new Result(Code.BAD_REQUEST, "查询模块失败，参数为空");
+        }
+        // 判断项目id是否存在
+        Project project = projectMapper.selectOne(new LambdaQueryWrapper<Project>()
+                .eq(Project::getUuid, projectId));
+        if (project == null) {
+            log.error("查询模块失败，项目id不存在");
+            return new Result(Code.NOT_FOUND, "查询模块失败，项目id不存在");
         }
         try {
             LambdaQueryWrapper<Module> queryWrapper = new LambdaQueryWrapper<>();
@@ -83,7 +100,6 @@ public class ModuleServiceImpl implements ModuleService {
             LambdaUpdateWrapper<Module> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(Module::getId, id)
                     .set(Module::getDeletedTime, LocalDateTime.now());
-
             // 执行更新操作
             int result = moduleMapper.update(null, updateWrapper);
             if (result > 0) {

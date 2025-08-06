@@ -1,5 +1,7 @@
 package com.qg.utils;
 
+import io.swagger.v3.oas.models.security.SecurityScheme;
+
 public class RedisConstants {
     /**
      * 验证码
@@ -14,4 +16,10 @@ public class RedisConstants {
      */
     public static final String LOGIN_USER_KEY = "login:user:";
     public static final long LOGIN_USER_TTL = 30L;
+
+    /**
+     * 错误 重复
+     */
+    public static final String ERROR_REPEAT_KEY = "error:repeat:";
+    public static final Integer MAX_ERROR_TIME = 10;
 }
