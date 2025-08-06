@@ -4,12 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
 import com.qg.domain.Role;
+import com.qg.domain.Users;
+import com.qg.dto.UsersDTO;
 import com.qg.mapper.RoleMapper;
+import com.qg.mapper.UsersMapper;
 import com.qg.service.RoleService;
+import com.qg.vo.ProjectMemberVO;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,6 +23,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private RoleMapper roleMapper;
+    @Autowired
+    private UsersMapper usersMapper;
     @Override
     public Result addRole(Role role) {
         //判断该用户是否在项目中
@@ -64,20 +72,28 @@ public class RoleServiceImpl implements RoleService {
         if(list == null) {
             return new Result(Code.NOT_FOUND, "该项目下无成员或项目不存在");
         }
-        return new Result(Code.SUCCESS,list,"查询成功");
-    }
+        List<ProjectMemberVO> projectMemberVOList = new ArrayList<>();
+        for(Role role : list)
+        {
+            ProjectMemberVO vo = new ProjectMemberVO();
+            Long id= role.getUserId();
+            vo.setId(id);
+            LambdaQueryWrapper<Users> lqw1 = new LambdaQueryWrapper<>();
+            lqw1.eq(Users::getId, id);
+            Users users = usersMapper.selectOne(lqw1);
+            if(users != null){
+                BeanUtils.copyProperties(users,vo);
+                BeanUtils.copyProperties(role,vo);
+                projectMemberVOList.add(vo);
+            }
 
-    @Override
-    public Result getProListByUserId(String userId) {
-        //查看个人加入的项目
-        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Role::getUserId, userId);
-        List<Role> list = roleMapper.selectList(lqw);
-        if(list == null) {
-            return new Result(Code.NOT_FOUND, "该用户未加入任何项目");
+        }
+        if(projectMemberVOList.size() == 0){
+            return new Result(Code.NOT_FOUND, "该项目下无成员");
         }
         return new Result(Code.SUCCESS,list,"查询成功");
     }
+
 
     //查询该项目该用户的角色与权限
     @Override
