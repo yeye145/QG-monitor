@@ -15,6 +15,6 @@ public class Role {
     private Long id;
     private Long userId;
     private String projectId;
-    private String power;
-
+    private Integer power;
+    private Integer userRole;
 }
