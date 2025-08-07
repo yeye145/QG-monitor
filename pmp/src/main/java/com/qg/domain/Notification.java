@@ -2,6 +2,7 @@ package com.qg.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,10 @@ public class Notification {
     private String projectId;
     private Long errorId;
     private Long senderId;
-    private String receiverId;
+    private Long receiverId;
     private LocalDateTime timestamp;
     private Integer isRead;
+
+    @TableLogic(value = "0", delval = "1")
+    private Integer isDeleted;
 }

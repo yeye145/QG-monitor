@@ -13,8 +13,8 @@ public class NotificationVO {
     private Long id;
     private String projectId;
     private Long errorId;
-    private String senderId;
-    private String receiverId;
+    private Long senderId;
+    private Long receiverId;
     private LocalDateTime timestamp;
     private Integer isRead;
 

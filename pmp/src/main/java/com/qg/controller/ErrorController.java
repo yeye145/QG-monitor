@@ -2,13 +2,13 @@ package com.qg.controller;
 
 import com.qg.domain.Error;
 import com.qg.domain.Result;
-import com.qg.service.AlertRuleService;
 import com.qg.service.ErrorService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @Tag(name = "错误信息")
 @RestController
@@ -34,8 +34,10 @@ public class ErrorController {
      * @return
      */
     @GetMapping("/selectByCondition")
-    public Result selectByCondition(@RequestParam String env, @RequestParam String projectId, @RequestParam(required = false) Long moduleId, @RequestParam(required = false) String type) {
-        return errorService.selectByEnvProjectModule(env, projectId, moduleId, type);
+    public Result selectByCondition(@RequestParam String env, @RequestParam String projectId,
+                                    @RequestParam(required = false) Long moduleId, @RequestParam(required = false) String type,
+                                    @RequestParam(required = false) String platform) {
+        return errorService.selectByEnvProjectModule(env, projectId, moduleId, type, platform);
     }
 
     /**
