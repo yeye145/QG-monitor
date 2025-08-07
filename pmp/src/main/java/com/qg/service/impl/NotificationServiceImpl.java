@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
             // 查询通知列表
             LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Notification::getReceiverId, receiverId)
-                    .eq(Notification::getIsRead, IS_NOT_READ)
+                    .orderByAsc(Notification::getIsRead) // 未读(0)在前，已读(1)在后
                     .orderByDesc(Notification::getTimestamp); // 按创建时间倒序
 
             if (isSenderExist.equals(IS_SENDER_EXIST)) {
@@ -76,7 +77,14 @@ public class NotificationServiceImpl implements NotificationService {
             // 批量查询关联数据以提高性能
             List<NotificationVO> notificationVOList = convertToVOList(notificationList);
 
-            log.info("成功查询通知，接收者ID: {}, 数量: {}", receiverId, notificationVOList.size());
+            // 统计未读和已读数量
+            long unreadCount = notificationList.stream()
+                    .filter(notification -> IS_NOT_READ.equals(notification.getIsRead()))
+                    .count();
+            long readCount = notificationList.size() - unreadCount;
+
+            log.info("成功查询通知，接收者ID: {}, 总数: {}, 未读: {}, 已读: {}",
+                    receiverId, notificationVOList.size(), unreadCount, readCount);
             return new Result(Code.SUCCESS, notificationVOList, "查询成功");
         } catch (Exception e) {
             log.error("查询通知失败，接收者ID: {}", receiverId, e);
@@ -116,6 +124,10 @@ public class NotificationServiceImpl implements NotificationService {
             int successCount = 0;
             List<Notification> insertedNotifications = new ArrayList<>();
 
+            // 分类存储通知
+            List<Notification> generalNotifications = new ArrayList<>();  // 无senderId的通知
+            List<Notification> designateNotifications = new ArrayList<>(); // 有senderId的通知
+
             // 批量插入通知
             for (Notification notification : notificationList) {
                 if (notification == null) {
@@ -123,25 +135,45 @@ public class NotificationServiceImpl implements NotificationService {
                     continue;
                 }
 
+                // 设置时间戳
+                notification.setTimestamp(LocalDateTime.now());
+
                 int result = notificationMapper.insert(notification);
                 if (result > 0) {
                     successCount++;
                     insertedNotifications.add(notification);
-                    log.debug("添加通知成功: {}", notification);
+
+                    // 根据senderId是否存在进行分类
+                    if (notification.getSenderId() != null) {
+                        designateNotifications.add(notification);
+                        log.debug("添加指定通知成功: {}", notification);
+                    } else {
+                        generalNotifications.add(notification);
+                        log.debug("添加通用通知成功: {}", notification);
+                    }
                 } else {
                     log.warn("添加通知失败: {}", notification);
                 }
             }
 
             if (successCount > 0) {
-                log.info("批量添加通知完成，总数量: {}，成功: {}", notificationList.size(), successCount);
+                log.info("批量添加通知完成，总数量: {}，成功: {}，通用通知: {}，指定通知: {}",
+                        notificationList.size(), successCount,
+                        generalNotifications.size(), designateNotifications.size());
 
-                // 批量实时推送通知给前端
-                broadcastNotifications(insertedNotifications);
+                // 分别广播不同类型的通知
+                if (!generalNotifications.isEmpty()) {
+                    broadcastNotificationsByType(generalNotifications, "notifications");
+                }
+
+                if (!designateNotifications.isEmpty()) {
+                    broadcastNotificationsByType(designateNotifications, "designate");
+                }
 
                 return new Result(Code.SUCCESS,
-                        String.format("批量添加通知成功，共处理 %d 条，成功 %d 条",
-                                notificationList.size(), successCount));
+                        String.format("批量添加通知成功，共处理 %d 条，成功 %d 条，通用 %d 条，指定 %d 条",
+                                notificationList.size(), successCount,
+                                generalNotifications.size(), designateNotifications.size()));
             } else {
                 log.error("批量添加通知全部失败，总数量: {}", notificationList.size());
                 return new Result(Code.INTERNAL_ERROR, "批量添加通知失败");
@@ -152,28 +184,59 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    /**
-     * 广播通知
-     * @param notifications
-     */
-    private void broadcastNotifications(List<Notification> notifications) {
+    @Override
+    public Result updateIsReadById(Long id) {
+        if (id == null) {
+            log.error("更新通知失败，参数为空");
+            return new Result(Code.BAD_REQUEST, "更新通知失败，参数为空");
+        }
         try {
+            LambdaUpdateWrapper<Notification> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Notification::getId, id)
+                    .set(Notification::getIsRead, IS_READ);
+            int result = notificationMapper.update(null, updateWrapper);
+            if (result > 0) {
+                return new Result(Code.SUCCESS, "更新成功");
+            } else {
+                return new Result(Code.INTERNAL_ERROR, "更新失败");
+            }
+        } catch (Exception e) {
+            log.error("更新通知失败，通知ID: {}", id, e);
+            return new Result(Code.INTERNAL_ERROR, "更新通知失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 按类型广播通知
+     * @param notifications 通知列表
+     * @param messageType 消息类型 ("notifications" 或 "designate")
+     */
+    private void broadcastNotificationsByType(List<Notification> notifications, String messageType) {
+        try {
+            if (notifications.isEmpty()) {
+                return;
+            }
+
             // 批量转换为 VO 对象
             List<NotificationVO> notificationVOList = convertToVOList(notifications);
 
             // 创建推送消息
             Map<String, Object> message = new HashMap<>();
-            message.put("type", "notifications");
+            message.put("type", messageType);
             message.put("data", notificationVOList);
             message.put("count", notificationVOList.size());
             message.put("timestamp", System.currentTimeMillis());
 
-            // 推送给指定接收者（可以根据业务需求调整）
-            webSocketHandler.sendMessageByType("notifications", message);
+            // 推送给前端
+            webSocketHandler.sendMessageByType(messageType, message);
 
-            log.debug("批量通知广播成功，数量: {}", notifications.size());
+            log.debug("批量{}通知广播成功，数量: {}",
+                    "notifications".equals(messageType) ? "通用" : "指定",
+                    notifications.size());
         } catch (Exception e) {
-            log.error("批量广播通知失败，通知数量: {}", notifications.size(), e);
+            log.error("批量广播{}通知失败，通知数量: {}",
+                    "notifications".equals(messageType) ? "通用" : "指定",
+                    notifications.size(), e);
         }
     }
 

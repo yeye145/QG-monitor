@@ -29,7 +29,7 @@ public class NotificationController {
     }
 
     /**
-     * 更新通知为已读
+     * 根据接收者id更新通知为已读
      * @param receiverId
      * @return
      */
@@ -38,9 +38,25 @@ public class NotificationController {
         return notificationService.updateIsRead(receiverId);
     }
 
+    /**
+     * 根据通知id更新通知为已读
+     * @param id
+     * @return
+     */
+    @PutMapping("/updateIsReadById/{id}")
+    public Result updateIsReadById(@PathVariable Long id) {
+        return notificationService.updateIsReadById(id);
+    }
 
+
+    /**
+     * 添加通知
+     * @param notificationList
+     * @return
+     */
     @PostMapping("/add")
     public Result addNotification(@RequestBody List<Notification> notificationList) {
         return notificationService.add(notificationList);
     }
+
 }

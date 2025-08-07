@@ -11,4 +11,6 @@ public interface NotificationService {
     Result updateIsRead(Long receiverId);
 
     Result add(List<Notification> notificationList);
+
+    Result updateIsReadById(Long id);
 }
