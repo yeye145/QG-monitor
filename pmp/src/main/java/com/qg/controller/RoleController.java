@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.qg.domain.Code.SUCCESS;
-
 @Slf4j
 @Tag(name ="权限判断")
 @RestController
@@ -69,6 +67,16 @@ public class RoleController {
     @GetMapping("/getRole")
     public Result getRole(@RequestParam String userId, @RequestParam String projectId) {
         return roleService.getRole(userId, projectId);
+    }
+
+    /**
+     * 更新用户角色
+     * @param role
+     * @return
+     */
+    @PutMapping("/updateUserRole")
+    public Result updateUserRole(@RequestBody Role role) {
+        return roleService.updateUserRole(role);
     }
 
 }

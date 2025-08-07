@@ -69,4 +69,14 @@ public class UserController {
         // 发送验证码到邮箱
         return usersService.sendCodeByEmail(email);
     }
+
+    /**
+     * 获取用户信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result getUser(@PathVariable Long id) {
+        return usersService.getUser(id);
+    }
 }

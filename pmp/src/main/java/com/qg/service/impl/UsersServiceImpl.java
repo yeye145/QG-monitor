@@ -173,4 +173,17 @@ public class UsersServiceImpl implements UsersService {
         }
     }
 
+    //用户获取个人信息
+    @Override
+    public Result getUser(Long id) {
+        if(id == null) {
+            return new Result(BAD_REQUEST, "用户ID不能为空");
+        }
+        Users user = usersMapper.selectById(id);
+        UsersDTO userDTO = BeanUtil.copyProperties(user, UsersDTO.class);
+        if(user == null) {
+            return new Result(NOT_FOUND, "用户不存在");
+        }
+        return new Result(SUCCESS, userDTO, "获取用户信息成功");
+    }
 }
