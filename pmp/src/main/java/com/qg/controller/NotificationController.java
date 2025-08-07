@@ -1,12 +1,10 @@
 package com.qg.controller;
 
+import com.qg.domain.Notification;
 import com.qg.domain.Result;
 import com.qg.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/notifications")
@@ -23,5 +21,10 @@ public class NotificationController {
     @GetMapping("/selectByReceiverId/{receiverId}")
     public Result selectByReceiverId(@PathVariable Integer receiverId) {
         return notificationService.selectByReceiverId(receiverId);
+    }
+
+    @PostMapping
+    public Result addNotification(@RequestBody Notification notification) {
+        return notificationService.addNotification(notification);
     }
 }

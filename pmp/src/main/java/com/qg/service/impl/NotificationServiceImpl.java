@@ -1,11 +1,8 @@
 package com.qg.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.qg.domain.Code;
-import com.qg.domain.Notification;
-import com.qg.domain.Project;
-import com.qg.domain.Result;
+import com.qg.domain.*;
+import com.qg.domain.Error;
 import com.qg.mapper.ErrorMapper;
 import com.qg.mapper.NotificationMapper;
 import com.qg.mapper.ProjectMapper;
@@ -44,13 +41,17 @@ public class NotificationServiceImpl implements NotificationService {
         }
         try {
             LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Notification::getReceiverId, receiverId);
+            queryWrapper.eq(Notification::getReceiverId, receiverId)
+                        .eq(Notification::getIsRead, 0);
             List<Notification> notificationList = notificationMapper.selectList(queryWrapper);
             List<NotificationVO> notificationVOList = new ArrayList<>();
             for (Notification notification : notificationList) {
                 NotificationVO notificationVO = new NotificationVO();
                 BeanUtils.copyProperties(notification, notificationVO);
-
+                //创建方法搜索三个表填充该VO
+                fillNotificationVO(notificationVO);
+                //把生成好的VO信息填充到list里面
+                notificationVOList.add(notificationVO);
             }
 
 //            log.info("成功查询通知: {}", notificationVOList);
@@ -59,6 +60,41 @@ public class NotificationServiceImpl implements NotificationService {
             log.error("查询通知失败，参数: {}", receiverId, e);
             return new Result(Code.INTERNAL_ERROR, "查询通知失败: " + e.getMessage());
         }
+        return null;
+    }
+
+    //查询三个表后进行填充
+    public NotificationVO fillNotificationVO(NotificationVO notificationVO){
+        String projectId = notificationVO.getProjectId();
+        Long errorId = notificationVO.getErrorId();
+        String senderId = notificationVO.getSenderId();
+        LambdaQueryWrapper<Project> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(Project::getUuid, projectId);
+        Project project = projectMapper.selectOne(queryWrapper1);
+        if(project != null){
+            notificationVO.setProjectName(project.getName());
+        }
+        LambdaQueryWrapper<Users> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(Users::getId, senderId);
+        Users users = usersMapper.selectOne(queryWrapper2);
+        if(users != null){
+            notificationVO.setSenderName(users.getUsername());
+            notificationVO.setSenderAvatar(users.getAvatar());
+        }
+        LambdaQueryWrapper<Error> queryWrapper3 = new LambdaQueryWrapper<>();
+        queryWrapper3.eq(Error::getId, errorId);
+        Error error = errorMapper.selectOne(queryWrapper3);
+        if(error != null){
+            notificationVO.setErrorType(error.getType());
+            notificationVO.setErrorMessage(error.getMessage());
+        }
+
+        return notificationVO;
+
+    }
+
+    @Override
+    public Result addNotification(Notification notification) {
         return null;
     }
 }
