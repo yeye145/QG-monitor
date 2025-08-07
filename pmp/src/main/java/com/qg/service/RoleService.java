@@ -12,7 +12,5 @@ public interface RoleService {
 
     Result getMemberList(String projectId);
 
-    Result getProListByUserId(String userId);
-
     Result getRole(String userId, String projectId);
 }
