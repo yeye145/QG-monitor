@@ -17,7 +17,7 @@ public class Notification {
     private String projectId;
     private Long errorId;
     private Long senderId;
-    private String receiverId;
+    private Long receiverId;
     private LocalDateTime timestamp;
     private Integer isRead;
 }
