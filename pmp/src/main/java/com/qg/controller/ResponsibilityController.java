@@ -20,7 +20,7 @@ public class ResponsibilityController {
     * @return
     */
    @PostMapping
-   public Result addResponsibility(Responsibility responsibility)
+   public Result addResponsibility(@RequestBody Responsibility responsibility)
    {
       return responsibilityService.addResponsibility(responsibility);
    }
@@ -31,7 +31,7 @@ public class ResponsibilityController {
      * @return
      */
    @GetMapping
-   public Result getResponsibilityList(@RequestParam Long projectId)
+   public Result getResponsibilityList(@RequestParam String projectId)
    {
       return responsibilityService.getResponsibilityList(projectId);
    }

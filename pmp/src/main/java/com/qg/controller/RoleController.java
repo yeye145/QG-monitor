@@ -69,7 +69,12 @@ public class RoleController {
         return roleService.getRole(userId, projectId);
     }
 
-    @PutMapping
+    /**
+     * 更新用户角色
+     * @param role
+     * @return
+     */
+    @PutMapping("/updateUserRole")
     public Result updateUserRole(@RequestBody Role role) {
         return roleService.updateUserRole(role);
     }

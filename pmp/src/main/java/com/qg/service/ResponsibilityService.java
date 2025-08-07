@@ -6,7 +6,7 @@ import com.qg.domain.Result;
 public interface ResponsibilityService {
     Result addResponsibility(Responsibility responsibility);
 
-    Result getResponsibilityList(Long projectId);
+    Result getResponsibilityList(String projectId);
 
     Result selectByRespId(Long responsibleId);
 

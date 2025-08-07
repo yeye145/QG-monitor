@@ -57,7 +57,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
     }
 
     @Override
-    public Result getResponsibilityList(Long projectId) {
+    public Result getResponsibilityList(String projectId) {
         if (projectId == null) {
             return new Result(Code.BAD_REQUEST, "项目ID不能为空");
         }
