@@ -206,6 +206,51 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    @Override
+    public Result deleteById(Long id) {
+        if (id == null) {
+            log.error("删除通知失败，id参数为空");
+            return new Result(Code.BAD_REQUEST, "删除通知失败，id参数为空");
+        }
+        try {
+            int result = notificationMapper.deleteById(id);
+            if (result > 0) {
+                log.debug("删除通知成功，id: {}", id);
+                return new Result(Code.SUCCESS, "删除通知成功");
+            } else {
+                log.warn("删除通知失败，id: {}", id);
+                return new Result(Code.INTERNAL_ERROR, "删除通知失败");
+            }
+        } catch (Exception e) {
+            log.error("删除通知失败，通知ID: {}", id, e);
+            return new Result(Code.INTERNAL_ERROR, "删除通知失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Result deleteByReceiverId(Long receiverId) {
+        if (receiverId == null) {
+            log.error("删除通知失败，receiverId参数为空");
+            return new Result(Code.BAD_REQUEST, "删除通知失败，receiverId参数为空");
+        }
+
+        try {
+            LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Notification::getReceiverId, receiverId);
+            int delete = notificationMapper.delete(queryWrapper);
+            if (delete > 0) {
+                log.debug("批量删除通知成功");
+                return new Result(Code.SUCCESS, "批量删除通知成功");
+            } else {
+                log.debug("批量删除通知失败");
+                return new Result(Code.INTERNAL_ERROR, "批量删除通知失败");
+            }
+        } catch (Exception e) {
+            log.error("删除通知失败，receiverId: {}", receiverId, e);
+            return new Result(Code.INTERNAL_ERROR, "删除通知失败: " + e.getMessage());
+        }
+    }
+
     /**
      * 按类型广播通知
      * @param notifications 通知列表

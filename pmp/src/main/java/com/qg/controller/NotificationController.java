@@ -59,4 +59,23 @@ public class NotificationController {
         return notificationService.add(notificationList);
     }
 
+    /**
+     * 根据 id 删除 通知
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/deleteById/{id}")
+    public Result deleteById(@PathVariable Long id) {
+        return notificationService.deleteById(id);
+    }
+
+    /**
+     * 根据 接收者 id 删除 通知
+     * @param receiverId
+     * @return
+     */
+    @DeleteMapping("/deleteByReceiverId/{receiverId}")
+    public Result deleteByReceiverId(@PathVariable Long receiverId) {
+        return notificationService.deleteByReceiverId(receiverId);
+    }
 }
