@@ -22,4 +22,10 @@ public class RedisConstants {
      */
     public static final String ERROR_REPEAT_KEY = "error:repeat:";
     public static final Integer MAX_ERROR_TIME = 10;
+
+    /**
+     * 通知是否已读
+     */
+    public static final Integer IS_READ = 1;
+    public static final Integer IS_NOT_READ = 0;
 }

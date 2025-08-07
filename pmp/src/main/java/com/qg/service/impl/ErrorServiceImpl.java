@@ -131,7 +131,7 @@ public class ErrorServiceImpl implements ErrorService {
 
 
     @Override
-    public Result selectByEnvProjectModule(String env, String projectId, Long moduleId) {
+    public Result selectByEnvProjectModule(String env, String projectId, Long moduleId, String type) {
         if (env == null || env.isEmpty() || projectId == null || projectId.isEmpty()) {
             log.error("查询错误信息失败，参数为空");
             return new Result(Code.BAD_REQUEST, "查询错误信息失败，参数为空");
@@ -154,6 +154,11 @@ public class ErrorServiceImpl implements ErrorService {
             // 只有当 moduleId 不为空时才添加 moduleId 条件
             if (moduleId != null) {
                 queryWrapper.eq(Error::getModuleId, moduleId);
+            }
+
+            // 只有当 type 不为空时才添加 type 条件
+            if (type != null && !type.isEmpty()) {
+                queryWrapper.eq(Error::getType, type.trim());
             }
             List<Error> errorList = errorMapper.selectList(queryWrapper);
             log.info("成功查询错误信息: {}", errorList);
