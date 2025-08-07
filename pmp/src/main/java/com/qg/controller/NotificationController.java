@@ -4,7 +4,6 @@ import com.qg.domain.Notification;
 import com.qg.domain.Result;
 import com.qg.service.NotificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
