@@ -18,9 +18,11 @@ public class NotificationVO {
     private LocalDateTime timestamp;
     private Integer isRead;
 
-    private String projectName;
-    private String senderName;
+    private String projectName;//项目名
+
+    private String senderName;//发送者
     private String senderAvatar;
+
     private String errorType;
     private String errorMessage;
 

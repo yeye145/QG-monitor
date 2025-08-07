@@ -12,4 +12,6 @@ public interface UsersService {
     Result register(Users user, String code);
 
     Result sendCodeByEmail(String email);
+
+    Result getUser(Long id);
 }

@@ -5,18 +5,19 @@ import com.qg.domain.Code;
 import com.qg.domain.Result;
 import com.qg.domain.Role;
 import com.qg.domain.Users;
-import com.qg.dto.UsersDTO;
 import com.qg.mapper.RoleMapper;
 import com.qg.mapper.UsersMapper;
 import com.qg.service.RoleService;
 import com.qg.vo.ProjectMemberVO;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.qg.utils.Constants.PERMISSION_OP;
+import static com.qg.utils.Constants.USER_ROLE_ADMIN;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -102,5 +103,19 @@ public class RoleServiceImpl implements RoleService {
         lqw.eq(Role::getUserId, userId).eq(Role::getProjectId, projectId);
         Role role = roleMapper.selectOne(lqw);
         return role == null ? new Result(Code.NOT_FOUND, "该项目下无此用户") : new Result(Code.SUCCESS, role, "查询成功");
+    }
+
+    @Override
+    public Result updateUserRole(Role role) {
+        if(role.getId() == null){
+            return new Result(Code.BAD_REQUEST, "参数id为空！");
+        }
+        if(role.getUserRole() == USER_ROLE_ADMIN){
+            role.setPower(PERMISSION_OP);
+            return roleMapper.updateById(role) == 1 ? new Result(Code.CREATED, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
+        }
+        else{
+            return roleMapper.updateById(role) == 1 ? new Result(Code.CREATED, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
+        }
     }
 }

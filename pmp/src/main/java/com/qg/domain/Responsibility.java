@@ -6,15 +6,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-public class Role {
+import java.time.OffsetDateTime;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Responsibility {
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
-    private Long userId;
     private String projectId;
-    private Integer power;
-    private Integer userRole;
+    private Long delegatorId;
+    private Long responsibleId;
+    private  Long errorId;
+    private OffsetDateTime createTime;
+
+
 }
