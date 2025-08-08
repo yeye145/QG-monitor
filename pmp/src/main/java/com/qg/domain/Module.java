@@ -18,4 +18,11 @@ public class Module {
     private String moduleName;
     private LocalDateTime createdTime;
     private LocalDateTime deletedTime;
+
+
+    public Module(String projectId, String moduleName) {
+        this.projectId = projectId;
+        this.moduleName = moduleName;
+        this.createdTime = LocalDateTime.now();
+    }
 }

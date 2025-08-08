@@ -3,11 +3,7 @@ package com.qg.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.*;
-import com.qg.domain.Error;
-import com.qg.mapper.ErrorMapper;
-import com.qg.mapper.NotificationMapper;
-import com.qg.mapper.ProjectMapper;
-import com.qg.mapper.UsersMapper;
+import com.qg.mapper.*;
 import com.qg.service.NotificationService;
 import com.qg.vo.NotificationVO;
 import com.qg.websocket.UnifiedWebSocketHandler;
@@ -33,7 +29,13 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationMapper notificationMapper;
 
     @Autowired
-    private ErrorMapper errorMapper;
+    private BackendErrorMapper backendErrorMapper;
+
+    @Autowired
+    private FrontendErrorMapper frontendErrorMapper;
+
+    @Autowired
+    private MobileErrorMapper mobileErrorMapper;
 
     @Autowired
     private ProjectMapper projectMapper;
@@ -179,7 +181,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
         } catch (Exception e) {
             log.error("批量添加通知失败，通知列表: {}", notificationList, e);
-            return new Result(Code.INTERNAL_ERROR, "批量添加通知失败: " + e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "批量添加通知失败");
         }
     }
 
@@ -201,7 +203,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
         } catch (Exception e) {
             log.error("更新通知失败，通知ID: {}", id, e);
-            return new Result(Code.INTERNAL_ERROR, "更新通知失败: " + e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "更新通知失败");
         }
     }
 
@@ -222,7 +224,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
         } catch (Exception e) {
             log.error("删除通知失败，通知ID: {}", id, e);
-            return new Result(Code.INTERNAL_ERROR, "删除通知失败: " + e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "删除通知失败");
         }
     }
 
@@ -246,7 +248,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
         } catch (Exception e) {
             log.error("删除通知失败，receiverId: {}", receiverId, e);
-            return new Result(Code.INTERNAL_ERROR, "删除通知失败: " + e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "删除通知失败");
         }
     }
 
@@ -295,24 +297,52 @@ public class NotificationServiceImpl implements NotificationService {
         // 提取所有需要查询的ID
         List<String> projectIds = new ArrayList<>();
         List<Long> senderIds = new ArrayList<>();
-        List<Long> errorIds = new ArrayList<>();
+        List<Long> backendErrorIds = new ArrayList<>();
+        List<Long> frontendErrorIds = new ArrayList<>();
+        List<Long> mobileErrorIds = new ArrayList<>();
 
         for (Notification notification : notificationList) {
+            // 收集项目ID
             if (notification.getProjectId() != null && !projectIds.contains(notification.getProjectId())) {
                 projectIds.add(notification.getProjectId());
             }
+
+            // 收集发送者ID
             if (notification.getSenderId() != null && !senderIds.contains(notification.getSenderId())) {
                 senderIds.add(notification.getSenderId());
             }
-            if (notification.getErrorId() != null && !errorIds.contains(notification.getErrorId())) {
-                errorIds.add(notification.getErrorId());
+
+            // 根据类型分类错误ID
+            if (notification.getErrorId() != null && notification.getType() != null) {
+                switch (notification.getType().toLowerCase()) {
+                    case "backend":
+                        if (!backendErrorIds.contains(notification.getErrorId())) {
+                            backendErrorIds.add(notification.getErrorId());
+                        }
+                        break;
+                    case "frontend":
+                        if (!frontendErrorIds.contains(notification.getErrorId())) {
+                            frontendErrorIds.add(notification.getErrorId());
+                        }
+                        break;
+                    case "mobile":
+                        if (!mobileErrorIds.contains(notification.getErrorId())) {
+                            mobileErrorIds.add(notification.getErrorId());
+                        }
+                        break;
+                    default:
+                        log.warn("未知的错误类型: {}", notification.getType());
+                        break;
+                }
             }
         }
 
         // 批量查询关联数据
         Map<String, Project> projectMap = getProjectMap(projectIds);
         Map<Long, Users> userMap = getUserMap(senderIds);
-        Map<Long, Error> errorMap = getErrorMap(errorIds);
+        Map<Long, BackendError> backendErrorMap = getBackendErrorMap(backendErrorIds);
+        Map<Long, FrontendError> frontendErrorMap = getFrontendErrorMap(frontendErrorIds);
+        Map<Long, MobileError> mobileErrorMap = getMobileErrorMap(mobileErrorIds);
 
         // 转换为VO对象
         List<NotificationVO> notificationVOList = new ArrayList<>();
@@ -320,7 +350,7 @@ public class NotificationServiceImpl implements NotificationService {
             NotificationVO notificationVO = new NotificationVO();
             BeanUtils.copyProperties(notification, notificationVO);
 
-            // 设置关联信息
+            // 设置项目名称
             if (notification.getProjectId() != null) {
                 Project project = projectMap.get(notification.getProjectId());
                 if (project != null) {
@@ -328,6 +358,7 @@ public class NotificationServiceImpl implements NotificationService {
                 }
             }
 
+            // 设置发送者信息
             if (notification.getSenderId() != null) {
                 Users sender = userMap.get(notification.getSenderId());
                 if (sender != null) {
@@ -336,13 +367,36 @@ public class NotificationServiceImpl implements NotificationService {
                 }
             }
 
-            if (notification.getErrorId() != null) {
-                Error error = errorMap.get(notification.getErrorId());
-                if (error != null) {
-                    notificationVO.setErrorType(error.getType());
-                    notificationVO.setErrorMessage(error.getMessage());
+            // 设置错误信息
+            if (notification.getErrorId() != null && notification.getType() != null) {
+                switch (notification.getType().toLowerCase()) {
+                    case "backend":
+                        BackendError backendError = backendErrorMap.get(notification.getErrorId());
+                        if (backendError != null) {
+                            notificationVO.setErrorType(backendError.getType());
+                            notificationVO.setErrorMessage(backendError.getStack());
+                        }
+                        break;
+                    case "frontend":
+                        FrontendError frontendError = frontendErrorMap.get(notification.getErrorId());
+                        if (frontendError != null) {
+                            notificationVO.setErrorType(frontendError.getErrorType());
+                            notificationVO.setErrorMessage(frontendError.getMessage());
+                        }
+                        break;
+                    case "mobile":
+                        MobileError mobileError = mobileErrorMap.get(notification.getErrorId());
+                        if (mobileError != null) {
+                            notificationVO.setErrorType(mobileError.getErrorType());
+                            notificationVO.setErrorMessage(mobileError.getMessage());
+                        }
+                        break;
+                    default:
+                        log.warn("未知的错误类型: {}", notification.getType());
+                        break;
                 }
             }
+
             notificationVOList.add(notificationVO);
         }
         return notificationVOList;
@@ -381,18 +435,50 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * 批量获取错误信息映射
+     * 获取后端错误信息映射
      */
-    private Map<Long, Error> getErrorMap(List<Long> errorIds) {
+    private Map<Long, BackendError> getBackendErrorMap(List<Long> errorIds) {
         if (errorIds.isEmpty()) {
             return new HashMap<>();
         }
 
-        LambdaQueryWrapper<Error> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Error::getId, errorIds);
-        List<Error> errors = errorMapper.selectList(queryWrapper);
+        LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BackendError::getId, errorIds);
+        List<BackendError> errors = backendErrorMapper.selectList(queryWrapper);
 
         return errors.stream()
-                .collect(Collectors.toMap(Error::getId, error -> error));
+                .collect(Collectors.toMap(BackendError::getId, error -> error));
+    }
+
+    /**
+     * 获取前端错误信息映射
+     */
+    private Map<Long, FrontendError> getFrontendErrorMap(List<Long> errorIds) {
+        if (errorIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        LambdaQueryWrapper<FrontendError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(FrontendError::getId, errorIds);
+        List<FrontendError> errors = frontendErrorMapper.selectList(queryWrapper);
+
+        return errors.stream()
+                .collect(Collectors.toMap(FrontendError::getId, error -> error));
+    }
+
+    /**
+     * 获取移动端错误信息映射
+     */
+    private Map<Long, MobileError> getMobileErrorMap(List<Long> errorIds) {
+        if (errorIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        LambdaQueryWrapper<MobileError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(MobileError::getId, errorIds);
+        List<MobileError> errors = mobileErrorMapper.selectList(queryWrapper);
+
+        return errors.stream()
+                .collect(Collectors.toMap(MobileError::getId, error -> error));
     }
 }

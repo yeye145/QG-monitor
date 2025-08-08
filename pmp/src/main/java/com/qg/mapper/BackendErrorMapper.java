@@ -2,6 +2,7 @@ package com.qg.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qg.domain.BackendError;
+import com.qg.domain.BackendPerformance;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

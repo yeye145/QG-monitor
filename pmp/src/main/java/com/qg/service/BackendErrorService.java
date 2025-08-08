@@ -1,6 +1,10 @@
 package com.qg.service;
 
+import com.qg.domain.BackendError;
+import com.qg.domain.BackendPerformance;
 import com.qg.domain.Result;
+
+import java.util.List;
 
 /**
  * @Description: // 类说明
@@ -11,4 +15,6 @@ import com.qg.domain.Result;
  */
 public interface BackendErrorService {
     Result selectByCondition(String projectId, Long moduleId, String type);
+
+    Integer saveBackendError(BackendError backendError);
 }

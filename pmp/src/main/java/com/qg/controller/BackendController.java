@@ -5,6 +5,7 @@ import com.qg.domain.*;
 import com.qg.service.BackendErrorService;
 import com.qg.service.BackendLogService;
 import com.qg.service.BackendPerformanceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import java.util.List;
  * @Date: 2025/8/7 22:00   // 时间
  * @Version: 1.0     // 版本
  */
+@Slf4j
 @RequestMapping("/backend")
 @RestController
 public class BackendController {
@@ -35,10 +37,9 @@ public class BackendController {
     private BackendLogService backendLogService;
 
     @PostMapping("/getMethodUseCount")
-    public String getMethodUseCount(@RequestBody String methodCount) {
-        System.err.println("***********接收到了方法调用情况信息***********");
-        System.err.println(methodCount);
-        return JSONUtil.toJsonStr(new Result(200, "已接收方法调用情况信息"));
+    public void getMethodUseCount(@RequestBody String methodCount) {
+        log.info("***********接收到了方法调用情况信息***********");
+        log.info(methodCount);
     }
 
     @PostMapping("/performance")
@@ -50,15 +51,15 @@ public class BackendController {
     }
 
     @PostMapping("/error")
-    public String getErrorData(@RequestBody String errorData) {
-        System.out.println("***********接收到了后端错误信息***********");
-        System.out.println(errorData);
+    public void getErrorData(@RequestBody String errorData) {
+        log.info("***********接收到了后端错误信息***********");
+        log.info(errorData);
         BackendError backendError = JSONUtil.toBean(errorData, BackendError.class);
-        if (backendError != null) {
-            System.out.println("已接收的后端错误信息: " + backendError);
+        if (backendErrorService.saveBackendError(backendError) > 0) {
+            log.info("已接收的后端错误信息: " + backendError);
+        } else {
+            log.error("接收后端错误信息失败");
         }
-
-        return JSONUtil.toJsonStr(new Result(200, "已接收错误信息"));
     }
 
     @PostMapping("/log")
@@ -66,5 +67,5 @@ public class BackendController {
         System.err.println("=============接收到了日志信息***********");
         return backendLogService.getLog(logJSON);
     }
-
 }
+

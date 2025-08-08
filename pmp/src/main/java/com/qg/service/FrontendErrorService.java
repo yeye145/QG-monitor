@@ -1,6 +1,10 @@
 package com.qg.service;
 
+import com.qg.domain.FrontendError;
+import com.qg.domain.FrontendPerformance;
 import com.qg.domain.Result;
+
+import java.util.List;
 
 /**
  * @Description: // 类说明
@@ -11,4 +15,6 @@ import com.qg.domain.Result;
  */
 public interface FrontendErrorService {
     Result selectByCondition(String projectId, String type);
+
+    Integer saveFrontendError(List<FrontendError> frontendErrors);
 }

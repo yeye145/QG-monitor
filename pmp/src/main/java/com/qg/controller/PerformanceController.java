@@ -18,15 +18,15 @@ public class PerformanceController {
     @Autowired
     private PerformanceService performanceService;
 
-    /**
-     * 插入性能数据
-     * @param performance
-     * @return
-     */
-    @PostMapping
-    public Result addPerformance(@RequestBody List< Performance>  performance){
-        return performanceService.addPerformance(performance);
-    }
+//    /**
+//     * 插入性能数据
+//     * @param performance
+//     * @return
+//     */
+//    @PostMapping
+//    public Result addPerformance(@RequestBody List< Performance>  performance){
+//        return performanceService.addPerformance(performance);
+//    }
 
     /**
      * 查询该项目的性能数据
@@ -38,14 +38,14 @@ public class PerformanceController {
         return performanceService.selectByProjectId(projectId);
     }
 
-    /**
-     * 查询该项目的指定环境下的性能数据
-     * @param env
-     * @param projectId
-     * @return
-     */
-    @GetMapping("/selectByEnvProjectId")
-    public Result selectByEnvProjectId(@RequestParam String env, @RequestParam String projectId){
-        return performanceService.selectByEnvProjectId(env,projectId);
-    }
+//    /**
+//     * 查询该项目的指定环境下的性能数据
+//     * @param env
+//     * @param projectId
+//     * @return
+//     */
+//    @GetMapping("/selectByEnvProjectId")
+//    public Result selectByEnvProjectId(@RequestParam String env, @RequestParam String projectId){
+//        return performanceService.selectByEnvProjectId(env,projectId);
+//    }
 }

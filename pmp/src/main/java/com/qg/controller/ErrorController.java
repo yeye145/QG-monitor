@@ -56,7 +56,7 @@ public class ErrorController {
 
     /**
      * 根据id查询错误信息
-     * @param id
+     * @param
      * @return
      */
     //@GetMapping("/selectById/{id}")
