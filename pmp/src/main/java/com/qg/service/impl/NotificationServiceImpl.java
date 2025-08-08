@@ -49,7 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Result selectByReceiverId(Long receiverId, Integer isSenderExist) {
         if (receiverId == null || isSenderExist == null
-                || !isSenderExist.equals(IS_SENDER_EXIST) && !isSenderExist.equals(IS_SENDER_NOT_EXIST)) {
+                || (!isSenderExist.equals(IS_SENDER_EXIST) && !isSenderExist.equals(IS_SENDER_NOT_EXIST))) {
             log.error("查询通知信息失败，参数错误");
             return new Result(Code.BAD_REQUEST, "查询通知信息失败，参数错误");
         }
@@ -229,8 +229,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Result deleteByReceiverId(Long receiverId) {
-        if (receiverId == null) {
+    public Result deleteByReceiverId(Long receiverId, Integer isSenderExist) {
+        if (receiverId == null || (!IS_SENDER_EXIST.equals(isSenderExist) && !IS_SENDER_NOT_EXIST.equals(isSenderExist))) {
             log.error("删除通知失败，receiverId参数为空");
             return new Result(Code.BAD_REQUEST, "删除通知失败，receiverId参数为空");
         }
@@ -238,6 +238,11 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Notification::getReceiverId, receiverId);
+            if (IS_SENDER_EXIST.equals(isSenderExist)) {
+                queryWrapper.isNotNull(Notification::getSenderId);
+            } else {
+                queryWrapper.isNull(Notification::getSenderId);
+            }
             int delete = notificationMapper.delete(queryWrapper);
             if (delete > 0) {
                 log.debug("批量删除通知成功");

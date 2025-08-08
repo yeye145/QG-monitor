@@ -16,5 +16,5 @@ public interface NotificationService {
 
     Result deleteById(Long id);
 
-    Result deleteByReceiverId(Long receiverId);
+    Result deleteByReceiverId(Long receiverId, Integer isSenderExist);
 }
