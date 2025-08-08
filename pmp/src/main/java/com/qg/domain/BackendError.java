@@ -20,7 +20,7 @@ public class BackendError {
     private String module;
     private String projectId;
     private String environment;
-    private String errorType;
-    private String errorStack;
+    private String type;
+    private String stack;
     private String environmentSnapshot;
 }
