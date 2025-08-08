@@ -1,6 +1,9 @@
 package com.qg.service.impl;
 
+import com.qg.domain.MobilePerformance;
+import com.qg.mapper.MobilePerformanceMapper;
 import com.qg.service.MobilePerformanceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,4 +15,15 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MobilePerformanceServiceImpl implements MobilePerformanceService {
+
+    @Autowired
+    private MobilePerformanceMapper mobilePerformanceMapper;
+
+    @Override
+    public Integer saveMobilePerformance(MobilePerformance mobilePerformance) {
+        if (mobilePerformance == null) {
+            return 0; // 返回0表示没有数据需要保存
+        }
+        return mobilePerformanceMapper.insert(mobilePerformance);
+    }
 }

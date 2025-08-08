@@ -1,5 +1,6 @@
 package com.qg.service;
 
+import com.qg.domain.MobileError;
 import com.qg.domain.Result;
 
 /**
@@ -11,4 +12,6 @@ import com.qg.domain.Result;
  */
 public interface MobileErrorService {
     Result selectByCondition(String projectId, String type);
+
+    Integer saveMobileError(MobileError mobileError);
 }

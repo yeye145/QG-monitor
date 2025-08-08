@@ -1,5 +1,9 @@
 package com.qg.service;
 
+import com.qg.domain.BackendPerformance;
+
+import java.util.List;
+
 /**
  * @Description: // 类说明
  * @ClassName: BackendPerformanceService    // 类名
@@ -8,4 +12,5 @@ package com.qg.service;
  * @Version: 1.0     // 版本
  */
 public interface BackendPerformanceService {
+    int saveBackendPerformance(List<BackendPerformance> backendPerformances);
 }

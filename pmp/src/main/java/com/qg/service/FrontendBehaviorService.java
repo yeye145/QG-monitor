@@ -1,5 +1,9 @@
 package com.qg.service;
 
+import com.qg.domain.FrontendBehavior;
+
+import java.util.List;
+
 /**
  * @Description: // 类说明
  * @ClassName: FrontendBehaviorService    // 类名
@@ -8,4 +12,5 @@ package com.qg.service;
  * @Version: 1.0     // 版本
  */
 public interface FrontendBehaviorService {
+    Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList);
 }
