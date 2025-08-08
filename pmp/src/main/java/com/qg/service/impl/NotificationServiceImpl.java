@@ -243,14 +243,9 @@ public class NotificationServiceImpl implements NotificationService {
             } else {
                 queryWrapper.isNull(Notification::getSenderId);
             }
-            int delete = notificationMapper.delete(queryWrapper);
-            if (delete > 0) {
-                log.debug("批量删除通知成功");
-                return new Result(Code.SUCCESS, "批量删除通知成功");
-            } else {
-                log.debug("批量删除通知失败");
-                return new Result(Code.INTERNAL_ERROR, "批量删除通知失败");
-            }
+            notificationMapper.delete(queryWrapper);
+            log.debug("批量删除通知成功");
+            return new Result(Code.SUCCESS, "批量删除通知成功");
         } catch (Exception e) {
             log.error("删除通知失败，receiverId: {}", receiverId, e);
             return new Result(Code.INTERNAL_ERROR, "删除通知失败");
