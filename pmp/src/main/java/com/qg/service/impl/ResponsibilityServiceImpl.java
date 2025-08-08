@@ -7,6 +7,7 @@ import com.qg.mapper.ErrorMapper;
 import com.qg.mapper.ProjectMapper;
 import com.qg.mapper.ResponsibilityMapper;
 import com.qg.mapper.UsersMapper;
+import com.qg.service.NotificationService;
 import com.qg.service.ResponsibilityService;
 import com.qg.vo.ResponsibilityVO;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +27,8 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
     private ProjectMapper projectMapper;
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Result addResponsibility(Responsibility responsibility) {
@@ -48,6 +51,16 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         }
         boolean success = responsibilityMapper.insert(responsibility) > 0 ;
         if (success) {
+
+            Notification notification = new Notification();
+            notification.setProjectId(responsibility.getProjectId());
+            notification.setErrorId(responsibility.getErrorId());
+            notification.setSenderId(responsibility.getDelegatorId());
+            notification.setReceiverId(responsibility.getResponsibleId());
+            List<Notification> notificationList = new ArrayList<>();
+            notificationList.add(notification);
+            notificationService.add(notificationList);
+
             return  new Result(Code.SUCCESS, "添加责任链成功");
         }
         else{
