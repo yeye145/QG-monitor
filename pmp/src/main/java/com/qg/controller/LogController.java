@@ -35,4 +35,5 @@ public class LogController {
             return new Result(500, "没有日志数据");
         }
     }
+
 }
