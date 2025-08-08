@@ -14,4 +14,6 @@ public interface UsersService {
     Result sendCodeByEmail(String email);
 
     Result getUser(Long id);
+
+    Result findPassword(Users user, String code);
 }

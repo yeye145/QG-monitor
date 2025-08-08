@@ -81,20 +81,47 @@ public class UserController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**
      * 用户注册
-     * @param registerDTO
-     * @return
+     * @param registerDTO 注册信息
+     * @return 注册结果
      */
     @PostMapping("/register")
     public Result register(@RequestBody RegisterDTO registerDTO) {
 
         log.info("开始注册用户");
         log.info("RegisterDTO: {}", registerDTO);
-        return usersService.register(registerDTO.getUsers(), registerDTO.getCode().trim());
+
+        // 参数校验
+        if (registerDTO == null) {
+            log.warn("注册失败，请求参数为空");
+            return new Result(BAD_REQUEST, "注册信息不能为空");
+        }
+
+        if (registerDTO.getUsers() == null) {
+            log.warn("注册失败，用户信息为空");
+            return new Result(BAD_REQUEST, "用户信息不能为空");
+        }
+
+        log.info("开始注册用户，邮箱: {}", registerDTO.getUsers().getEmail());
+
+        try {
+            String code = registerDTO.getCode() != null ? registerDTO.getCode().trim() : "";
+            if (code.isEmpty()) {
+                log.warn("注册失败，验证码为空，邮箱: {}", registerDTO.getUsers().getEmail());
+                return new Result(BAD_REQUEST, "验证码不能为空");
+            }
+
+            Result result = usersService.register(registerDTO.getUsers(), code);
+            log.info("用户注册处理完成，邮箱: {}, 结果: {}",
+                    registerDTO.getUsers().getEmail(), result.getCode());
+            return result;
+        } catch (Exception e) {
+            log.error("用户注册异常，邮箱: {}", registerDTO.getUsers().getEmail(), e);
+            return new Result(INTERNAL_ERROR, "注册过程中发生异常: " + e.getMessage());
+        }
     }
 
     /**
@@ -119,35 +146,14 @@ public class UserController {
         return usersService.getUser(id);
     }
 
-
-
-//    void testGenerateRSAKeyPair() {
-//        try {
-//            // 生成密钥对
-//            KeyPair keyPair = generateRSAKeyPair(2048);
-//
-//            // 获取公钥和私钥
-//            RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-//            RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-//
-//            // 输出Base64编码的密钥
-//            System.out.println("公钥: " + Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-//            System.out.println("私钥: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
-//
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    /**
-//     * 生成RSA密钥对
-//     * @param keySize 密钥长度(通常为1024, 2048, 4096等)
-//     * @return KeyPair对象
-//     * @throws NoSuchAlgorithmException
-//     */
-//    public static KeyPair generateRSAKeyPair(int keySize) throws NoSuchAlgorithmException {
-//        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-//        keyPairGenerator.initialize(keySize);
-//        return keyPairGenerator.generateKeyPair();
-//    }
+    /**
+     * 找回密码
+     * @param user
+     * @param code
+     * @return
+     */
+    @PutMapping("/findPassword/{code}")
+    public Result findPassword(@RequestBody Users user, @PathVariable String code) {
+        return usersService.findPassword(user, code);
+    }
 }

@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.qg.domain.Code;
 import com.qg.domain.Result;
 import com.qg.domain.Users;
 import com.qg.dto.UsersDTO;
@@ -11,7 +13,9 @@ import com.qg.mapper.UsersMapper;
 import com.qg.service.UsersService;
 import com.qg.utils.EmailService;
 import com.qg.utils.HashSaltUtil;
+import com.qg.utils.RedisConstants;
 import com.qg.utils.RegexUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -24,7 +28,9 @@ import java.util.concurrent.TimeUnit;
 import static com.qg.domain.Code.*;
 import static com.qg.utils.RedisConstants.*;
 import static com.qg.utils.RedisConstants.LOGIN_CODE_KEY;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+@Slf4j
 @Service
 public class UsersServiceImpl implements UsersService {
     @Autowired
@@ -42,11 +48,11 @@ public class UsersServiceImpl implements UsersService {
         LambdaQueryWrapper<Users> lqw = new LambdaQueryWrapper<>();
 
         lqw.eq(Users::getEmail, email);
-        System.out.println("登录邮箱：" + email);
+        log.info("用户登录邮箱：{}", email);
 
         Users loginUser = usersMapper.selectOne(lqw);
 
-        System.out.println(loginUser);
+        log.info("登录用户：{}", loginUser);
 
 
         if (loginUser == null || !HashSaltUtil.verifyHashPassword(password, loginUser.getPassword())) {
@@ -185,5 +191,46 @@ public class UsersServiceImpl implements UsersService {
             return new Result(NOT_FOUND, "用户不存在");
         }
         return new Result(SUCCESS, userDTO, "获取用户信息成功");
+    }
+
+    @Override
+    public Result findPassword(Users user, String code) {
+        if (user == null || user.getEmail() == null || user.getPassword() == null || code == null) {
+            log.error("参数错误");
+            return new Result(BAD_REQUEST, "参数错误");
+        }
+        try {
+            LambdaQueryWrapper<Users> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Users::getEmail, user.getEmail());
+            Users oldUser = usersMapper.selectOne(queryWrapper);
+            if (oldUser == null) {
+                log.error("用户不存在");
+                return new Result(NOT_FOUND, "用户不存在");
+            }
+
+            String redisCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + user.getEmail());
+            if (!code.equals(redisCode)) {
+                log.error("验证码错误");
+                return new Result(BAD_REQUEST, "验证码错误");
+            }
+
+            LambdaUpdateWrapper<Users> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Users::getEmail, user.getEmail())
+                    .set(Users::getPassword, HashSaltUtil.creatHashPassword(user.getPassword()));
+            int count = usersMapper.update(null, updateWrapper);
+
+            if (count > 0) {
+                log.info("修改密码成功，参数: {}", user);
+                return new Result(SUCCESS, "修改密码成功");
+            } else {
+                log.warn("修改密码失败，参数: {}", user);
+                return new Result(INTERNAL_ERROR, "修改密码失败");
+            }
+
+
+        } catch (Exception e) {
+            log.error("修改密码失败", e);
+            return new Result(INTERNAL_ERROR, "修改密码失败");
+        }
     }
 }
