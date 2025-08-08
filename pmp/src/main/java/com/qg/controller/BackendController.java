@@ -8,6 +8,7 @@ import com.qg.domain.Result;
 import com.qg.service.BackendErrorService;
 import com.qg.service.BackendLogService;
 import com.qg.service.BackendPerformanceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ import java.util.List;
  * @Date: 2025/8/7 22:00   // 时间
  * @Version: 1.0     // 版本
  */
+@Slf4j
 @RequestMapping("/backend")
 @RestController
 public class BackendController {
@@ -38,45 +40,45 @@ public class BackendController {
 
 
     @PostMapping("/getMethodUseCount")
-    public String getMethodUseCount(@RequestBody String methodCount) {
-        System.err.println("***********接收到了方法调用情况信息***********");
-        System.err.println(methodCount);
-        return JSONUtil.toJsonStr(new Result(200, "已接收方法调用情况信息"));
+    public void getMethodUseCount(@RequestBody String methodCount) {
+        log.info("***********接收到了方法调用情况信息***********");
+        log.info(methodCount);
     }
 
     @PostMapping("/performance")
-    public String getPerformanceData(@RequestBody String performanceData) {
-        System.out.println("***********接收到了后端性能数据***********");
-        System.out.println(performanceData);
+    public void getPerformanceData(@RequestBody String performanceData) {
+        log.info("***********接收到了后端性能数据***********");
+        log.info(performanceData);
         List<BackendPerformance> backendPerformances = JSONUtil.toList(performanceData, BackendPerformance.class);
-        if (backendPerformances != null) {
-
-            System.out.println("已接收的后端性能数据: " + backendPerformances);
+        if (backendPerformanceService.saveBackendPerformance(backendPerformances) > 0) {
+            log.info("已接收的后端性能数据: " + backendPerformances);
+        }else {
+            log.error("接收后端性能数据失败");
         }
-        return "";
     }
 
     @PostMapping("/error")
-    public String getErrorData(@RequestBody String errorData) {
-        System.out.println("***********接收到了后端错误信息***********");
-        System.out.println(errorData);
+    public void getErrorData(@RequestBody String errorData) {
+        log.info("***********接收到了后端错误信息***********");
+        log.info(errorData);
         BackendError backendError = JSONUtil.toBean(errorData, BackendError.class);
-        if (backendError != null) {
-            System.out.println("已接收的后端错误信息: " + backendError);
+        if (backendErrorService.saveBackendError(backendError) > 0) {
+            log.info("已接收的后端错误信息: " + backendError);
+        } else {
+            log.error("接收后端错误信息失败");
         }
-
-        return JSONUtil.toJsonStr(new Result(200, "已接收错误信息"));
     }
 
     @PostMapping("/log")
-    public String getLogData(@RequestBody String logData) {
-        System.err.println("=============接收到了日志信息***********");
-        System.err.println(logData);
+    public void getLogData(@RequestBody String logData) {
+        log.info("***********接收到了后端日志信息***********");
+        log.info(logData);
         List<BackendLog> backendLogs = JSONUtil.toList(logData, BackendLog.class);
-        if (backendLogs != null) {
-            System.out.println("已接收的日志信息: " + backendLogs);
+        if (backendLogService.saveBackendLogs(backendLogs) > 0) {
+            log.info("已接收的后端日志信息: " + backendLogs);
+        } else {
+            log.error("接收后端日志信息失败");
         }
-        return JSONUtil.toJsonStr(new Result(200, "已接收日志信息"));
     }
 
 

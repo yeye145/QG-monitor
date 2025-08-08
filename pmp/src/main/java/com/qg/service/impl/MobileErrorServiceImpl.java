@@ -37,4 +37,12 @@ public class MobileErrorServiceImpl implements MobileErrorService {
 
         return new Result(200, mobileErrors, "查询成功");
     }
+
+    @Override
+    public Integer saveMobileError(MobileError mobileError) {
+        if (mobileError == null) {
+            return 0; // 返回0表示没有数据需要保存
+        }
+        return mobileErrorMapper.insert(mobileError); // 返回插入的记录数
+    }
 }

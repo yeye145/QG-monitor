@@ -1,5 +1,9 @@
 package com.qg.service;
 
+import com.qg.domain.FrontendPerformance;
+
+import java.util.List;
+
 /**
  * @Description: // 类说明
  * @ClassName: FrontendPerformanceService    // 类名
@@ -8,4 +12,6 @@ package com.qg.service;
  * @Version: 1.0     // 版本
  */
 public interface FrontendPerformanceService {
+
+    Integer saveFrontendPerformance(List<FrontendPerformance> frontendPerformance);
 }
