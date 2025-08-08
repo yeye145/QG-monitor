@@ -1,7 +1,15 @@
 package com.qg.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.qg.domain.FrontendError;
+import com.qg.domain.Result;
+import com.qg.mapper.FrontendErrorMapper;
 import com.qg.service.FrontendErrorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Description: 前端错误应用  // 类说明
@@ -10,5 +18,24 @@ import com.qg.service.FrontendErrorService;
  * @Date: 2025/8/7 21:35   // 时间
  * @Version: 1.0     // 版本
  */
+@Service
 public class FrontendErrorServiceImpl implements FrontendErrorService {
+
+    @Autowired
+    private FrontendErrorMapper frontendErrorMapper;
+
+    @Override
+    public Result selectByCondition(String projectId, String type) {
+        if (projectId == null || type == null) {
+            return new Result(400, "参数不能为空");
+        }
+        LambdaQueryWrapper<FrontendError> queryWrapper = new LambdaQueryWrapper<>();
+
+        queryWrapper.eq(FrontendError::getProjectId, projectId)
+                    .eq(FrontendError::getErrorType, type);
+
+        List<FrontendError> frontendErrors = frontendErrorMapper.selectList(queryWrapper);
+
+        return new Result(200, frontendErrors, "查询成功");
+    }
 }

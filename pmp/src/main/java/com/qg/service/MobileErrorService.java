@@ -1,5 +1,7 @@
 package com.qg.service;
 
+import com.qg.domain.Result;
+
 /**
  * @Description: // 类说明
  * @ClassName: MobileErrorService    // 类名
@@ -8,4 +10,5 @@ package com.qg.service;
  * @Version: 1.0     // 版本
  */
 public interface MobileErrorService {
+    Result selectByCondition(String projectId, String type);
 }
