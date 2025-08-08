@@ -1,5 +1,7 @@
 package com.qg.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FrontendError {
-
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private String projectId;
     private Long timestamp;

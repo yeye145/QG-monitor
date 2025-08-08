@@ -10,6 +10,7 @@ import com.qg.service.FrontendPerformanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,7 +39,7 @@ public class FrontendController {
 
 
     @PostMapping("/performance")
-    public void getPerformanceData(String performanceData) {
+    public void getPerformanceData(@RequestBody String performanceData) {
         log.info("***********接收到了前端性能数据***********");
         log.info(performanceData);
         List<FrontendPerformance> frontendPerformance = JSONUtil.toList(performanceData, FrontendPerformance.class);
@@ -50,7 +51,7 @@ public class FrontendController {
     }
 
     @PostMapping("/error")
-    public void getErrorData(String errorData) {
+    public void getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了前端错误数据***********");
         log.info(errorData);
         List<FrontendError> frontendErrors = JSONUtil.toList(errorData, FrontendError.class);
@@ -62,7 +63,7 @@ public class FrontendController {
     }
 
     @PostMapping("/behavior")
-    public void getBehaviorData(String behaviorData) {
+    public void getBehaviorData(@RequestBody String behaviorData) {
         log.info("***********接收到了前端行为数据***********");
         log.info(behaviorData);
         List<FrontendBehavior> behaviorList = JSONUtil.toList(behaviorData, FrontendBehavior.class);
