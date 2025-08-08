@@ -18,7 +18,7 @@ public class NotificationController {
     private NotificationService notificationService;
 
     /**
-     * 根据接收者id查询通知（未读）
+     * 根据接收者id查询通知
      * @param receiverId
      * @return
      */
