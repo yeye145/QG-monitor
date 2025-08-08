@@ -1,14 +1,12 @@
 package com.qg.controller;
 
 import cn.hutool.json.JSONUtil;
-import com.qg.domain.BackendError;
-import com.qg.domain.BackendLog;
-import com.qg.domain.BackendPerformance;
-import com.qg.domain.Result;
+import com.qg.domain.*;
 import com.qg.service.BackendErrorService;
 import com.qg.service.BackendLogService;
 import com.qg.service.BackendPerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +34,6 @@ public class BackendController {
     @Autowired
     private BackendLogService backendLogService;
 
-
     @PostMapping("/getMethodUseCount")
     public String getMethodUseCount(@RequestBody String methodCount) {
         System.err.println("***********接收到了方法调用情况信息***********");
@@ -47,12 +44,8 @@ public class BackendController {
     @PostMapping("/performance")
     public String getPerformanceData(@RequestBody String performanceData) {
         System.out.println("***********接收到了后端性能数据***********");
-        System.out.println(performanceData);
         List<BackendPerformance> backendPerformances = JSONUtil.toList(performanceData, BackendPerformance.class);
-        if (backendPerformances != null) {
-
-            System.out.println("已接收的后端性能数据: " + backendPerformances);
-        }
+        backendPerformances.forEach(System.out::println);
         return "";
     }
 
@@ -69,15 +62,9 @@ public class BackendController {
     }
 
     @PostMapping("/log")
-    public String getLogData(@RequestBody String logData) {
+    public String getLog(@RequestBody String logJSON) {
         System.err.println("=============接收到了日志信息***********");
-        System.err.println(logData);
-        List<BackendLog> backendLogs = JSONUtil.toList(logData, BackendLog.class);
-        if (backendLogs != null) {
-            System.out.println("已接收的日志信息: " + backendLogs);
-        }
-        return JSONUtil.toJsonStr(new Result(200, "已接收日志信息"));
+        return backendLogService.getLog(logJSON);
     }
-
 
 }

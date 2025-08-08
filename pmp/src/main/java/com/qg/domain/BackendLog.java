@@ -1,5 +1,7 @@
 package com.qg.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,12 +17,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BackendLog {
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     private Long timestamp;
+    private String level;
+    private String context;
     private String module;
+    private String source = "backend";
     private String projectId;
+    private EnvironmentSnapshot environmentSnapshot;
     private String environment;
-    private String logLevel;
-    private String logMessage;
-    private String environmentSnapshot;
 }
