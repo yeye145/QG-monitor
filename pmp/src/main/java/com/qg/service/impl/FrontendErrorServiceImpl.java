@@ -3,6 +3,7 @@ package com.qg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.FrontendError;
+import com.qg.domain.FrontendPerformance;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendErrorMapper;
 import com.qg.service.FrontendErrorService;
@@ -37,5 +38,19 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
         List<FrontendError> frontendErrors = frontendErrorMapper.selectList(queryWrapper);
 
         return new Result(200, frontendErrors, "查询成功");
+    }
+
+    @Override
+    public Integer saveFrontendError(List<FrontendError> frontendErrors) {
+        if (frontendErrors == null || frontendErrors.isEmpty()) {
+            return 0; // 返回0表示没有数据需要保存
+        }
+        int count = 0;
+
+        for (FrontendError error : frontendErrors) {
+            count += frontendErrorMapper.insert(error);
+        }
+
+        return frontendErrors.size() == count ? count : 0; // 返回保存的记录数
     }
 }
