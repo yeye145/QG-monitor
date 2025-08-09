@@ -37,19 +37,18 @@ public class BackendLog {
     private String module;
     private String projectId;
     private String environment;
-    private String logLevel;
     private String logMessage;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> environmentSnapshot;
 
     private final AtomicInteger event = new AtomicInteger(0);
 
-    // TODO: 原子性递增
-    public void incrementAndGetEvent() {
+    // 原子性递增
+    public void incrementEvent() {
         event.incrementAndGet();
     }
 
-    // TODO: 获取当前值
+    // 获取当前值
     public int getEvent() {
         return event.get();
     }

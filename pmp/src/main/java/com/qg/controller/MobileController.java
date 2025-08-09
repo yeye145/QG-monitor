@@ -45,15 +45,9 @@ public class MobileController {
     }
 
     @PostMapping("/error")
-    public void getErrorData(@RequestBody String errorData) {
+    public void getErrorData(@RequestBody String mobileErrorJSON) {
         log.info("***********接收到了移动端错误数据***********");
-        log.info(errorData);
-        MobileError mobileError = JSONUtil.toBean(errorData, MobileError.class); // 解析JSON数据
-        if (mobileErrorService.saveMobileError(mobileError) > 0) {
-            log.info("已接收的移动端错误数据: " + mobileError);
-        } else {
-            log.error("接收移动端错误数据失败");
-        }
+        log.info(mobileErrorService.receiveErrorFromSDK(mobileErrorJSON));
     }
 
 }

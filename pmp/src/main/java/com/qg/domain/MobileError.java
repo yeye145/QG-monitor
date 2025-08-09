@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
+import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @Description: 移动错误类  // 类说明
  * @ClassName: MobileError    // 类名
@@ -22,9 +25,22 @@ public class MobileError {
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private String projectId;
+
     private Timestamp timestamp;
     private String errorType;
     private String message;
     private String stack;
     private String className;
+
+    private final AtomicInteger event = new AtomicInteger(0);
+
+    // 原子性递增
+    public void incrementEvent() {
+        event.incrementAndGet();
+    }
+
+    // 获取当前值
+    public int getEvent() {
+        return event.get();
+    }
 }

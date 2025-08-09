@@ -51,17 +51,16 @@ public class BackendController {
     }
 
     @PostMapping("/error")
-    public void getErrorData(@RequestBody String errorData) {
+    public Result getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了后端错误信息***********");
         log.info(errorData);
-        BackendError backendError = JSONUtil.toBean(errorData, BackendError.class);
-        if (backendErrorService.saveBackendError(backendError) > 0) {
-            log.info("已接收的后端错误信息: " + backendError);
-        } else {
-            log.error("接收后端错误信息失败");
-        }
+        return backendErrorService.addBackendError(errorData);
     }
 
+    /**
+     * 接收后端SDK日志
+     * @param logJSON
+     */
     @PostMapping("/log")
     public void receiveLogFromSDK(@RequestBody String logJSON) {
         log.info(backendLogService.receiveLogFromSDK(logJSON));

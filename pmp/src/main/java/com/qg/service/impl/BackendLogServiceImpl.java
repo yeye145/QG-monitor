@@ -3,7 +3,7 @@ package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.BackendLog;
-import com.qg.repository.InfoLogRepository;
+import com.qg.repository.BackendLogRepository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.mapper.BackendLogMapper;
@@ -25,7 +25,7 @@ import java.util.List;
 public class BackendLogServiceImpl implements BackendLogService {
 
     @Autowired
-    private InfoLogRepository infoLogRepository;
+    private BackendLogRepository backendLogRepository;
 
     @Autowired
     private BackendLogMapper backendLogMapper;
@@ -58,15 +58,20 @@ public class BackendLogServiceImpl implements BackendLogService {
 
     }
 
+    /**
+     * 获取后端SDK发送的日志
+     * @param logJSON
+     * @return
+     */
     @Override
     public String receiveLogFromSDK(String logJSON) {
-        // TODO: 转换数据，进行缓存交互
+        // 转换数据，进行缓存交互
         try {
             JSONUtil.toList(logJSON, BackendLog.class)
-                    .forEach(log -> infoLogRepository.statisticsLog(log));
-            return "info-log存入缓存成功";
+                    .forEach(log -> backendLogRepository.statistics(log));
+            return "backend-info-log存入缓存成功";
         } catch (Exception e) {
-            return "info-log存入缓存失败";
+            return "backend-info-log存入缓存失败";
         }
     }
 
@@ -81,7 +86,7 @@ public class BackendLogServiceImpl implements BackendLogService {
             queryWrapper.eq(BackendLog::getEnvironment, evn);
         }
         if (logLevel != null && !logLevel.isEmpty()) {
-            queryWrapper.eq(BackendLog::getLogLevel, logLevel);
+            queryWrapper.eq(BackendLog::getLevel, logLevel);
         }
 
         return backendLogMapper.selectList(queryWrapper);

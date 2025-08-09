@@ -5,18 +5,21 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.qg.domain.Code;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qg.domain.Result;
 import com.qg.domain.Users;
+import com.qg.dto.EncryptionResultDTO;
 import com.qg.dto.UsersDTO;
 import com.qg.mapper.UsersMapper;
 import com.qg.service.UsersService;
+import com.qg.utils.CryptoUtils;
 import com.qg.utils.EmailService;
 import com.qg.utils.HashSaltUtil;
-import com.qg.utils.RedisConstants;
 import com.qg.utils.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.qg.domain.Code.*;
 import static com.qg.utils.RedisConstants.*;
-import static com.qg.utils.RedisConstants.LOGIN_CODE_KEY;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
@@ -37,7 +38,12 @@ public class UsersServiceImpl implements UsersService {
     EmailService emailService;
 
     @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     private UsersMapper usersMapper;
+
+    @Value("${rsa.key-pairs.pair1.public-key}")
+    private String rsaPublicKey;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -94,6 +100,15 @@ public class UsersServiceImpl implements UsersService {
             return new Result(BAD_REQUEST, "邮箱格式错误");
         }
 
+        LambdaQueryWrapper<Users> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Users::getEmail, email);
+        // 判断邮箱是否已经被注册
+        Users one = usersMapper.selectOne(lqw);
+        if (one != null) {
+            System.out.println("该邮箱已被注册");
+            return new Result(CONFLICT, "该邮箱已被注册！");
+        }
+
         // 再查看验证码是否正确
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + email);
         if (cacheCode == null || !cacheCode.equals(code)) {
@@ -103,15 +118,8 @@ public class UsersServiceImpl implements UsersService {
             return new Result(NOT_FOUND, "验证码错误");
         }
 
-        LambdaQueryWrapper<Users> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Users::getEmail, email);
 
-        // 判断邮箱是否已经被注册
-        Users one = usersMapper.selectOne(lqw);
-        if (one != null) {
-            System.out.println("该邮箱已被注册");
-            return new Result(CONFLICT, "该邮箱已被注册！");
-        }
+
 
         // 对密码进行加密处理
         user.setPassword(HashSaltUtil.creatHashPassword(user.getPassword()));
@@ -147,8 +155,21 @@ public class UsersServiceImpl implements UsersService {
         Map<String, Object> map = new HashMap<>();
         map.put("user", userDTO);
         map.put("token", token);
+        EncryptionResultDTO encryptionResultDTO = null;
+        try {
+            String jsonData = new ObjectMapper().writeValueAsString(map);//将map类型的数据转化为json字符串
+            log.info("加密前的JSON: {}", jsonData);
 
-        return new Result(CREATED, map, "恭喜你，注册成功！");
+            encryptionResultDTO = CryptoUtils.encryptWithAESAndRSA(jsonData, rsaPublicKey);
+
+            log.info("加密后的JSON: {}", encryptionResultDTO.getEncryptedData());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return new Result(CREATED, encryptionResultDTO, "恭喜你，注册成功！");
     }
 
     @Override
@@ -186,12 +207,31 @@ public class UsersServiceImpl implements UsersService {
             return new Result(BAD_REQUEST, "用户ID不能为空");
         }
         Users user = usersMapper.selectById(id);
-        UsersDTO userDTO = BeanUtil.copyProperties(user, UsersDTO.class);
         if(user == null) {
             return new Result(NOT_FOUND, "用户不存在");
         }
-        return new Result(SUCCESS, userDTO, "获取用户信息成功");
+        user.setPassword(null);
+        user.setIsDeleted(null);
+
+        //加密
+        String jsonData = null;//将map类型的数据转化为json字符串
+        EncryptionResultDTO encryptionResultDTO = null;
+        try {
+            jsonData = objectMapper.writeValueAsString(user);
+
+            log.info("加密前的JSON: {}", jsonData);
+
+            encryptionResultDTO = CryptoUtils.encryptWithAESAndRSA(jsonData, rsaPublicKey);
+
+        }  catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        log.info("加密后的JSON: {}", encryptionResultDTO.getEncryptedData());
+        return new Result(SUCCESS, encryptionResultDTO, "获取用户信息成功");
     }
+
 
     @Override
     public Result findPassword(Users user, String code) {

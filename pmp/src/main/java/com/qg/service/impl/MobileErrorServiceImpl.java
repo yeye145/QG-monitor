@@ -1,9 +1,11 @@
 package com.qg.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.MobileError;
 import com.qg.domain.Result;
 import com.qg.mapper.MobileErrorMapper;
+import com.qg.repository.MobileErrorRepository;
 import com.qg.service.MobileErrorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,11 +26,13 @@ public class MobileErrorServiceImpl implements MobileErrorService {
 
     @Autowired
     private MobileErrorMapper mobileErrorMapper;
+    @Autowired
+    private MobileErrorRepository mobileErrorRepository;
 
     @Override
     public Result selectByCondition(String projectId, String type) {
         if (projectId == null || projectId.isEmpty()) {
-            return  new Result(BAD_REQUEST, "参数错误");
+            return new Result(BAD_REQUEST, "参数错误");
         }
         LambdaQueryWrapper<MobileError> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MobileError::getProjectId, projectId);
@@ -43,10 +47,12 @@ public class MobileErrorServiceImpl implements MobileErrorService {
     }
 
     @Override
-    public Integer saveMobileError(MobileError mobileError) {
-        if (mobileError == null) {
-            return 0; // 返回0表示没有数据需要保存
+    public String receiveErrorFromSDK(String mobileErrorJSON) {
+        try {
+            mobileErrorRepository.statistics(JSONUtil.toBean(mobileErrorJSON, MobileError.class));
+            return "mobile-error存入缓存成功";
+        } catch (Exception e) {
+            return "mobile-error存入缓存失败";
         }
-        return mobileErrorMapper.insert(mobileError); // 返回插入的记录数
     }
 }
