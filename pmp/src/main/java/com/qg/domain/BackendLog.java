@@ -42,12 +42,12 @@ public class BackendLog {
 
     private final AtomicInteger event = new AtomicInteger(0);
 
-    // TODO: 原子性递增
-    public void incrementAndGetEvent() {
+    // 原子性递增
+    public void incrementEvent() {
         event.incrementAndGet();
     }
 
-    // TODO: 获取当前值
+    // 获取当前值
     public int getEvent() {
         return event.get();
     }

@@ -3,7 +3,7 @@ package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.BackendLog;
-import com.qg.repository.LogRepository;
+import com.qg.repository.BackendLogRepository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.mapper.BackendLogMapper;
@@ -25,7 +25,7 @@ import java.util.List;
 public class BackendLogServiceImpl implements BackendLogService {
 
     @Autowired
-    private LogRepository logRepository;
+    private BackendLogRepository backendLogRepository;
 
     @Autowired
     private BackendLogMapper backendLogMapper;
@@ -65,13 +65,13 @@ public class BackendLogServiceImpl implements BackendLogService {
      */
     @Override
     public String receiveLogFromSDK(String logJSON) {
-        // TODO: 转换数据，进行缓存交互
+        // 转换数据，进行缓存交互
         try {
             JSONUtil.toList(logJSON, BackendLog.class)
-                    .forEach(log -> logRepository.statisticsLog(log));
-            return "info-log存入缓存成功";
+                    .forEach(log -> backendLogRepository.statistics(log));
+            return "backend-info-log存入缓存成功";
         } catch (Exception e) {
-            return "info-log存入缓存失败";
+            return "backend-info-log存入缓存失败";
         }
     }
 
