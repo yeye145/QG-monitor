@@ -1,6 +1,7 @@
 package com.qg.service;
 
 import com.qg.domain.BackendPerformance;
+import com.qg.domain.Result;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ import java.util.List;
  */
 public interface BackendPerformanceService {
     int saveBackendPerformance(List<BackendPerformance> backendPerformances);
+
+    Result selectByCondition(String projectId, Long moduleId, String api, String environment);
 }

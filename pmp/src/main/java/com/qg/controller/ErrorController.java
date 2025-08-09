@@ -1,13 +1,13 @@
 package com.qg.controller;
 
-import com.qg.domain.Error;
+
 import com.qg.domain.Result;
 import com.qg.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 
 @Tag(name = "错误信息")
@@ -20,13 +20,13 @@ public class ErrorController {
 
 
     @Autowired
-    private BackendErrorService backendErrorService;
+    private BackendResponsibilityService backendResponsibilityService;
 
     @Autowired
-    private FrontendErrorService frontendErrorService;
+    private FrontendResponsibilityService frontendResponsibilityService;
 
     @Autowired
-    private MobileErrorService mobileErrorService;
+    private MobileResponsibilityService mobileResponsibilityService;
 
     @Autowired
     private AllErrorService allErrorService;
@@ -65,16 +65,18 @@ public class ErrorController {
     }*/
     @GetMapping("/selectByCondition")
     public Result selectByCondition(@RequestParam String projectId, @RequestParam(required = false) Long moduleId,
-                                    @RequestParam(required = false) String type, @RequestParam(required = false) String platform) {
+                                    @RequestParam(required = false) String errorType, @RequestParam(required = false) String platform) {
+
+        if (platform == null || platform.isEmpty()) {
+            return allErrorService.selectByCondition(projectId, moduleId, errorType);
+        }
         switch (platform) {
             case "backend":
-                return backendErrorService.selectByCondition(projectId, moduleId, type);
+                return backendResponsibilityService.selectByCondition(projectId, moduleId, errorType);
             case "frontend":
-                return frontendErrorService.selectByCondition(projectId, type);
+                return frontendResponsibilityService.selectByCondition(projectId, errorType);
             case "mobile":
-                return mobileErrorService.selectByCondition(projectId, type);
-            case "all":
-                return allErrorService.selectByCondition(projectId, moduleId, type);
+                return mobileResponsibilityService.selectByCondition(projectId, errorType);
             default:
                 return new Result(400, "不支持的平台类型");
         }

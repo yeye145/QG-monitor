@@ -4,15 +4,13 @@ import cn.hutool.json.JSONUtil;
 import com.qg.domain.FrontendBehavior;
 import com.qg.domain.FrontendError;
 import com.qg.domain.FrontendPerformance;
+import com.qg.domain.Result;
 import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -51,15 +49,10 @@ public class FrontendController {
     }
 
     @PostMapping("/error")
-    public void getErrorData(@RequestBody String errorData) {
+    public Result getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了前端错误数据***********");
         log.info(errorData);
-        List<FrontendError> frontendErrors = JSONUtil.toList(errorData, FrontendError.class);
-        if (frontendErrorService.saveFrontendError(frontendErrors) > 0) {
-            log.info("已接收的前端错误数据: " + frontendErrors);
-        } else {
-            log.error("接收前端错误数据失败");
-        }
+        return frontendErrorService.addFrontendError(errorData);
     }
 
     @PostMapping("/behavior")
@@ -72,6 +65,32 @@ public class FrontendController {
         } else {
             log.error("接收前端行为数据失败");
         }
+    }
+
+    @PostMapping("/{type}")
+    public void getData(@RequestBody String data,@PathVariable String type) {
+        log.info("***********接收到了前端数据***********");
+        log.info(data);
+        switch (type) {
+            case "performance":
+                List<FrontendPerformance> performanceList = JSONUtil.toList(data, FrontendPerformance.class);
+                frontendPerformanceService.saveFrontendPerformance(performanceList);
+                log.info("已接收的前端性能数据: " + performanceList);
+                break;
+            case "error":
+//                List<FrontendError> errorList = JSONUtil.toList(data, FrontendError.class);
+                frontendErrorService.addFrontendError(data);
+//                log.info("已接收的前端错误数据: " + errorList);
+                break;
+            case "behavior":
+                List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);
+                frontendBehaviorService.saveFrontendBehavior(behaviorList);
+                log.info("已接收的前端行为数据: " + behaviorList);
+                break;
+            default:
+                log.error("未知的数据类型: " + type);
+        }
+
     }
 
 

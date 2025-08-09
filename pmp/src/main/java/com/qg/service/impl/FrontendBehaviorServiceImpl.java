@@ -1,12 +1,21 @@
 package com.qg.service.impl;
 
+import cn.hutool.json.JSONUtil;
+import com.qg.aggregator.FrontendErrorAggregator;
+import com.qg.domain.BackendError;
 import com.qg.domain.FrontendBehavior;
+import com.qg.domain.FrontendError;
+import com.qg.domain.Result;
 import com.qg.mapper.FrontendBehaviorMapper;
 import com.qg.service.FrontendBehaviorService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.qg.domain.Code.*;
 
 /**
  * @Description: 前端行为应用  // 类说明
@@ -16,9 +25,12 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 @Service
+@Slf4j
 public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
     @Autowired
     private FrontendBehaviorMapper frontendBehaviorMapper;
+
+
 
     @Override
     public Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList) {
@@ -32,4 +44,6 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
         }
         return behaviorList.size() == count ? count : 0; // 返回保存的记录
     }
+
+
 }
