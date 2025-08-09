@@ -52,7 +52,7 @@ public class FrontendController {
     public Result getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了前端错误数据***********");
         log.info(errorData);
-        return frontendBehaviorService.addFrontendError(errorData);
+        return frontendErrorService.addFrontendError(errorData);
     }
 
     @PostMapping("/behavior")
@@ -78,9 +78,9 @@ public class FrontendController {
                 log.info("已接收的前端性能数据: " + performanceList);
                 break;
             case "error":
-                List<FrontendError> errorList = JSONUtil.toList(data, FrontendError.class);
-                frontendErrorService.saveFrontendError(errorList);
-                log.info("已接收的前端错误数据: " + errorList);
+//                List<FrontendError> errorList = JSONUtil.toList(data, FrontendError.class);
+                frontendErrorService.addFrontendError(data);
+//                log.info("已接收的前端错误数据: " + errorList);
                 break;
             case "behavior":
                 List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);

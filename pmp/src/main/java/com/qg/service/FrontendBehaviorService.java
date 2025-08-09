@@ -15,5 +15,4 @@ import java.util.List;
 public interface FrontendBehaviorService {
     Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList);
 
-    Result addFrontendError(String errorData);
 }
