@@ -26,6 +26,9 @@ import static com.qg.domain.Code.*;
 @RequestMapping("/users")
 public class UserController {
 
+    @Autowired  // Spring会自动注入配置好的ObjectMapper
+    private ObjectMapper objectMapper;
+
     @Autowired
     private UsersService usersService;
 
@@ -73,7 +76,9 @@ public class UserController {
             map.put("user", BeanUtil.copyProperties(user, UsersDTO.class));
 
             // 5. 使用指定方法加密（关键修改点）
-            String jsonData = new ObjectMapper().writeValueAsString(map);//将map类型的数据转化为json字符串
+
+            String jsonData =objectMapper.writeValueAsString(map);//将map类型的数据转化为json字符串
+
             log.info("加密前的JSON: {}", jsonData);
             EncryptionResultDTO encryptionResultDTO = CryptoUtils.encryptWithAESAndRSA(jsonData, rsaPublicKey);
             log.info("加密后的JSON: {}", encryptionResultDTO.getEncryptedData());
@@ -85,13 +90,21 @@ public class UserController {
 
     /**
      * 用户注册
-     * @param registerDTO 注册信息
+     * @param request 注册信息
      * @return 注册结果
      */
     @PostMapping("/register")
-    public Result register(@RequestBody RegisterDTO registerDTO) {
-
+    public Result register(@RequestBody EncryptedRequestDTO request) {
+        RegisterDTO registerDTO = new RegisterDTO();
+        try {
         log.info("开始注册用户");
+        String decryptedJson  = CryptoUtils.decryptWithAESAndRSA(
+                request.getEncryptedData(),
+                request.getEncryptedKey(),
+                rsaPrivateKey
+        );
+        log.info("解密后的JSON: {}", decryptedJson);
+        registerDTO = new ObjectMapper().readValue(decryptedJson, RegisterDTO.class);
         log.info("RegisterDTO: {}", registerDTO);
 
         // 参数校验
@@ -107,7 +120,7 @@ public class UserController {
 
         log.info("开始注册用户，邮箱: {}", registerDTO.getUsers().getEmail());
 
-        try {
+
             String code = registerDTO.getCode() != null ? registerDTO.getCode().trim() : "";
             if (code.isEmpty()) {
                 log.warn("注册失败，验证码为空，邮箱: {}", registerDTO.getUsers().getEmail());
@@ -115,25 +128,40 @@ public class UserController {
             }
 
             Result result = usersService.register(registerDTO.getUsers(), code);
+
             log.info("用户注册处理完成，邮箱: {}, 结果: {}",
                     registerDTO.getUsers().getEmail(), result.getCode());
+
             return result;
         } catch (Exception e) {
-            log.error("用户注册异常，邮箱: {}", registerDTO.getUsers().getEmail(), e);
+            log.error("用户注册异常，个人信息: {}", registerDTO, e);
             return new Result(INTERNAL_ERROR, "注册过程中发生异常: " + e.getMessage());
         }
     }
 
     /**
      * 发送验证码到邮箱
-     * @param email
+     * @param encryptedData
+     * @param encryptedKey
      * @return
      */
     @GetMapping("/sendCodeByEmail")
-    public Result sendCodeByEmail(@RequestParam("email") String email) {
-        System.out.println(email);
-        // 发送验证码到邮箱
-        return usersService.sendCodeByEmail(email);
+    public Result sendCodeByEmail(@RequestParam("encryptedData") String encryptedData, @RequestParam("encryptedKey") String encryptedKey) {
+        try {
+            String decryptedJson  = CryptoUtils.decryptWithAESAndRSA(
+                    encryptedData,
+                    encryptedKey,
+                    rsaPrivateKey
+            );
+            Map<String, String> params = new ObjectMapper()
+                    .readValue(decryptedJson, new TypeReference<Map<String, String>>() {});
+            String email = params.get("email");
+            log.info("发送验证码到邮箱，邮箱: {}", email);
+            // 发送验证码到邮箱
+            return usersService.sendCodeByEmail(email);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -148,12 +176,35 @@ public class UserController {
 
     /**
      * 找回密码
-     * @param user
-     * @param code
+     * @param request
      * @return
      */
-    @PutMapping("/findPassword/{code}")
-    public Result findPassword(@RequestBody Users user, @PathVariable String code) {
-        return usersService.findPassword(user, code);
+    @PutMapping("/findPassword")
+    public Result findPassword(@RequestBody EncryptedRequestDTO request) {
+        try {
+            log.info("接收到的参数: {}",request);
+            // 1. 使用CryptoUtils解密请求
+            String decryptedJson = CryptoUtils.decryptWithAESAndRSA(
+                    request.getEncryptedData(),
+                    request.getEncryptedKey(),
+                    rsaPrivateKey
+            );
+            log.info("解密后的JSON: {}", decryptedJson);
+            // 2. 解析JSON获取邮箱密码
+            Map<String, Object> params = new ObjectMapper()
+                    .readValue(decryptedJson, new TypeReference<Map<String, Object>>() {});
+
+            // 获取user对象并转换为Users类
+            Map<String, Object> userMap = (Map<String, Object>) params.get("users");
+            Users users = new ObjectMapper().convertValue(userMap, Users.class);
+            log.info("用户信息: {}", users);
+
+            // 获取code
+            String code = (String) params.get("code");
+            log.info("验证码: {}", code);
+            return usersService.findPassword(users, code);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
