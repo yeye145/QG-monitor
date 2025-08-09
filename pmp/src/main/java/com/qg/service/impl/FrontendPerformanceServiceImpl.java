@@ -1,6 +1,8 @@
 package com.qg.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.FrontendPerformance;
+import com.qg.domain.Result;
 import com.qg.mapper.FrontendPerformanceMapper;
 import com.qg.service.FrontendPerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,5 +37,22 @@ public class FrontendPerformanceServiceImpl implements FrontendPerformanceServic
 
         return frontendPerformance.size() == count ? count : 0; // 返回保存的记录数
 
+    }
+
+    @Override
+    public Result selectByCondition(String projectId, String capture) {
+        if (projectId == null || projectId.isEmpty()) {
+            return new Result(400, "项目ID不能为空");
+        }
+        LambdaQueryWrapper<FrontendPerformance> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FrontendPerformance::getProjectId, projectId);
+
+        if (capture != null && !capture.isEmpty()) {
+            queryWrapper.eq(FrontendPerformance::getCaptureType, capture);
+        }
+
+        List<FrontendPerformance> frontendPerformances = frontendPerformanceMapper.selectList(queryWrapper);
+
+        return new Result(200, frontendPerformances, "查询成功");
     }
 }

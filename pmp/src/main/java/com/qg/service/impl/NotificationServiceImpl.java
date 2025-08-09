@@ -373,7 +373,7 @@ public class NotificationServiceImpl implements NotificationService {
                     case "backend":
                         BackendError backendError = backendErrorMap.get(notification.getErrorId());
                         if (backendError != null) {
-                            notificationVO.setErrorType(backendError.getType());
+                            notificationVO.setErrorType(backendError.getErrorType());
                             notificationVO.setErrorMessage(backendError.getStack());
                         }
                         break;
