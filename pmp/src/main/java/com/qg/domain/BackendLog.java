@@ -7,11 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-<<<<<<< HEAD
+
 import java.util.Map;
-=======
+
 import java.util.concurrent.atomic.AtomicInteger;
->>>>>>> upstream/main
+
 
 /**
  * @Description: 后端日志类  // 类说明
