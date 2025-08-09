@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * @Description: 移动错误Vo  // 类说明
@@ -19,7 +20,7 @@ import java.sql.Timestamp;
 public class MobileResponsibilityVO {
 
     private String projectId;
-    private Timestamp timestamp;
+    private LocalDateTime timestamp;
     private String errorType;
     private String message;
     private String stack;

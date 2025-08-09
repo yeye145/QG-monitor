@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * @Description: 前端错误类  // 类说明
@@ -23,7 +24,7 @@ public class FrontendError {
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private String projectId;
-    private Timestamp timestamp;
+    private LocalDateTime timestamp;
     private String sessionId;
     private String userAgent;
     private String errorType;

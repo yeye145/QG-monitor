@@ -26,7 +26,7 @@ public class MobileError {
     private Long id;
     private String projectId;
 
-    private Timestamp timestamp;
+    private LocalDateTime timestamp;
     private String errorType;
     private String message;
     private String stack;
