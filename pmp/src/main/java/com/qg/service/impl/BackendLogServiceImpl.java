@@ -2,17 +2,15 @@ package com.qg.service.impl;
 
 
 import cn.hutool.json.JSONUtil;
-import com.qg.domain.Result;
-import com.qg.repository.LogINFORepository;
+import com.qg.domain.BackendLog;
+import com.qg.repository.InfoLogRepository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.qg.domain.BackendLog;
 import com.qg.mapper.BackendLogMapper;
 
 import com.qg.service.BackendLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -27,7 +25,7 @@ import java.util.List;
 public class BackendLogServiceImpl implements BackendLogService {
 
     @Autowired
-    private LogINFORepository logINFORepository;
+    private InfoLogRepository infoLogRepository;
 
     @Autowired
     private BackendLogMapper backendLogMapper;
@@ -59,10 +57,16 @@ public class BackendLogServiceImpl implements BackendLogService {
         return backendLogMapper.selectList(queryWrapper);
 
     }
-        @Override
-        public String getLog(@RequestBody String logJSON) {
-            logINFORepository.checkLogRepeat(logJSON);
-            return JSONUtil.toJsonStr(new Result(200, "已接收日志信息"));
 
+    @Override
+    public String receiveLogFromSDK(String logJSON) {
+        // TODO: 转换数据，进行缓存交互
+        try {
+            JSONUtil.toList(logJSON, BackendLog.class)
+                    .forEach(log -> infoLogRepository.statisticsLog(log));
+            return "info-log存入缓存成功";
+        } catch (Exception e) {
+            return "info-log存入缓存失败";
+        }
     }
 }

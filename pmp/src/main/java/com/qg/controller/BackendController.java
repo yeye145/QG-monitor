@@ -63,9 +63,8 @@ public class BackendController {
     }
 
     @PostMapping("/log")
-    public String getLog(@RequestBody String logJSON) {
-        System.err.println("=============接收到了日志信息***********");
-        return backendLogService.getLog(logJSON);
+    public void receiveLogFromSDK(@RequestBody String logJSON) {
+        log.info(backendLogService.receiveLogFromSDK(logJSON));
     }
 }
 
