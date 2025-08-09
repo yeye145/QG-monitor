@@ -27,8 +27,9 @@ public class BackendError {
     private String module;
     private String projectId;
     private String environment;
-    private String type;
+    private String errorType;
     private String stack;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> environmentSnapshot;
+    private Integer event;
 }

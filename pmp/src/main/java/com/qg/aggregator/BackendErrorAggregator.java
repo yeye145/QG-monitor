@@ -42,10 +42,10 @@ public class BackendErrorAggregator {
                 backendError.getEnvironment());
 
         // 使用错误类型作为 field
-        String field = backendError.getType();
+        String field = backendError.getErrorType();
 
         // 将整个 BackendError 对象序列化为 JSON 字符串
-        String errorJson = JSONUtil.toJsonStr(backendError);
+        String errorJson;
 
         // 使用 Redis 的 Hash 数据结构
         // 如果该类型已存在，则更新计数并保留最早的时间戳
@@ -67,6 +67,7 @@ public class BackendErrorAggregator {
         } else {
             // 第一次出现该类型错误，初始化计数为1
             backendError.setEvent(1);
+            errorJson = JSONUtil.toJsonStr(backendError);
         }
 
         // 存储到 Redis

@@ -53,7 +53,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
             return new Result(BAD_REQUEST, "模块不存在");
         }
         if (type != null && !type.isEmpty()) {
-            queryWrapper.eq(BackendError::getType, type);
+            queryWrapper.eq(BackendError::getErrorType, type);
         }
         queryWrapper.eq(BackendError::getProjectId, projectId);
 
@@ -91,7 +91,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         try {
             BackendError backendError = JSONUtil.toBean(errorData, BackendError.class);
             if (backendError.getProjectId() == null ||
-                    backendError.getType() == null ||
+                    backendError.getErrorType() == null ||
                     backendError.getEnvironment() == null) {
                 log.error("参数错误");
                 return new Result(BAD_REQUEST, "参数错误");
