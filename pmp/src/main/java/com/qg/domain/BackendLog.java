@@ -36,7 +36,6 @@ public class BackendLog {
     private String module;
     private String projectId;
     private String environment;
-    private String logLevel;
     private String logMessage;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> environmentSnapshot;

@@ -62,6 +62,10 @@ public class BackendController {
         }
     }
 
+    /**
+     * 接收后端SDK日志
+     * @param logJSON
+     */
     @PostMapping("/log")
     public void receiveLogFromSDK(@RequestBody String logJSON) {
         log.info(backendLogService.receiveLogFromSDK(logJSON));

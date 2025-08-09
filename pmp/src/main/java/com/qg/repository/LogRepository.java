@@ -16,16 +16,16 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Repository
-public class InfoLogRepository {
-    // TODO：目前是10秒缓存过期，6秒定时存一次
+public class LogRepository {
+    // TODO：目前是30秒缓存过期，6秒定时存一次
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private BackendLogMapper backendLogMapper;
 
-    private static final String LOG_KEY = "log:backend:info";
-    private static final long TTL_MINUTES = 10;
+    private static final String LOG_INFO_KEY = "backend:log";
+    private static final long TTL_MINUTES = 30;
 
     private static final ConcurrentHashMap<String, BackendLog>
             infoLogConcurrentHashMap = new ConcurrentHashMap<>();
@@ -37,8 +37,9 @@ public class InfoLogRepository {
      * @param log
      */
     public void statisticsLog(BackendLog log) {
-        // TODO: 生成键（log:backend + project-token + context）
-        String redisKey = String.format("%s:%s:%s", LOG_KEY, log.getProjectId(), log.getContext());
+        // TODO: 生成键（backend:log-level: + project-token-environment: + context）
+        String redisKey = String.format("%s-%s:%s-%s:%s", LOG_INFO_KEY, log.getLevel()
+                , log.getProjectId(), log.getEnvironment(), log.getContext());
 
         synchronized (redisKey.intern()) {
 
@@ -84,7 +85,7 @@ public class InfoLogRepository {
                         }
                     });
                 }
-            }  catch (DataAccessException e) {
+            } catch (DataAccessException e) {
                 log.error("插入日志到数据库中失败：{}", e.getMessage());
             }
         });
