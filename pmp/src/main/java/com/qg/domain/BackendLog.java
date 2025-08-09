@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.sql.Timestamp;
 import java.util.Map;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +29,7 @@ public class BackendLog {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "timestamp")
-    private Long timestamp;
+    private Timestamp timestamp;
     @TableField(value = "log_level")
     private String level;
     @TableField(value = "log_message")

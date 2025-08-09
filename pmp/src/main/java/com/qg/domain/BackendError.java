@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.Map;
 
 /**
@@ -23,7 +23,7 @@ import java.util.Map;
 public class BackendError {
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
-    private LocalDateTime timestamp;
+    private Timestamp timestamp;
     private String module;
     private String projectId;
     private String environment;

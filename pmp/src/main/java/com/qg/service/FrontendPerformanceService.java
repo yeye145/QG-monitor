@@ -1,6 +1,7 @@
 package com.qg.service;
 
 import com.qg.domain.FrontendPerformance;
+import com.qg.domain.Result;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ import java.util.List;
 public interface FrontendPerformanceService {
 
     Integer saveFrontendPerformance(List<FrontendPerformance> frontendPerformance);
+
+    Result selectByCondition(String projectId, String capture);
 }

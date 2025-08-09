@@ -1,6 +1,7 @@
 package com.qg.service;
 
 import com.qg.domain.MobilePerformance;
+import com.qg.domain.Result;
 
 /**
  * @Description: // 类说明
@@ -13,4 +14,5 @@ public interface MobilePerformanceService {
     Integer saveMobilePerformance(MobilePerformance mobilePerformance);
 
 
+    Result selectByCondition(String projectId, String deviceModel, String osVersion);
 }

@@ -14,10 +14,11 @@ import java.time.OffsetDateTime;
 public class Responsibility {
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
+    private String platform;
     private String projectId;
     private Long delegatorId;
     private Long responsibleId;
-    private  Long errorId;
+    private Long errorId;
     private OffsetDateTime createTime;
 
 

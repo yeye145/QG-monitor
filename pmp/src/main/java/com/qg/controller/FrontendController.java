@@ -9,10 +9,7 @@ import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -72,6 +69,32 @@ public class FrontendController {
         } else {
             log.error("接收前端行为数据失败");
         }
+    }
+
+    @PostMapping("/{type}")
+    public void getData(@RequestBody String data,@PathVariable String type) {
+        log.info("***********接收到了前端数据***********");
+        log.info(data);
+        switch (type) {
+            case "performance":
+                List<FrontendPerformance> performanceList = JSONUtil.toList(data, FrontendPerformance.class);
+                frontendPerformanceService.saveFrontendPerformance(performanceList);
+                log.info("已接收的前端性能数据: " + performanceList);
+                break;
+            case "error":
+                List<FrontendError> errorList = JSONUtil.toList(data, FrontendError.class);
+                frontendErrorService.saveFrontendError(errorList);
+                log.info("已接收的前端错误数据: " + errorList);
+                break;
+            case "behavior":
+                List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);
+                frontendBehaviorService.saveFrontendBehavior(behaviorList);
+                log.info("已接收的前端行为数据: " + behaviorList);
+                break;
+            default:
+                log.error("未知的数据类型: " + type);
+        }
+
     }
 
 
