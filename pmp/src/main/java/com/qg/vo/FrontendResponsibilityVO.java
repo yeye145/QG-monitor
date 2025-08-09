@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * @Description: 前端错误Vo  // 类说明
@@ -20,7 +21,7 @@ import java.sql.Timestamp;
 public class FrontendResponsibilityVO {
 
     private String projectId;
-    private Timestamp timestamp;
+    private LocalDateTime timestamp;
     private String sessionId;
     private String userAgent;
     private String errorType;
