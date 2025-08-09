@@ -18,7 +18,7 @@ public class NotificationController {
     private NotificationService notificationService;
 
     /**
-     * 根据接收者id查询通知（未读）
+     * 根据接收者id查询通知
      * @param receiverId
      * @return
      */
@@ -73,8 +73,8 @@ public class NotificationController {
      * @param receiverId
      * @return
      */
-    @DeleteMapping("/deleteByReceiverId/{receiverId}")
-    public Result deleteByReceiverId(@PathVariable Long receiverId) {
-        return notificationService.deleteByReceiverId(receiverId);
+    @DeleteMapping("/deleteByReceiverId")
+    public Result deleteByReceiverId(@RequestParam Long receiverId, @RequestParam Integer isSenderExist) {
+        return notificationService.deleteByReceiverId(receiverId, isSenderExist);
     }
 }

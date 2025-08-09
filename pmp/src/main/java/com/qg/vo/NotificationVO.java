@@ -17,6 +17,8 @@ public class NotificationVO {
     private Long receiverId;
     private LocalDateTime timestamp;
     private Integer isRead;
+    private String type;
+    private String environment;
 
     private String projectName;//项目名
 
@@ -25,5 +27,4 @@ public class NotificationVO {
 
     private String errorType;
     private String errorMessage;
-
 }

@@ -21,6 +21,8 @@ public class Notification {
     private Long receiverId;
     private LocalDateTime timestamp;
     private Integer isRead;
+    private String type;
+    private String environment;
 
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
