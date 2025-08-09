@@ -1,15 +1,13 @@
 package com.qg.controller;
 
 import cn.hutool.json.JSONUtil;
-import com.qg.domain.BackendError;
-import com.qg.domain.BackendLog;
-import com.qg.domain.BackendPerformance;
-import com.qg.domain.Result;
+import com.qg.domain.*;
 import com.qg.service.BackendErrorService;
 import com.qg.service.BackendLogService;
 import com.qg.service.BackendPerformanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +36,6 @@ public class BackendController {
     @Autowired
     private BackendLogService backendLogService;
 
-
     @PostMapping("/getMethodUseCount")
     public void getMethodUseCount(@RequestBody String methodCount) {
         log.info("***********接收到了方法调用情况信息***********");
@@ -46,15 +43,11 @@ public class BackendController {
     }
 
     @PostMapping("/performance")
-    public void getPerformanceData(@RequestBody String performanceData) {
-        log.info("***********接收到了后端性能数据***********");
-        log.info(performanceData);
+    public String getPerformanceData(@RequestBody String performanceData) {
+        System.out.println("***********接收到了后端性能数据***********");
         List<BackendPerformance> backendPerformances = JSONUtil.toList(performanceData, BackendPerformance.class);
-        if (backendPerformanceService.saveBackendPerformance(backendPerformances) > 0) {
-            log.info("已接收的后端性能数据: " + backendPerformances);
-        }else {
-            log.error("接收后端性能数据失败");
-        }
+        backendPerformances.forEach(System.out::println);
+        return "";
     }
 
     @PostMapping("/error")
@@ -65,16 +58,8 @@ public class BackendController {
     }
 
     @PostMapping("/log")
-    public void getLogData(@RequestBody String logData) {
-        log.info("***********接收到了后端日志信息***********");
-        log.info(logData);
-        List<BackendLog> backendLogs = JSONUtil.toList(logData, BackendLog.class);
-        if (backendLogService.saveBackendLogs(backendLogs) > 0) {
-            log.info("已接收的后端日志信息: " + backendLogs);
-        } else {
-            log.error("接收后端日志信息失败");
-        }
+    public void receiveLogFromSDK(@RequestBody String logJSON) {
+        log.info(backendLogService.receiveLogFromSDK(logJSON));
     }
-
-
 }
+

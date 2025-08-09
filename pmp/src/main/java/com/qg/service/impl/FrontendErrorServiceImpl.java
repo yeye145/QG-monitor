@@ -27,13 +27,16 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
 
     @Override
     public Result selectByCondition(String projectId, String type) {
-        if (projectId == null || type == null) {
+        if (projectId == null) {
             return new Result(400, "参数不能为空");
         }
         LambdaQueryWrapper<FrontendError> queryWrapper = new LambdaQueryWrapper<>();
 
-        queryWrapper.eq(FrontendError::getProjectId, projectId)
-                    .eq(FrontendError::getErrorType, type);
+        queryWrapper.eq(FrontendError::getProjectId, projectId);
+
+        if (type != null && !type.isEmpty()) {
+            queryWrapper.eq(FrontendError::getErrorType, type);
+        }
 
         List<FrontendError> frontendErrors = frontendErrorMapper.selectList(queryWrapper);
 

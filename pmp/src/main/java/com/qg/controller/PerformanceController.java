@@ -28,15 +28,15 @@ public class PerformanceController {
 //        return performanceService.addPerformance(performance);
 //    }
 
-    /**
+/*    *//**
      * 查询该项目的性能数据
      * @param projectId
      * @return
-     */
+     *//*
     @GetMapping
     public Result selectByProjectId(@RequestParam String projectId){
         return performanceService.selectByProjectId(projectId);
-    }
+    }*/
 
 //    /**
 //     * 查询该项目的指定环境下的性能数据
@@ -48,4 +48,30 @@ public class PerformanceController {
 //    public Result selectByEnvProjectId(@RequestParam String env, @RequestParam String projectId){
 //        return performanceService.selectByEnvProjectId(env,projectId);
 //    }
+
+    @GetMapping("/selectByCondition")
+    public Result selectByCondition(@RequestParam String platform, @RequestParam String projectId,
+                                    @RequestParam(required = false) String module, @RequestParam(required = false) String api,@RequestParam(required = false) String environment,
+                                    @RequestParam(required = false) String capture,
+                                    @RequestParam(required = false) String deviceModel, @RequestParam(required = false) String osVersion) {
+        /*switch (platform) {
+            case "backend":
+                return performanceService.selectByCondition(projectId, module, api, environment);
+            case "frontend":
+                return performanceService.selectByCondition(projectId, capture);
+            case "mobile":
+                return performanceService.selectByCondition(projectId, deviceModel, osVersion);
+            default:
+                return new Result(400, "平台参数错误");
+        }*/
+
+
+
+
+        return new Result(400, "参数错误");
+
+
+    }
+
+
 }
