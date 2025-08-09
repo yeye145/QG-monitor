@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 /**
  * @Description: 前端错误类  // 类说明
  * @ClassName: frontendError    // 类名
@@ -21,24 +24,25 @@ public class FrontendError {
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private String projectId;
-    private Long timestamp;
+    private LocalDateTime timestamp;
     private String sessionId;
     private String userAgent;
     private String errorType;
     private String message;
     private String stack;
+    private Integer event;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String requestInfo;
+    private Map<String, Object> requestInfo;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String responseInfo;
+    private Map<String, Object> responseInfo;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String resourceInfo;
+    private Map<String, Object> resourceInfo;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String breadcrumbs;
+    private Map<String, Object> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String tags;
+    private Map<String, Object> tags;
     private String captureType;
     private Long duration;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String elementInfo;
+    private Map<String, Object> elementInfo;
 }

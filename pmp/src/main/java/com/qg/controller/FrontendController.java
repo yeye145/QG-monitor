@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.qg.domain.FrontendBehavior;
 import com.qg.domain.FrontendError;
 import com.qg.domain.FrontendPerformance;
+import com.qg.domain.Result;
 import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
@@ -51,15 +52,10 @@ public class FrontendController {
     }
 
     @PostMapping("/error")
-    public void getErrorData(@RequestBody String errorData) {
+    public Result getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了前端错误数据***********");
         log.info(errorData);
-        List<FrontendError> frontendErrors = JSONUtil.toList(errorData, FrontendError.class);
-        if (frontendErrorService.saveFrontendError(frontendErrors) > 0) {
-            log.info("已接收的前端错误数据: " + frontendErrors);
-        } else {
-            log.error("接收前端错误数据失败");
-        }
+        return frontendBehaviorService.addFrontendError(errorData);
     }
 
     @PostMapping("/behavior")
