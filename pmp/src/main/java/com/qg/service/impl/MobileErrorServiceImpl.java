@@ -31,8 +31,12 @@ public class MobileErrorServiceImpl implements MobileErrorService {
             return  new Result(BAD_REQUEST, "参数错误");
         }
         LambdaQueryWrapper<MobileError> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(MobileError::getProjectId, projectId)
-                    .eq(MobileError::getErrorType, type);
+        queryWrapper.eq(MobileError::getProjectId, projectId);
+
+        if (type != null && !type.isEmpty()) {
+            queryWrapper.eq(MobileError::getErrorType, type);
+        }
+
         List<MobileError> mobileErrors = mobileErrorMapper.selectList(queryWrapper);
 
         return new Result(200, mobileErrors, "查询成功");

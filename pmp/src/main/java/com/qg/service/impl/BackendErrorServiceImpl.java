@@ -31,19 +31,21 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
     @Override
     public Result selectByCondition(String projectId, Long moduleId, String type) {
-        if (projectId == null || moduleId == null || type == null) {
+        if (projectId == null) {
             return new Result(400, "参数不能为空");
         }
 
         LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
         if (moduleMapper.selectById(moduleId) != null) {
             String moduleName = moduleMapper.selectById(moduleId).getModuleName();
-            queryWrapper.eq(BackendError::getModule, moduleName)
-                        .eq(BackendError::getProjectId, projectId)
-                        .eq(BackendError::getType, type);
+            queryWrapper.eq(BackendError::getModule, moduleName);
         } else {
             return new Result(400, "模块不存在");
         }
+        if (type != null && !type.isEmpty()) {
+            queryWrapper.eq(BackendError::getType, type);
+        }
+        queryWrapper.eq(BackendError::getProjectId, projectId);
 
         List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
 

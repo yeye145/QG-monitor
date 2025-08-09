@@ -18,5 +18,8 @@ public interface BackendLogService {
 
     List<BackendLog> getAllLogs(String projectId);
 
+    List<BackendLog> getLogsByCondition(String evn, String logLevel, String projectId);
+
     String receiveLogFromSDK(String logJSON);
+
 }

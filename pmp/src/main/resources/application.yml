@@ -62,5 +62,7 @@ server:
   port: 8080
 
 mybatis-plus:
+  type-handlers-package: com.qg.handler
   configuration:
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+

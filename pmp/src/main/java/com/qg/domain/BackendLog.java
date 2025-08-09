@@ -7,7 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+import java.util.Map;
+
 import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * @Description: 后端日志类  // 类说明
@@ -31,8 +35,12 @@ public class BackendLog {
     private String context;
     private String module;
     private String projectId;
-    private String environmentSnapshot;
     private String environment;
+    private String logLevel;
+    private String logMessage;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> environmentSnapshot;
+
     private final AtomicInteger event = new AtomicInteger(0);
 
     // TODO: 原子性递增
@@ -44,4 +52,5 @@ public class BackendLog {
     public int getEvent() {
         return event.get();
     }
+
 }
