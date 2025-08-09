@@ -47,4 +47,21 @@ public class BackendLogServiceImpl implements BackendLogService {
 
         return backendLogMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<BackendLog> getLogsByCondition(String evn, String logLevel, String projectId) {
+        if (projectId == null || projectId.isEmpty()) {
+            return List.of(); // 返回空列表表示没有日志数据
+        }
+        LambdaQueryWrapper<BackendLog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BackendLog::getProjectId, projectId);
+        if (evn != null && !evn.isEmpty()) {
+            queryWrapper.eq(BackendLog::getEnvironment, evn);
+        }
+        if (logLevel != null && !logLevel.isEmpty()) {
+            queryWrapper.eq(BackendLog::getLogLevel, logLevel);
+        }
+
+        return backendLogMapper.selectList(queryWrapper);
+    }
 }

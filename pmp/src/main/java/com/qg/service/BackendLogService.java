@@ -15,4 +15,6 @@ public interface BackendLogService {
     Integer saveBackendLogs(List<BackendLog> backendLogs);
 
     List<BackendLog> getAllLogs(String projectId);
+
+    List<BackendLog> getLogsByCondition(String evn, String logLevel, String projectId);
 }

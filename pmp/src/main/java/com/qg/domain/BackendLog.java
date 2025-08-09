@@ -1,10 +1,13 @@
 package com.qg.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * @Description: 后端日志类  // 类说明
@@ -25,5 +28,6 @@ public class BackendLog {
     private String environment;
     private String logLevel;
     private String logMessage;
-    private String environmentSnapshot;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> environmentSnapshot;
 }

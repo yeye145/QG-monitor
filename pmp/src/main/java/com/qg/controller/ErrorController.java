@@ -63,9 +63,6 @@ public class ErrorController {
     /*public Result selectById(@PathVariable Long id) {
         return errorService.selectById(id);
     }*/
-
-
-
     @GetMapping("/selectByCondition")
     public Result selectByCondition(@RequestParam String projectId, @RequestParam(required = false) Long moduleId,
                                     @RequestParam(required = false) String type, @RequestParam(required = false) String platform) {
