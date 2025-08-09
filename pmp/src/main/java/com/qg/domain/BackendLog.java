@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BackendLog {
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "timestamp")
