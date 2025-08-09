@@ -5,10 +5,7 @@ import com.qg.domain.Result;
 import com.qg.service.BackendLogService;
 import com.qg.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,6 +30,17 @@ public class LogController {
             return new Result(SUCCESS,logs,"查询成功");
         } else {
             return new Result(500, "没有日志数据");
+        }
+    }
+
+    @GetMapping("/selectByCondition")
+    public Result getLogsByCondition (@RequestParam(required = false) String evn,
+                                      @RequestParam(required = false) String logLevel, @RequestParam String projectId) {
+        List<BackendLog> logs = backendLogService.getLogsByCondition(evn, logLevel, projectId);
+        if (logs != null && !logs.isEmpty()) {
+            return new Result(SUCCESS, logs, "查询成功");
+        } else {
+            return new Result(500, "没有符合条件的日志数据");
         }
     }
 }

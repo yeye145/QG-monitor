@@ -62,7 +62,7 @@ public class AllErrorServiceImpl implements AllErrorService {
 
 
         if (type != null && !type.isEmpty()) {
-            backendQueryWrapper.eq(BackendError::getType, type);
+            backendQueryWrapper.eq(BackendError::getErrorType, type);
             frontendQueryWrapper.eq(FrontendError::getErrorType, type);
             mobileQueryWrapper.eq(MobileError::getErrorType, type);
 

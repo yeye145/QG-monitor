@@ -1,5 +1,8 @@
 package com.qg.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,11 +18,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FrontendPerformance {
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private String projectId;
     private Long timestamp;
     private String sessionId;
     private String userAgent;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private String metrics;
     private String captureType;
 }

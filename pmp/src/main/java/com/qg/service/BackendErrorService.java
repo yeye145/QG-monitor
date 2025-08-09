@@ -17,4 +17,6 @@ public interface BackendErrorService {
     Result selectByCondition(String projectId, Long moduleId, String type);
 
     Integer saveBackendError(BackendError backendError);
+
+    Result addBackendError(String errorData);
 }

@@ -1,8 +1,13 @@
 package com.qg.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * @Description: 后端性能类  // 类说明
@@ -15,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BackendPerformance {
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private Long timestamp;
     private String module;
@@ -23,5 +29,6 @@ public class BackendPerformance {
     private String api;
     private Integer duration;
     private Boolean slow;
-    private String environmentSnapshot;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> environmentSnapshot;
 }
