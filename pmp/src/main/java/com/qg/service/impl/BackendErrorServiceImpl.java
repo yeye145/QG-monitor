@@ -46,8 +46,9 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         }
 
         LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
-        if (moduleMapper.selectById(moduleId) != null) {
-            String moduleName = moduleMapper.selectById(moduleId).getModuleName();
+        Module module = moduleMapper.selectById(moduleId);
+        if (module != null) {
+            String moduleName = module.getModuleName();
             queryWrapper.eq(BackendError::getModule, moduleName);
         } else {
             return new Result(BAD_REQUEST, "模块不存在");

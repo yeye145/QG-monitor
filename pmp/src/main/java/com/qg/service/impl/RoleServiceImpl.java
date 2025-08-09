@@ -92,7 +92,7 @@ public class RoleServiceImpl implements RoleService {
         if(projectMemberVOList.size() == 0){
             return new Result(Code.NOT_FOUND, "该项目下无成员");
         }
-        return new Result(Code.SUCCESS,list,"查询成功");
+        return new Result(Code.SUCCESS,projectMemberVOList,"查询成功");
     }
 
 

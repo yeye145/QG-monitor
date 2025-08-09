@@ -41,8 +41,8 @@ public class FrontendError {
     private Map<String, Object> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> tags;
-    private String captureType;
-    private Long duration;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> elementInfo;
+    private String captureType;
+    private Long duration;
 }

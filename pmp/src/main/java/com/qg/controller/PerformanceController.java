@@ -2,7 +2,7 @@ package com.qg.controller;
 
 import com.qg.domain.Performance;
 import com.qg.domain.Result;
-import com.qg.service.PerformanceService;
+import com.qg.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/performances")
 public class PerformanceController {
+
     @Autowired
-    private PerformanceService performanceService;
+    private BackendPerformanceService backendPerformanceService;
+
+    @Autowired
+    private FrontendPerformanceService frontendPerformanceService;
+
+    @Autowired
+    private MobilePerformanceService mobilePerformanceService;
+
+    @Autowired
+    private AllPerformanceService allPerformanceService;
+
+
+/*    @Autowired
+    private PerformanceService performanceService;*/
 
 //    /**
 //     * 插入性能数据
@@ -51,25 +65,21 @@ public class PerformanceController {
 
     @GetMapping("/selectByCondition")
     public Result selectByCondition(@RequestParam String platform, @RequestParam String projectId,
-                                    @RequestParam(required = false) String module, @RequestParam(required = false) String api,@RequestParam(required = false) String environment,
+                                    @RequestParam(required = false) Long moduleId, @RequestParam(required = false) String api,@RequestParam(required = false) String environment,
                                     @RequestParam(required = false) String capture,
                                     @RequestParam(required = false) String deviceModel, @RequestParam(required = false) String osVersion) {
-        /*switch (platform) {
+        switch (platform) {
             case "backend":
-                return performanceService.selectByCondition(projectId, module, api, environment);
+                return backendPerformanceService.selectByCondition(projectId, moduleId, api, environment);
             case "frontend":
-                return performanceService.selectByCondition(projectId, capture);
+                return frontendPerformanceService.selectByCondition(projectId, capture);
             case "mobile":
-                return performanceService.selectByCondition(projectId, deviceModel, osVersion);
+                return mobilePerformanceService.selectByCondition(projectId, deviceModel, osVersion);
+            case "all":
+                return allPerformanceService.selectByCondition(projectId, moduleId, api, environment, capture, deviceModel, osVersion);
             default:
                 return new Result(400, "平台参数错误");
-        }*/
-
-
-
-
-        return new Result(400, "参数错误");
-
+        }
 
     }
 

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +30,7 @@ public class BackendLog {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @TableField(value = "timestamp")
-    private Long timestamp;
+    private LocalDateTime timestamp;
     @TableField(value = "log_level")
     private String level;
     @TableField(value = "log_message")
@@ -42,12 +44,12 @@ public class BackendLog {
 
     private final AtomicInteger event = new AtomicInteger(0);
 
-    // TODO: 原子性递增
-    public void incrementAndGetEvent() {
+    // 原子性递增
+    public void incrementEvent() {
         event.incrementAndGet();
     }
 
-    // TODO: 获取当前值
+    // 获取当前值
     public int getEvent() {
         return event.get();
     }

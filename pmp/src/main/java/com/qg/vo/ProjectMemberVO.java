@@ -12,4 +12,6 @@ public class ProjectMemberVO {
     private String username;
     private String avatar;
     private String userRole;
+    private Integer power;
+
 }
