@@ -16,4 +16,6 @@ public interface BackendPerformanceService {
     int saveBackendPerformance(List<BackendPerformance> backendPerformances);
 
     Result selectByCondition(String projectId, Long moduleId, String api, String environment);
+
+    Result addPerformance(String performanceData);
 }
