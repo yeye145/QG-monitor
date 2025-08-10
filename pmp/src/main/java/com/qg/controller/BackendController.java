@@ -5,6 +5,7 @@ import com.qg.domain.*;
 import com.qg.service.BackendErrorService;
 import com.qg.service.BackendLogService;
 import com.qg.service.BackendPerformanceService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,6 +26,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/backend")
 @RestController
+@Tag(name = "后端信息")
 public class BackendController {
 
     @Autowired
@@ -36,18 +38,30 @@ public class BackendController {
     @Autowired
     private BackendLogService backendLogService;
 
+    /**
+     * 接收后端方法调用数据
+     * @param methodCount
+     */
     @PostMapping("/getMethodUseCount")
     public void getMethodUseCount(@RequestBody String methodCount) {
         log.info("***********接收到了方法调用情况信息***********");
         log.info(methodCount);
     }
 
+    /**
+     * 接收后端性能数据
+     * @param performanceData
+     */
     @PostMapping("/performance")
     public void getPerformanceData(@RequestBody String performanceData) {
         System.out.println("***********接收到了后端性能数据***********");
         backendPerformanceService.addPerformance(performanceData);
     }
 
+    /**
+     * 接收后端错误数据
+     * @param errorData
+     */
     @PostMapping("/error")
     public void getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了后端错误信息***********");

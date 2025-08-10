@@ -8,6 +8,7 @@ import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
 import com.qg.utils.FileUploadHandler;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import static com.qg.utils.FileUploadHandler.isValidFile;
 @Slf4j
 @RequestMapping("/frontend")
 @RestController
+@Tag(name = "前端信息")
 public class FrontendController {
 
     @Autowired
@@ -80,6 +82,12 @@ public class FrontendController {
 //        }
 //    }
 
+    /**
+     * 接收前端数据
+     * @param data
+     * @param type
+     * @return
+     */
     @PostMapping("/{type}")
     public Result getData(@RequestBody String data, @PathVariable String type) {
 
@@ -103,6 +111,17 @@ public class FrontendController {
 
     }
 
+    /**
+     * 接收前端sourcemap文件
+     * @param projectId
+     * @param timestamp
+     * @param version
+     * @param buildVersion
+     * @param files
+     * @param jsFilenames
+     * @param fileHashes
+     * @return
+     */
     @PostMapping("/formData")
     public Result getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
                           @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
