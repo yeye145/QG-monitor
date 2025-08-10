@@ -46,7 +46,6 @@ public class MobileController {
 
     @PostMapping("/error")
     public void getErrorData(@RequestBody String mobileErrorJSON) {
-        log.info("***********接收到了移动端错误数据***********");
         mobileErrorService.receiveErrorFromSDK(mobileErrorJSON);
     }
 

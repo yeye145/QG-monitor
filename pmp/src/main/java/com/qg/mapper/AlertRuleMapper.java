@@ -13,17 +13,16 @@ import java.util.HashMap;
 @Mapper
 public interface AlertRuleMapper extends BaseMapper<AlertRule> {
 
-
     @Select("SELECT " +
-            "CONCAT('mobile:error:', project_id, ':', error_type, ':', #{className}) AS redis_key, " +
+            "'mobile:error:' || project_id || ':' || error_type || ':' || #{className,jdbcType=VARCHAR} AS redis_key, " +
             "ar.threshold " +
             "FROM alert_rule ar " +
-            "WHERE project_id = #{projectId} " +
-            "AND error_type = #{errorType}")
+            "WHERE project_id = #{projectId,jdbcType=VARCHAR} " +
+            "AND error_type = #{errorType,jdbcType=VARCHAR}")
     @MapKey("redis_key")
-        // 以redis_key为键
     HashMap<String, Integer> selectByMobileRedisKeyToMap(
             @Param("projectId") String projectId,
             @Param("errorType") String errorType,
             @Param("className") String className);
+
 }
