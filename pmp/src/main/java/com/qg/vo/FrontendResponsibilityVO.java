@@ -22,6 +22,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class FrontendResponsibilityVO {
 
+    private Long id;
     private String projectId;
     private LocalDateTime timestamp;
     private String sessionId;

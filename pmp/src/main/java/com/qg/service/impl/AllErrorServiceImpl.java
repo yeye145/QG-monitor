@@ -87,6 +87,7 @@ public class AllErrorServiceImpl implements AllErrorService {
             Long id = error.getId();
             BackendResponsibilityVO backendResponsibilityVO = new BackendResponsibilityVO();
             backendResponsibilityVO.setEnvironment(error.getEnvironment());
+            backendResponsibilityVO.setId(id);
             backendResponsibilityVO.setEnvironmentSnapshot(error.getEnvironmentSnapshot());
             backendResponsibilityVO.setProjectId(error.getProjectId());
             backendResponsibilityVO.setTimestamp(error.getTimestamp());
@@ -124,6 +125,7 @@ public class AllErrorServiceImpl implements AllErrorService {
             Long id = frontendError.getId();
 
             frontendResponsibilityVO.setProjectId(frontendError.getProjectId());
+            frontendResponsibilityVO.setId(id);
             frontendResponsibilityVO.setBreadcrumbs(frontendError.getBreadcrumbs());
             frontendResponsibilityVO.setErrorType(frontendError.getErrorType());
             frontendResponsibilityVO.setCaptureType(frontendError.getCaptureType());
@@ -169,6 +171,7 @@ public class AllErrorServiceImpl implements AllErrorService {
         for (MobileError error : mobileErrors) {
             Long id = error.getId();
             MobileResponsibilityVO mobileResponsibilityVO = new MobileResponsibilityVO();
+            mobileResponsibilityVO.setId(id);
             mobileResponsibilityVO.setClassName(error.getClassName());
             mobileResponsibilityVO.setErrorType(error.getErrorType());
             mobileResponsibilityVO.setMessage(error.getMessage());

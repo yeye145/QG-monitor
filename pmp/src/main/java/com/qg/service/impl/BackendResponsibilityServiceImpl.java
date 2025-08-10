@@ -72,6 +72,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             Long id = error.getId();
             BackendResponsibilityVO backendResponsibilityVO = new BackendResponsibilityVO();
             backendResponsibilityVO.setEnvironment(error.getEnvironment());
+            backendResponsibilityVO.setId(id);
             backendResponsibilityVO.setEnvironmentSnapshot(error.getEnvironmentSnapshot());
             backendResponsibilityVO.setProjectId(error.getProjectId());
             backendResponsibilityVO.setTimestamp(error.getTimestamp());
