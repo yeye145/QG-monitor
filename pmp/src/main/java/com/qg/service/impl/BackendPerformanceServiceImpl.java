@@ -35,6 +35,9 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
     @Autowired
     private ModuleMapper moduleMapper;
 
+    @Autowired
+    private ModuleService moduleService;
+
     @Override
     public int saveBackendPerformance(List<BackendPerformance> backendPerformances) {
         if (backendPerformances == null || backendPerformances.isEmpty()) {
@@ -99,7 +102,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
             // 过滤掉 projectId 为空的数据
             List<BackendPerformance> validPerformances = backendPerformances.stream()
                     .filter(performance -> performance.getProjectId() != null && !performance.getProjectId().isEmpty())
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (validPerformances.isEmpty()) {
                 log.warn("没有有效的后端性能数据（projectId为空）");
@@ -109,6 +112,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
             int count = 0;
             for (BackendPerformance performance : validPerformances) {
                 count += backendPerformanceMapper.insert(performance);
+                moduleService.putModuleIfAbsent(performance.getModule(), performance.getProjectId());
             }
             boolean isSuccess = count > 0;
 
