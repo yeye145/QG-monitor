@@ -1,6 +1,7 @@
 package com.qg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.Code;
 import com.qg.domain.Project;
 import com.qg.domain.Result;
@@ -10,6 +11,7 @@ import com.qg.mapper.RoleMapper;
 import com.qg.service.ProjectService;
 import com.qg.service.RoleService;
 import com.qg.vo.PersonalProjectVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,12 +21,13 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class ProjectServiceImpl implements ProjectService {
     @Autowired
-    ProjectMapper projectMapper;
+    private ProjectMapper projectMapper;
 
     @Autowired
-    RoleMapper roleMapper;
+    private RoleMapper roleMapper;
 
     @Override
     public Result addProject(Project project){
@@ -51,20 +54,28 @@ public class ProjectServiceImpl implements ProjectService {
     //管理员修改项目
     @Override
     public Result updateProject(Project project) {
-        // 创建更新条件，根据uuid进行更新
-        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Project::getUuid, project.getUuid());
+        log.debug("修改项目，项目信息： {}", project);
 
-        Project existingProject = projectMapper.selectOne(lqw);
+        // 直接尝试更新项目，避免先查询再更新的两次数据库访问
+        LambdaUpdateWrapper<Project> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Project::getUuid, project.getUuid())
+                .eq(Project::getIsDeleted, false);
+        int updateResult = projectMapper.update(project, updateWrapper);
 
-        // 判断项目是否存在
-        if (existingProject == null) {
-            return new Result(Code.NOT_FOUND, "项目不存在");
+        if (updateResult == 0) {
+            // 检查项目是否存在
+            LambdaQueryWrapper<Project> checkWrapper = new LambdaQueryWrapper<>();
+            checkWrapper.eq(Project::getUuid, project.getUuid());
+            Project existingProject = projectMapper.selectOne(checkWrapper);
+
+            if (existingProject == null) {
+                return new Result(Code.NOT_FOUND, "项目不存在");
+            } else {
+                return new Result(Code.INTERNAL_ERROR, "更新失败");
+            }
         }
-        // 使用update方法，传入要更新的对象和条件
-        return projectMapper.update(project, lqw) == 1 ?
-               new Result(Code.SUCCESS, "更新成功") :
-               new Result(Code.INTERNAL_ERROR, "更新失败，项目不存在");
+
+        return new Result(Code.SUCCESS, "更新成功");
     }
 
 

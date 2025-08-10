@@ -1,14 +1,14 @@
 package com.qg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.qg.domain.Code;
-import com.qg.domain.Result;
-import com.qg.domain.Role;
-import com.qg.domain.Users;
+import com.qg.domain.*;
+import com.qg.mapper.ProjectMapper;
 import com.qg.mapper.RoleMapper;
 import com.qg.mapper.UsersMapper;
 import com.qg.service.RoleService;
 import com.qg.vo.ProjectMemberVO;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,16 +16,18 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.qg.utils.Constants.PERMISSION_OP;
-import static com.qg.utils.Constants.USER_ROLE_ADMIN;
+import static com.qg.utils.Constants.*;
 
 @Service
+@Slf4j
 public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private RoleMapper roleMapper;
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private ProjectMapper projectMapper;
     @Override
     public Result addRole(Role role) {
         //判断该用户是否在项目中
@@ -52,15 +54,23 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Result deleteRole(Role role) {
-        //判断用户是否在项目里
-        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Role::getUserId, role.getUserId()).eq(Role::getProjectId, role.getProjectId());
-        if(roleMapper.selectOne(lqw) == null)
-        {
-            return new Result(Code.NOT_FOUND, "该用户未加入该项目");
+        if (role == null) {
+            return new Result(Code.BAD_REQUEST, "参数错误");
         }
-        //删除用户
-        return roleMapper.delete(lqw) == 1 ? new Result(Code.CREATED, "删除成功") : new Result(Code.INTERNAL_ERROR, "删除失败");
+        try {
+            //判断用户是否在项目里
+            LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(Role::getUserId, role.getUserId()).eq(Role::getProjectId, role.getProjectId());
+            if(roleMapper.selectOne(lqw) == null)
+            {
+                return new Result(Code.NOT_FOUND, "该用户未加入该项目");
+            }
+            //删除用户
+            return roleMapper.delete(lqw) == 1 ? new Result(Code.CREATED, "删除成功") : new Result(Code.INTERNAL_ERROR, "删除失败");
+        } catch (Exception e) {
+            log.error("删除用户角色失败",  e);
+            return new Result(Code.INTERNAL_ERROR, "删除失败");
+        }
     }
 
 
@@ -98,12 +108,60 @@ public class RoleServiceImpl implements RoleService {
 
     //查询该项目该用户的角色与权限
     @Override
-    public Result getRole(String userId, String projectId) {
-        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Role::getUserId, userId).eq(Role::getProjectId, projectId);
-        Role role = roleMapper.selectOne(lqw);
-        return role == null ? new Result(Code.NOT_FOUND, "该项目下无此用户") : new Result(Code.SUCCESS, role, "查询成功");
+    public Result getRole(Long userId, String projectId) {
+        // 参数校验
+        if (userId == null || projectId == null || projectId.isEmpty()) {
+            log.warn("参数为空: userId={}, projectId={}", userId, projectId);
+            return new Result(Code.BAD_REQUEST, "参数不能为空");
+        }
+
+        try {
+            // 查询项目信息
+            LambdaQueryWrapper<Project> projectLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            projectLambdaQueryWrapper.eq(Project::getUuid, projectId)
+                    .eq(Project::getIsDeleted, false);
+            Project project = projectMapper.selectOne(projectLambdaQueryWrapper);
+
+            // 检查项目是否存在
+            if (project == null) {
+                log.warn("项目不存在或已被删除: projectId={}", projectId);
+                return new Result(Code.NOT_FOUND, "项目不存在或已被删除");
+            }
+
+            // 查询用户在项目中的角色
+            LambdaQueryWrapper<Role> roleQueryWrapper = new LambdaQueryWrapper<>();
+            roleQueryWrapper.eq(Role::getUserId, userId)
+                    .eq(Role::getProjectId, projectId);
+            Role role = roleMapper.selectOne(roleQueryWrapper);
+
+            // 如果用户在项目中没有角色，创建默认角色
+            if (role == null) {
+                Role defaultRole = new Role();
+                defaultRole.setUserId(userId);
+                defaultRole.setProjectId(projectId);
+
+                // 根据项目是否公开设置默认权限
+                if (project.getIsPublic()) {
+                    defaultRole.setPower(PERMISSION_READ); // 公开项目默认权限
+                } else {
+                    defaultRole.setPower(PERMISSION_NOT_VISIBLE); // 私有项目默认权限
+                }
+
+                log.info("为用户创建默认角色: userId={}, projectId={}, power={}",
+                        userId, projectId, defaultRole.getPower());
+                return new Result(Code.SUCCESS, defaultRole, "查询成功");
+            }
+
+            log.info("查询到用户角色: userId={}, projectId={}, power={}",
+                    userId, projectId, role.getPower());
+            return new Result(Code.SUCCESS, role, "查询成功");
+
+        } catch (Exception e) {
+            log.error("查询用户角色时发生异常: userId={}, projectId={}", userId, projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询用户角色失败: " + e.getMessage());
+        }
     }
+
 
     @Override
     public Result updateUserRole(Role role) {

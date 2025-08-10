@@ -65,7 +65,7 @@ public class RoleController {
      * @return
      */
     @GetMapping("/getRole")
-    public Result getRole(@RequestParam String userId, @RequestParam String projectId) {
+    public Result getRole(@RequestParam Long userId, @RequestParam String projectId) {
         return roleService.getRole(userId, projectId);
     }
 

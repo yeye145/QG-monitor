@@ -124,7 +124,7 @@ public class FrontendController {
      */
     @PostMapping("/formData")
     public Result getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
-                          @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
+                          @RequestParam(required = false) String buildVersion, @RequestParam("files") MultipartFile[] files,
                           @RequestParam String[] jsFilenames, @RequestParam String fileHashes) {
 
         log.info("\n项目ID: {}\n时间戳: {}\n版本: {}\n构建版本: {}\n文件数量: {}\nJS文件名: {}\n文件哈希: {}", projectId, timestamp, version, buildVersion, files.length, String.join(", ", jsFilenames), fileHashes);

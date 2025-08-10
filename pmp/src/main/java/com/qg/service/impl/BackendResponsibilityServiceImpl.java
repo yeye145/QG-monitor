@@ -52,8 +52,6 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
         if (module != null) {
             String moduleName = module.getModuleName();
             queryWrapper.eq(BackendError::getModule, moduleName);
-        } else {
-            return new Result(400, "模块不存在");
         }
         if (type != null && !type.isEmpty()) {
             queryWrapper.eq(BackendError::getErrorType, type);

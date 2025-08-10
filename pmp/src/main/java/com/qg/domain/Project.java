@@ -18,8 +18,11 @@ public class Project {
     private String description;
     private LocalDateTime createdTime;
     private Boolean isPublic;
+    private String webhook;
+    private String invitedCode;
+    private String groupCode;
 
-    @TableLogic
+    @TableLogic(value = "false", delval = "true")
     @TableField("is_deleted")
     private Boolean isDeleted;
 }
