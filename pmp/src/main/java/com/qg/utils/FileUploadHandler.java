@@ -75,6 +75,19 @@ public class FileUploadHandler {
         return isValidImageFile(file) || isValidDocumentFile(file) || isValidInstallFile(file);
     }
 
+    /**
+     * 根据文件类型确定存储目录
+     */
+    public static String determineSubDirectory(MultipartFile file) {
+        if (FileUploadHandler.isValidImageFile(file)) {
+            return FileUploadHandler.IMAGE_DIR;
+        } else if (FileUploadHandler.isValidDocumentFile(file)) {
+            return FileUploadHandler.DOCUMENT_DIR;
+        } else {
+            return FileUploadHandler.INSTALL_DIR;
+        }
+    }
+
 
     // 根据数据库中的相对路径生成完整URL
     public static String generatePublicUrl(String relativePath, String subDir) {
