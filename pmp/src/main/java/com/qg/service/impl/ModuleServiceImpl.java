@@ -12,6 +12,7 @@ import com.qg.mapper.ProjectMapper;
 import com.qg.service.ModuleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -116,6 +117,7 @@ public class ModuleServiceImpl implements ModuleService {
 
     /**
      * 添加不存在的模块工具方法
+     *
      * @param moduleName
      * @param projectId
      */
@@ -126,15 +128,11 @@ public class ModuleServiceImpl implements ModuleService {
             return;
         }
 
-        // 查询数据库中是否已存在该模块
-        LambdaQueryWrapper<Module> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Module::getProjectId, projectId)
-                .eq(Module::getModuleName, moduleName);
-        Module module = moduleMapper.selectOne(queryWrapper);
-
-        // 如果模块为空，插入数据库
-        if (module == null) {
+        try {
             moduleMapper.insert(new Module(projectId, moduleName));
+        } catch (DuplicateKeyException ignored) {
+        } catch (Exception e) {
+            log.error("添加模块失败:{}", e.getMessage());
         }
     }
 }
