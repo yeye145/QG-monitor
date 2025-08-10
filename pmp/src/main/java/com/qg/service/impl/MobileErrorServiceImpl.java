@@ -7,6 +7,7 @@ import com.qg.domain.Result;
 import com.qg.mapper.MobileErrorMapper;
 import com.qg.repository.MobileErrorRepository;
 import com.qg.service.MobileErrorService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ import static com.qg.domain.Code.BAD_REQUEST;
  * @Date: 2025/8/7 21:36   // 时间
  * @Version: 1.0     // 版本
  */
+
+@Slf4j
 @Service
 public class MobileErrorServiceImpl implements MobileErrorService {
 
@@ -47,12 +50,12 @@ public class MobileErrorServiceImpl implements MobileErrorService {
     }
 
     @Override
-    public String receiveErrorFromSDK(String mobileErrorJSON) {
+    public void receiveErrorFromSDK(String mobileErrorJSON) {
         try {
             mobileErrorRepository.statistics(JSONUtil.toBean(mobileErrorJSON, MobileError.class));
-            return "mobile-error存入缓存成功";
+            log.info("mobile-error存入缓存成功");
         } catch (Exception e) {
-            return "mobile-error存入缓存失败";
+            log.warn("mobile-error存入缓存失败,发生异常:{}", e.getMessage());
         }
     }
 }
