@@ -11,6 +11,7 @@ import com.qg.mapper.BackendLogMapper;
 
 import com.qg.service.BackendLogService;
 import com.qg.service.ModuleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.List;
  * @Date: 2025/8/7 21:33   // 时间
  * @Version: 1.0     // 版本
  */
+@Slf4j
 @Service
 public class BackendLogServiceImpl implements BackendLogService {
 
@@ -48,11 +50,12 @@ public class BackendLogServiceImpl implements BackendLogService {
 
     /**
      * 获取后端SDK发送的日志
+     *
      * @param logJSON
      * @return
      */
     @Override
-    public String receiveLogFromSDK(String logJSON) {
+    public void receiveLogFromSDK(String logJSON) {
         // 转换数据，进行缓存交互
         try {
             JSONUtil.toList(logJSON, BackendLog.class)
@@ -60,9 +63,9 @@ public class BackendLogServiceImpl implements BackendLogService {
                         moduleService.putModuleIfAbsent(log.getModule(), log.getProjectId());
                         backendLogRepository.statistics(log);
                     });
-            return "backend-info-log存入缓存成功";
+            log.info("backend-info-log存入缓存成功");
         } catch (Exception e) {
-            return "backend-info-log存入缓存失败";
+            log.warn("backend-info-log存入缓存失败:{}", e.getMessage());
         }
     }
 

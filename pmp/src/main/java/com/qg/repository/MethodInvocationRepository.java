@@ -5,13 +5,18 @@ import com.qg.mapper.MethodInvocationMapper;
 import com.qg.vo.MethodInvocationVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
+
 
 
 @Repository
@@ -65,9 +70,13 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
     @Override
     protected void saveToDatabase(MethodInvocation entity) {
         try {
-            methodInvocationMapper.insert(entity);
+            MethodInvocationVO methodInvocationVO = convertToVO(entity);
+            methodInvocationMapper.insert(methodInvocationVO);
         } catch (Exception e) {
-            log.error("方法调用统计失败,项目ID: {}: {}", entity.getProjectId(), e.getMessage());
+            System.err.println("\n\n\n方法调用统计失败\n" + e + "\n\n\n");
+            e.printStackTrace();
+            System.out.println("\n\n\n");
+//            log.error("方法调用统计失败,项目ID: {}: {}", entity.getProjectId(), e.getMessage());
         }
     }
 
@@ -80,6 +89,19 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
     protected void incrementEvent(MethodInvocation entity) {
     }
 
+    @Override
+    @Scheduled(fixedRate = 6000)
+    public void scheduleSaveToDatabase() {
+        cacheMap.forEach((fullKey, entity) -> {
+            String redisKey = REDIS_KEY_PREFIX + fullKey;
+            if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(redisKey))) {
+                // Redis已过期，保存到数据库并清理缓存
+                saveToDatabase(entity);
+                cacheMap.remove(fullKey);
+            }
+        });
+    }
+
     /**
      * 将实体转换为VO
      *
@@ -90,7 +112,7 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
         MethodInvocationVO vo = new MethodInvocationVO();
         vo.setProjectId(entity.getProjectId());
         vo.setMethodName(entity.getMethodName());
-        vo.setInvocationCount(entity.getEventCount());
+        vo.setEvent(entity.getEventCount());
         vo.setCreateTime(LocalDateTime.now());
         return vo;
     }

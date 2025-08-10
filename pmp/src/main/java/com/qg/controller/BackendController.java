@@ -101,7 +101,7 @@ public class BackendController {
      */
     @PostMapping("/log")
     public void receiveLogFromSDK(@RequestBody String logJSON) {
-        log.info(backendLogService.receiveLogFromSDK(logJSON));
+        backendLogService.receiveLogFromSDK(logJSON);
     }
 }
 
