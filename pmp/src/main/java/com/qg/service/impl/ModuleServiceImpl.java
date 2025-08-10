@@ -78,8 +78,7 @@ public class ModuleServiceImpl implements ModuleService {
         }
         try {
             LambdaQueryWrapper<Module> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Module::getProjectId, projectId.trim())
-                    .isNull(Module::getDeletedTime);
+            queryWrapper.eq(Module::getProjectId, projectId.trim());
             List<Module> moduleList = moduleMapper.selectList(queryWrapper);
             log.info("成功查询模块: {}", moduleList);
             return new Result(Code.SUCCESS, moduleList, "查询成功");
@@ -98,11 +97,10 @@ public class ModuleServiceImpl implements ModuleService {
 
         try {
             // 创建更新包装器
-            LambdaUpdateWrapper<Module> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Module::getId, id)
-                    .set(Module::getDeletedTime, LocalDateTime.now());
+//            LambdaUpdateWrapper<Module> updateWrapper = new LambdaUpdateWrapper<>();
+//            updateWrapper.eq(Module::getId, id);
             // 执行更新操作
-            int result = moduleMapper.update(null, updateWrapper);
+            int result = moduleMapper.deleteById(id);
             if (result > 0) {
                 log.info("删除模块成功，id: {}", id);
                 return new Result(Code.SUCCESS, "删除成功");

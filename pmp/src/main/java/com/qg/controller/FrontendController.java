@@ -3,17 +3,27 @@ package com.qg.controller;
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.*;
 import com.qg.dto.FileUploadDTO;
+import com.qg.service.FileUploadService;
 import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
+import com.qg.utils.FileUploadHandler;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.qg.domain.Code.INTERNAL_ERROR;
+import static com.qg.utils.FileUploadHandler.determineSubDirectory;
+import static com.qg.utils.FileUploadHandler.isValidFile;
 
 /**
  * @Description: 前端业务类  // 类说明
@@ -35,6 +45,8 @@ public class FrontendController {
 
     @Autowired
     private FrontendBehaviorService frontendBehaviorService;
+    @Autowired
+    private FileUploadService fileUploadService;
 
 
 //    @PostMapping("/performance")
@@ -69,7 +81,7 @@ public class FrontendController {
 //    }
 
     @PostMapping("/{type}")
-    public Result getData(@RequestBody String data,@PathVariable String type) {
+    public Result getData(@RequestBody String data, @PathVariable String type) {
 
         switch (type) {
             case "performance":
@@ -92,28 +104,15 @@ public class FrontendController {
     }
 
     @PostMapping("/formData")
-    public void getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
-                        @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
-                        @RequestParam String [] jsFilenames, @RequestParam String fileHashes) {
-        // 构建DTO
-        FileUploadDTO dto = new FileUploadDTO();
-        dto.setProjectId(projectId);
-        dto.setTimestamp(timestamp);
-        dto.setVersion(version);
-        dto.setBuildVersion(buildVersion);
-        dto.setFiles(files);
-        dto.setJsFilenames(jsFilenames);
-        dto.setFileHashes(fileHashes);
+    public Result getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
+                          @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
+                          @RequestParam String[] jsFilenames, @RequestParam String fileHashes) {
 
-        log.info("\n项目ID: " + projectId +
-                "\n时间戳: " + timestamp +
-                "\n版本: " + version +
-                "\n构建版本: " + buildVersion +
-                "\n文件数量: " + files.length +
-                "\nJS文件名: " + String.join(", ", jsFilenames) +
-                "\n文件哈希: " + fileHashes);
+        log.info("\n项目ID: {}\n时间戳: {}\n版本: {}\n构建版本: {}\n文件数量: {}\nJS文件名: {}\n文件哈希: {}", projectId, timestamp, version, buildVersion, files.length, String.join(", ", jsFilenames), fileHashes);
+
+        return fileUploadService.uploadFile(projectId, timestamp
+                , version, buildVersion, files, jsFilenames, fileHashes);
     }
-
 
 
 
