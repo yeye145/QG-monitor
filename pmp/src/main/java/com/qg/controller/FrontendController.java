@@ -8,6 +8,7 @@ import com.qg.service.FrontendPerformanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -68,6 +69,7 @@ public class FrontendController {
 
     @PostMapping("/{type}")
     public Result getData(@RequestBody String data,@PathVariable String type) {
+
         switch (type) {
             case "performance":
                 log.info("************接收到前端性能数据*************");
@@ -87,6 +89,24 @@ public class FrontendController {
         }
 
     }
+
+    @PostMapping("/formData")
+    public void getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
+                        @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
+                        @RequestParam String [] jsFilenames, @RequestParam String fileHashes) {
+        log.info("接收到前端上传的文件数据");
+        log.info("项目ID: " + projectId,
+                "时间戳: " + timestamp,
+                "版本: " + version,
+                "构建版本: " + buildVersion,
+                "文件数量: " + files.length,
+                "JS文件名: " + String.join(", ", jsFilenames),
+                "文件哈希: " + fileHashes);
+    }
+
+
+
+
 
 
 }
