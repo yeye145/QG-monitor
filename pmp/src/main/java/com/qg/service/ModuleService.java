@@ -9,4 +9,6 @@ public interface ModuleService {
     Result selectByProjectId(String projectId);
 
     Result deleteById(Long id);
+
+    void putModuleIfAbsent(String moduleName, String projectId);
 }

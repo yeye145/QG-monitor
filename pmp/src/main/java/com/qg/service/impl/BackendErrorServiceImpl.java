@@ -10,6 +10,7 @@ import com.qg.domain.Result;
 import com.qg.mapper.BackendErrorMapper;
 import com.qg.mapper.ModuleMapper;
 import com.qg.service.BackendErrorService;
+import com.qg.service.ModuleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
     @Autowired
     private BackendErrorAggregator backendErrorAggregator;
+    @Autowired
+    private ModuleService moduleService;
 
     @Override
     public Result selectByCondition(String projectId, Long moduleId, String type) {
@@ -71,13 +74,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         if (backendError == null|| projectId == null) {
             return 0; // 返回0表示没有数据需要保存
         }
-        LambdaQueryWrapper<Module> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Module::getProjectId, projectId).
-                eq(Module::getModuleName, moduleName);
-        Module module = moduleMapper.selectOne(queryWrapper);
-        if (module == null) {
-            moduleMapper.insert(new Module(projectId, moduleName));
-        }
+        moduleService.putModuleIfAbsent(moduleName, projectId);
 
         return backendErrorMapper.insert(backendError);
     }
