@@ -86,4 +86,11 @@ mybatis-plus:
   type-handlers-package: com.qg.handler
   configuration:
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+          id-type: auto
+          logic-not-delete-value: 0
+          logic-delete-field: is_deleted
+          logic-delete-value: 1
 

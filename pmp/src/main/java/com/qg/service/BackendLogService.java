@@ -18,6 +18,6 @@ public interface BackendLogService {
 
     List<BackendLog> getLogsByCondition(String evn, String logLevel, String projectId);
 
-    String receiveLogFromSDK(String logJSON);
+    void receiveLogFromSDK(String logJSON);
 
 }
