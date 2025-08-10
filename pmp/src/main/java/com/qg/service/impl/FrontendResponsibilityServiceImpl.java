@@ -104,6 +104,6 @@ public class FrontendResponsibilityServiceImpl implements FrontendResponsibility
 
         }
 
-        return new Result(200, frontendResponsibilityVOList, "查询成功");
+        return new Result(200, List.of(new ArrayList<>(),frontendResponsibilityVOList,new ArrayList<>()), "查询成功");
     }
 }
