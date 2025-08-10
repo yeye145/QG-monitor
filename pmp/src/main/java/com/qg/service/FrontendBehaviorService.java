@@ -13,6 +13,6 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 public interface FrontendBehaviorService {
-    Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList);
+    Result saveFrontendBehavior(String data);
 
 }

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,7 +39,7 @@ public class FrontendError {
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> resourceInfo;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private Map<String, Object> breadcrumbs;
+    private List<Map<String, Object>> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private Map<String, Object> tags;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)

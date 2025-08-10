@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * @Description: 前端性能类  // 类说明
@@ -28,6 +29,6 @@ public class FrontendPerformance {
     private String sessionId;
     private String userAgent;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String metrics;
+    private Map<String, Object> metrics;
     private String captureType;
 }
