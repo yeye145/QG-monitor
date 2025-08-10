@@ -1,5 +1,6 @@
 package com.qg.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.Code;
@@ -112,6 +113,30 @@ public class ModuleServiceImpl implements ModuleService {
         } catch (Exception e) {
             log.error("删除模块失败，模块ID: {}", id, e);
             return new Result(Code.INTERNAL_ERROR, "删除模块失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 添加不存在的模块工具方法
+     * @param moduleName
+     * @param projectId
+     */
+    @Override
+    public void putModuleIfAbsent(String moduleName, String projectId) {
+        if (StrUtil.isBlank(moduleName)) {
+            log.warn("添加模块失败，模块名称为空");
+            return;
+        }
+
+        // 查询数据库中是否已存在该模块
+        LambdaQueryWrapper<Module> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Module::getProjectId, projectId)
+                .eq(Module::getModuleName, moduleName);
+        Module module = moduleMapper.selectOne(queryWrapper);
+
+        // 如果模块为空，插入数据库
+        if (module == null) {
+            moduleMapper.insert(new Module(projectId, moduleName));
         }
     }
 }

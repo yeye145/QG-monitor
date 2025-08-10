@@ -3,12 +3,14 @@ package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.BackendLog;
+
 import com.qg.repository.BackendLogRepository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.mapper.BackendLogMapper;
 
 import com.qg.service.BackendLogService;
+import com.qg.service.ModuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,25 +28,11 @@ public class BackendLogServiceImpl implements BackendLogService {
 
     @Autowired
     private BackendLogRepository backendLogRepository;
-
     @Autowired
     private BackendLogMapper backendLogMapper;
+    @Autowired
+    private ModuleService moduleService;
 
-
-    @Override
-    public Integer saveBackendLogs(List<BackendLog> backendLogs) {
-        if (backendLogs == null || backendLogs.isEmpty()) {
-            return 0; // 返回0表示没有数据需要保存
-        }
-        int count = 0;
-
-        for (BackendLog backendLog : backendLogs) {
-            // 假设有一个方法来保存单个日志条目
-            count += backendLogMapper.insert(backendLog);
-        }
-
-        return backendLogs.size() == count ? count : 0; // 返回保存的记录数
-    }
 
     @Override
     public List<BackendLog> getAllLogs(String projectId) {
@@ -68,12 +56,16 @@ public class BackendLogServiceImpl implements BackendLogService {
         // 转换数据，进行缓存交互
         try {
             JSONUtil.toList(logJSON, BackendLog.class)
-                    .forEach(log -> backendLogRepository.statistics(log));
+                    .forEach(log -> {
+                        moduleService.putModuleIfAbsent(log.getModule(), log.getProjectId());
+                        backendLogRepository.statistics(log);
+                    });
             return "backend-info-log存入缓存成功";
         } catch (Exception e) {
             return "backend-info-log存入缓存失败";
         }
     }
+
 
     @Override
     public List<BackendLog> getLogsByCondition(String evn, String logLevel, String projectId) {

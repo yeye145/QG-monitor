@@ -2,6 +2,7 @@ package com.qg.controller;
 
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.*;
+import com.qg.dto.FileUploadDTO;
 import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
@@ -94,17 +95,24 @@ public class FrontendController {
     public void getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
                         @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
                         @RequestParam String [] jsFilenames, @RequestParam String fileHashes) {
-        log.info("接收到前端上传的文件数据");
-        log.info("项目ID: " + projectId,
-                "时间戳: " + timestamp,
-                "版本: " + version,
-                "构建版本: " + buildVersion,
-                "文件数量: " + files.length,
-                "JS文件名: " + String.join(", ", jsFilenames),
-                "文件哈希: " + fileHashes);
+        // 构建DTO
+        FileUploadDTO dto = new FileUploadDTO();
+        dto.setProjectId(projectId);
+        dto.setTimestamp(timestamp);
+        dto.setVersion(version);
+        dto.setBuildVersion(buildVersion);
+        dto.setFiles(files);
+        dto.setJsFilenames(jsFilenames);
+        dto.setFileHashes(fileHashes);
+
+        log.info("\n项目ID: " + projectId +
+                "\n时间戳: " + timestamp +
+                "\n版本: " + version +
+                "\n构建版本: " + buildVersion +
+                "\n文件数量: " + files.length +
+                "\nJS文件名: " + String.join(", ", jsFilenames) +
+                "\n文件哈希: " + fileHashes);
     }
-
-
 
 
 
