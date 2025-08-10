@@ -2,6 +2,7 @@ package com.qg.controller;
 
 import com.qg.domain.Project;
 import com.qg.domain.Result;
+import com.qg.dto.InviteDto;
 import com.qg.service.ProjectService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -86,4 +87,23 @@ public class ProjectController {
         return ProjectService.getPersonalUnpublicProject(userId);
     }
 
+    /**
+     * 获取项目邀请码
+     * @param projectId
+     * @return
+     */
+    @GetMapping("/getInviteCode")
+    public Result getInviteCode(@RequestParam String projectId){
+        return ProjectService.getInviteDCode(projectId);
+    }
+
+    /**
+     * 加入项目
+     * @param inviteDto
+     * @return
+     */
+    @PostMapping("/joinProject")
+    public Result joinProject(@RequestBody InviteDto inviteDto){
+        return ProjectService.joinProject(inviteDto);
+    }
 }
