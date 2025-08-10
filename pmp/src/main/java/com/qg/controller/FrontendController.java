@@ -1,29 +1,17 @@
 package com.qg.controller;
 
-import cn.hutool.json.JSONUtil;
 import com.qg.domain.*;
-import com.qg.dto.FileUploadDTO;
 import com.qg.service.FileUploadService;
 import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
-import com.qg.utils.FileUploadHandler;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import static com.qg.domain.Code.INTERNAL_ERROR;
-import static com.qg.utils.FileUploadHandler.determineSubDirectory;
-import static com.qg.utils.FileUploadHandler.isValidFile;
 
 /**
  * @Description: 前端业务类  // 类说明

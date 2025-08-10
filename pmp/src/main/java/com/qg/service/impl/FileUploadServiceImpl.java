@@ -3,7 +3,6 @@ package com.qg.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
-import com.qg.dto.FileUploadDTO;
 import com.qg.service.FileUploadService;
 import com.qg.utils.FileUploadHandler;
 import lombok.AllArgsConstructor;
@@ -55,17 +54,8 @@ public class FileUploadServiceImpl implements FileUploadService {
                 return new Result(Code.BAD_REQUEST, "至少需要上传一个文件");
             }
 
-            // 构建DTO
-            FileUploadDTO dto = new FileUploadDTO();
-            dto.setProjectId(projectId);
-            dto.setTimestamp(timestamp);
-            dto.setVersion(version);
-            dto.setBuildVersion(buildVersion);
-            dto.setJsFilenames(jsFilenames);
-            dto.setFileHashes(fileHashes);
-
             // 处理文件上传
-            List<FileInfo> uploadedFiles = processFiles(files, dto);
+            List<FileInfo> uploadedFiles = processFiles(files);
 
             return new Result(Code.SUCCESS, "文件上传成功", JSONUtil.toJsonStr(Map.of(
                     "projectInfo", Map.of(
@@ -87,8 +77,11 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     /**
      * 处理文件存储逻辑
+     * @param files
+     * @return
+     * @throws IOException
      */
-    private List<FileInfo> processFiles(MultipartFile[] files, FileUploadDTO dto) throws IOException {
+    private List<FileInfo> processFiles(MultipartFile[] files) throws IOException {
         List<FileInfo> result = new ArrayList<>();
 
         for (MultipartFile file : files) {

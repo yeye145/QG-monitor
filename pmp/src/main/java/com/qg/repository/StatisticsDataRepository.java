@@ -28,7 +28,7 @@ public abstract class StatisticsDataRepository<T> {
     protected abstract void incrementEvent(T entity);
 
     /**
-     * 统计并缓存日志/错误
+     * 统计并缓存数据
      */
     public void statistics(T entity) {
         // 获取前缀
