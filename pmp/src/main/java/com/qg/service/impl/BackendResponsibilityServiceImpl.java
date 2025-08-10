@@ -98,7 +98,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             backendResponsibilityVOList.add(backendResponsibilityVO);
         }
 
-        return new Result(200, backendResponsibilityVOList,"查询成功");
+        return new Result(200, List.of(backendResponsibilityVOList,new ArrayList<>(),new ArrayList<>()),"查询成功");
 
     }
 }
