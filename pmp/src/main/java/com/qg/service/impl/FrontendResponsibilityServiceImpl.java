@@ -67,6 +67,7 @@ public class FrontendResponsibilityServiceImpl implements FrontendResponsibility
             frontendResponsibilityVO.setProjectId(frontendError.getProjectId());
             frontendResponsibilityVO.setBreadcrumbs(frontendError.getBreadcrumbs());
             frontendResponsibilityVO.setErrorType(frontendError.getErrorType());
+            frontendResponsibilityVO.setId(id);
             frontendResponsibilityVO.setCaptureType(frontendError.getCaptureType());
             frontendResponsibilityVO.setDuration(frontendError.getDuration());
             frontendResponsibilityVO.setElementInfo(frontendError.getElementInfo());
@@ -104,6 +105,6 @@ public class FrontendResponsibilityServiceImpl implements FrontendResponsibility
 
         }
 
-        return new Result(200, frontendResponsibilityVOList, "查询成功");
+        return new Result(200, List.of(new ArrayList<>(),frontendResponsibilityVOList,new ArrayList<>()), "查询成功");
     }
 }

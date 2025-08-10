@@ -12,7 +12,7 @@ public interface RoleService {
 
     Result getMemberList(String projectId);
 
-    Result getRole(String userId, String projectId);
+    Result getRole(Long userId, String projectId);
 
     Result updateUserRole(Role role);
 }

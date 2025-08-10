@@ -4,6 +4,7 @@ import com.qg.domain.BackendLog;
 import com.qg.domain.Result;
 import com.qg.service.BackendLogService;
 import com.qg.service.LogService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import static com.qg.domain.Code.SUCCESS;
 
 @RestController
 @RequestMapping("/logs")
+@Tag(name = "日志信息")
 public class LogController {
 
     @Autowired

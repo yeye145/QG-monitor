@@ -52,8 +52,6 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
         if (module != null) {
             String moduleName = module.getModuleName();
             queryWrapper.eq(BackendError::getModule, moduleName);
-        } else {
-            return new Result(400, "模块不存在");
         }
         if (type != null && !type.isEmpty()) {
             queryWrapper.eq(BackendError::getErrorType, type);
@@ -72,6 +70,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             Long id = error.getId();
             BackendResponsibilityVO backendResponsibilityVO = new BackendResponsibilityVO();
             backendResponsibilityVO.setEnvironment(error.getEnvironment());
+            backendResponsibilityVO.setId(id);
             backendResponsibilityVO.setEnvironmentSnapshot(error.getEnvironmentSnapshot());
             backendResponsibilityVO.setProjectId(error.getProjectId());
             backendResponsibilityVO.setTimestamp(error.getTimestamp());
@@ -98,7 +97,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             backendResponsibilityVOList.add(backendResponsibilityVO);
         }
 
-        return new Result(200, backendResponsibilityVOList,"查询成功");
+        return new Result(200, List.of(backendResponsibilityVOList,new ArrayList<>(),new ArrayList<>()),"查询成功");
 
     }
 }

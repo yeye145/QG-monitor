@@ -60,6 +60,7 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
         for (MobileError error : mobileErrors) {
             Long id = error.getId();
             MobileResponsibilityVO mobileResponsibilityVO = new MobileResponsibilityVO();
+            mobileResponsibilityVO.setId(id);
             mobileResponsibilityVO.setClassName(error.getClassName());
             mobileResponsibilityVO.setErrorType(error.getErrorType());
             mobileResponsibilityVO.setMessage(error.getMessage());
@@ -87,6 +88,6 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
         }
 
 
-        return new Result(200, mobileResponsibilityVOList, "查询成功");
+        return new Result(200, List.of(new ArrayList<>(),new ArrayList<>(),mobileResponsibilityVOList), "查询成功");
     }
 }

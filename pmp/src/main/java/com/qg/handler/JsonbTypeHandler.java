@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -16,27 +19,38 @@ import java.util.Map;
  * @Date: 2025/8/9 10:16   // 时间
  * @Version: 1.0     // 版本
  */
+@Component
 public class JsonbTypeHandler extends BaseTypeHandler<Object> {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static ObjectMapper staticObjectMapper = new ObjectMapper();
+
+    @Autowired(required = false)
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        staticObjectMapper = objectMapper;
+    }
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType) throws SQLException {
         try {
             String jsonValue;
-            if (parameter instanceof String) {
-                // 如果参数已经是字符串，验证是否为有效的JSON
+            // 只有当参数不是基本类型时才进行 JSON 序列化
+            if (isPrimitiveType(parameter)) {
+                // 对于基本类型，直接使用其字符串表示
+                jsonValue = parameter.toString();
+            } else if (parameter instanceof String) {
                 String stringValue = (String) parameter;
+                // 验证是否为有效的JSON
                 try {
-                    objectMapper.readTree(stringValue);
+                    staticObjectMapper.readTree(stringValue);
                     jsonValue = stringValue;
                 } catch (JsonProcessingException e) {
                     // 如果不是有效的JSON，将其转换为JSON字符串
-                    jsonValue = objectMapper.writeValueAsString(parameter);
+                    jsonValue = staticObjectMapper.writeValueAsString(parameter);
                 }
             } else {
-                // 其他类型都转换为JSON字符串
-                jsonValue = objectMapper.writeValueAsString(parameter);
+                // 复杂对象转换为JSON字符串
+                jsonValue = staticObjectMapper.writeValueAsString(parameter);
             }
             ps.setObject(i, jsonValue, Types.OTHER);
         } catch (JsonProcessingException e) {
@@ -45,19 +59,19 @@ public class JsonbTypeHandler extends BaseTypeHandler<Object> {
     }
 
     @Override
-    public Object getNullableResult(java.sql.ResultSet rs, String columnName) throws SQLException {
+    public Object getNullableResult(ResultSet rs, String columnName) throws SQLException {
         String json = rs.getString(columnName);
         return parseJson(json);
     }
 
     @Override
-    public Object getNullableResult(java.sql.ResultSet rs, int columnIndex) throws SQLException {
+    public Object getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         String json = rs.getString(columnIndex);
         return parseJson(json);
     }
 
     @Override
-    public Object getNullableResult(java.sql.CallableStatement cs, int columnIndex) throws SQLException {
+    public Object getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         String json = cs.getString(columnIndex);
         return parseJson(json);
     }
@@ -67,9 +81,22 @@ public class JsonbTypeHandler extends BaseTypeHandler<Object> {
             return null;
         }
         try {
-            return objectMapper.readValue(json, Object.class);
+            // 尝试解析为 JSON 对象
+            return staticObjectMapper.readValue(json, Object.class);
         } catch (JsonProcessingException e) {
-            throw new SQLException("Failed to parse JSON: " + json, e);
+            // 如果解析失败，返回原始字符串
+            return json;
         }
+    }
+
+    /**
+     * 判断是否为基本类型
+     */
+    private boolean isPrimitiveType(Object obj) {
+        return obj instanceof String ||
+                obj instanceof Number ||
+                obj instanceof Boolean ||
+                obj instanceof Character ||
+                obj instanceof Enum;
     }
 }

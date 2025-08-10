@@ -65,7 +65,7 @@ public class FileUploadHandler {
         if (fileName == null) return false;
 
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-        return fileExtension.matches("\\.(zip|tar|tar.gz)$");
+        return fileExtension.matches("\\.(zip|tar|tar.gz|map|html|js)$");
     }
 
     /**

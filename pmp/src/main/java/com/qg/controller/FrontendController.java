@@ -5,6 +5,7 @@ import com.qg.service.FileUploadService;
 import com.qg.service.FrontendBehaviorService;
 import com.qg.service.FrontendErrorService;
 import com.qg.service.FrontendPerformanceService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static com.qg.domain.Code.INTERNAL_ERROR;
 @Slf4j
 @RequestMapping("/frontend")
 @RestController
+@Tag(name = "前端信息")
 public class FrontendController {
 
     @Autowired
@@ -68,6 +70,12 @@ public class FrontendController {
 //        }
 //    }
 
+    /**
+     * 接收前端数据
+     * @param data
+     * @param type
+     * @return
+     */
     @PostMapping("/{type}")
     public Result getData(@RequestBody String data, @PathVariable String type) {
 
@@ -91,9 +99,20 @@ public class FrontendController {
 
     }
 
+    /**
+     * 接收前端sourcemap文件
+     * @param projectId
+     * @param timestamp
+     * @param version
+     * @param buildVersion
+     * @param files
+     * @param jsFilenames
+     * @param fileHashes
+     * @return
+     */
     @PostMapping("/formData")
     public Result getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
-                          @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
+                          @RequestParam(required = false) String buildVersion, @RequestParam("files") MultipartFile[] files,
                           @RequestParam String[] jsFilenames, @RequestParam String fileHashes) {
 
         log.info("\n项目ID: {}\n时间戳: {}\n版本: {}\n构建版本: {}\n文件数量: {}\nJS文件名: {}\n文件哈希: {}", projectId, timestamp, version, buildVersion, files.length, String.join(", ", jsFilenames), fileHashes);
