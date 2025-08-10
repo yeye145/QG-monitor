@@ -32,27 +32,41 @@ public class FrontendPerformanceServiceImpl implements FrontendPerformanceServic
 
     @Override
     public Result saveFrontendPerformance(String data) {
+        // 参数校验
+        if (data == null || data.trim().isEmpty()) {
+            log.warn("前端性能数据为空");
+            return new Result(BAD_REQUEST, "前端性能数据为空");
+        }
+
         try {
             List<FrontendPerformance> frontendPerformanceList = JSONUtil.toList(data, FrontendPerformance.class);
 
             if (frontendPerformanceList == null || frontendPerformanceList.isEmpty()) {
-                log.error("前端性能数据为空");
-                return new Result(BAD_REQUEST, "前端性能数据为空"); // 返回0表示没有数据需要保存
+                log.warn("解析后的前端性能数据为空");
+                return new Result(BAD_REQUEST, "解析前端性能数据为空");
             }
-            int count = 0;
 
+            // 计数成功插入的记录数
+            int successCount = 0;
             for (FrontendPerformance performance : frontendPerformanceList) {
-                // 假设有一个方法来保存单个性能数据条目
-                count += frontendPerformanceMapper.insert(performance);
+                if (performance != null) { // 额外的空值检查
+                    int result = frontendPerformanceMapper.insert(performance);
+                    successCount += result;
+                }
             }
-            log.info("保存前端性能数据成功，保存了" + count + "条数据");
-            return new Result(SUCCESS, "保存前端性能数据成功"); // 返回保存的记录数
-        } catch (Exception e) {
-            log.error("保存前端性能数据出错：{}", e.getMessage());
-            return new Result(INTERNAL_ERROR, "保存前端性能数据出错");
-        }
 
+            log.info("保存前端性能数据完成，总共{}条，成功{}条", frontendPerformanceList.size(), successCount);
+            return new Result(SUCCESS, "保存前端性能数据成功，共处理" + frontendPerformanceList.size() + "条数据");
+
+        } catch (cn.hutool.json.JSONException e) {
+            log.error("前端性能数据JSON解析失败: ", e);
+            return new Result(BAD_REQUEST, "数据格式错误: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("保存前端性能数据时发生异常: ", e);
+            return new Result(INTERNAL_ERROR, "保存前端性能数据失败: " + e.getMessage());
+        }
     }
+
 
     @Override
     public Result selectByCondition(String projectId, String capture) {

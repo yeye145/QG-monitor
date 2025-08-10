@@ -43,11 +43,9 @@ public class BackendController {
     }
 
     @PostMapping("/performance")
-    public String getPerformanceData(@RequestBody String performanceData) {
+    public Result getPerformanceData(@RequestBody String performanceData) {
         System.out.println("***********接收到了后端性能数据***********");
-        List<BackendPerformance> backendPerformances = JSONUtil.toList(performanceData, BackendPerformance.class);
-        backendPerformances.forEach(System.out::println);
-        return "";
+        return backendPerformanceService.addPerformance(performanceData);
     }
 
     @PostMapping("/error")

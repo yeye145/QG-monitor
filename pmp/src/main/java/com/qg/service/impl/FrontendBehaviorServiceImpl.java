@@ -32,20 +32,41 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
 
     @Override
     public Result saveFrontendBehavior(String data) {
-        List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);
+        // 参数校验
+        if (data == null || data.trim().isEmpty()) {
+            log.warn("前端用户行为数据为空");
+            return new Result(BAD_REQUEST, "前端用户行为数据为空");
+        }
 
-        if (behaviorList == null || behaviorList.isEmpty()) {
-            log.error("接收到的前端用户行为数据为空");
-            return new Result(BAD_REQUEST, "前端用户行为数据为空"); // 返回0表示没有数据需要保存
+        try {
+            List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);
+
+            if (behaviorList == null || behaviorList.isEmpty()) {
+                log.warn("解析后的前端用户行为数据为空");
+                return new Result(BAD_REQUEST, "解析前端用户行为数据为空");
+            }
+
+            // 批量插入数据
+            int successCount = 0;
+            for (FrontendBehavior behavior : behaviorList) {
+                if (behavior != null) { // 额外的空值检查
+                    int result = frontendBehaviorMapper.insert(behavior);
+                    successCount += result;
+                }
+            }
+
+            log.info("保存前端用户行为数据完成，总共{}条，成功{}条", behaviorList.size(), successCount);
+            return new Result(SUCCESS, "保存前端用户行为数据成功，共处理" + behaviorList.size() + "条数据");
+
+        } catch (cn.hutool.json.JSONException e) {
+            log.error("前端用户行为数据JSON解析失败: ", e);
+            return new Result(BAD_REQUEST, "数据格式错误: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("保存前端用户行为数据时发生异常: ", e);
+            return new Result(INTERNAL_ERROR, "保存前端用户行为数据失败: " + e.getMessage());
         }
-        int count = 0;
-        for (FrontendBehavior behavior : behaviorList) {
-            // 假设有一个方法来保存单个行为数据条目
-            count += frontendBehaviorMapper.insert(behavior);
-        }
-        log.info("保存前端用户行为数据成功，保存了" + count + "条数据");
-        return new Result(SUCCESS, "保存前端用户行为数据成功"); // 返回保存的记录
     }
+
 
 
 }
