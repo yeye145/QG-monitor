@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.qg.repository.RepositoryConstants.FIXED_RATE_DEFAULT;
+
 @Repository
 @Slf4j
 public abstract class StatisticsDataRepository<T> {
@@ -59,7 +61,7 @@ public abstract class StatisticsDataRepository<T> {
     /**
      * 定时将缓存中的数据批量存入数据库
      */
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = FIXED_RATE_DEFAULT)
     public void scheduleSaveToDatabase() {
         cacheMap.forEach((key, entity) -> {
             try {
