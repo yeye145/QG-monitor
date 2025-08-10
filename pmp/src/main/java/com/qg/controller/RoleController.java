@@ -40,12 +40,13 @@ public class RoleController {
 
     /**
      * 删除项目成员
-     * @param role
+     * @param projectId
+     * @param userId
      * @return
      */
     @DeleteMapping
-    public Result deleteRole(@RequestBody Role role) {
-        return roleService.deleteRole(role);
+    public Result deleteRole(@RequestParam String projectId, @RequestParam Long userId) {
+        return roleService.deleteRole(projectId, userId);
     }
 
     /**

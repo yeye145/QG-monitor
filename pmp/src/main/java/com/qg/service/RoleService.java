@@ -8,7 +8,7 @@ public interface RoleService {
 
     Result updateRole(Role role);
 
-    Result deleteRole(Role role);
+    Result deleteRole(String projectId, Long userId);
 
     Result getMemberList(String projectId);
 
