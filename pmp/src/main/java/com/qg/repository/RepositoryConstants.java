@@ -10,6 +10,8 @@ public enum RepositoryConstants {
     // RedisKey前缀
     BACKEND_LOG_PREFIX("backend:log"),
     MOBILE_ERROR_PREFIX("mobile:error"),
+    REDIS_KEY_PREFIX("backend:method:"),
+
 
     // TTL时间（分钟）
     TTL_MINUTES(1),
@@ -20,6 +22,9 @@ public enum RepositoryConstants {
     CONTENT("content"),
     MENTIONED_MOBILE_LIST("mentioned_mobile_list");
 
+    // 定时任务配置
+    public static final int FIXED_RATE_DEFAULT = 6000;
+    public static final int FIXED_RATE_METHOD = 12000;
 
 
     private final Object value;

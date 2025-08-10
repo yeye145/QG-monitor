@@ -5,11 +5,7 @@ import com.qg.mapper.MethodInvocationMapper;
 import com.qg.vo.MethodInvocationVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
 
@@ -17,27 +13,24 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import static com.qg.repository.RepositoryConstants.*;
 
 
 @Repository
 @Slf4j
 public class MethodInvocationRepository extends StatisticsDataRepository<MethodInvocation> {
 
-    private static final String REDIS_KEY_PREFIX = "backend:method:";
-
     @Autowired
     private MethodInvocationMapper methodInvocationMapper;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
 
     public void statisticsMethod(Map<String, Integer> methodMap) {
         // 批量更新Redis
         stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             methodMap.forEach((fullKey, count) -> {
-                String redisKey = REDIS_KEY_PREFIX + fullKey;
+                String redisKey = REDIS_KEY_PREFIX.getAsString() + fullKey;
                 connection.stringCommands().incrBy(redisKey.getBytes(), count);
                 // 设置过期时间
-                connection.keyCommands().expire(redisKey.getBytes(), Duration.ofSeconds(60));
+                connection.keyCommands().expire(redisKey.getBytes(), Duration.ofMinutes(getTtlMinutes()));
             });
             return null;
         });
@@ -64,7 +57,7 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
 
     @Override
     protected long getTtlMinutes() {
-        return 1;
+        return TTL_MINUTES.getAsLong();
     }
 
     @Override
@@ -73,16 +66,13 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
             MethodInvocationVO methodInvocationVO = convertToVO(entity);
             methodInvocationMapper.insert(methodInvocationVO);
         } catch (Exception e) {
-            System.err.println("\n\n\n方法调用统计失败\n" + e + "\n\n\n");
-            e.printStackTrace();
-            System.out.println("\n\n\n");
-//            log.error("方法调用统计失败,项目ID: {}: {}", entity.getProjectId(), e.getMessage());
+            log.error("方法调用统计失败,项目ID: {}: {}", entity.getProjectId(), e.getMessage());
         }
     }
 
     @Override
     protected String generateUniqueKey(MethodInvocation entity) {
-        return REDIS_KEY_PREFIX + entity.getProjectId() + ":" + entity.getMethodName();
+        return REDIS_KEY_PREFIX.getAsString() + entity.getProjectId() + ":" + entity.getMethodName();
     }
 
     @Override
@@ -90,10 +80,10 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
     }
 
     @Override
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = FIXED_RATE_METHOD)
     public void scheduleSaveToDatabase() {
         cacheMap.forEach((fullKey, entity) -> {
-            String redisKey = REDIS_KEY_PREFIX + fullKey;
+            String redisKey = REDIS_KEY_PREFIX.getAsString() + fullKey;
             if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(redisKey))) {
                 // Redis已过期，保存到数据库并清理缓存
                 saveToDatabase(entity);
