@@ -43,16 +43,16 @@ public class BackendController {
     }
 
     @PostMapping("/performance")
-    public Result getPerformanceData(@RequestBody String performanceData) {
+    public void getPerformanceData(@RequestBody String performanceData) {
         System.out.println("***********接收到了后端性能数据***********");
-        return backendPerformanceService.addPerformance(performanceData);
+        backendPerformanceService.addPerformance(performanceData);
     }
 
     @PostMapping("/error")
-    public Result getErrorData(@RequestBody String errorData) {
+    public void getErrorData(@RequestBody String errorData) {
         log.info("***********接收到了后端错误信息***********");
         log.info(errorData);
-        return backendErrorService.addBackendError(errorData);
+        backendErrorService.addBackendError(errorData);
     }
 
     /**
