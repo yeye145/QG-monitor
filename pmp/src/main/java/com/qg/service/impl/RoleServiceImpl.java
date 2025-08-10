@@ -42,34 +42,69 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Result updateRole(Role role) {
-        //判断用户是否在项目里
-        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Role::getUserId, role.getUserId()).eq(Role::getProjectId, role.getProjectId());
-        if (roleMapper.selectOne(lqw) == null) {
-            return new Result(Code.NOT_FOUND, "该用户未加入该项目");
-        }
-        //更新用户权限
-        return roleMapper.update(role, lqw) == 1 ? new Result(Code.CREATED, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
-    }
-
-    @Override
-    public Result deleteRole(Role role) {
+        // 参数校验
         if (role == null) {
             return new Result(Code.BAD_REQUEST, "参数错误");
         }
+
+        if (role.getUserId() == null || role.getProjectId() == null) {
+            return new Result(Code.BAD_REQUEST, "用户ID和项目ID不能为空");
+        }
+
         try {
-            //判断用户是否在项目里
+            // 构建更新条件
             LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(Role::getUserId, role.getUserId()).eq(Role::getProjectId, role.getProjectId());
-            if(roleMapper.selectOne(lqw) == null)
-            {
+            lqw.eq(Role::getUserId, role.getUserId())
+                    .eq(Role::getProjectId, role.getProjectId());
+
+            // 直接执行更新操作
+            int updateResult = roleMapper.update(role, lqw);
+
+            if (updateResult > 0) {
+                log.info("更新用户角色成功: userId={}, projectId={}",
+                        role.getUserId(), role.getProjectId());
+                return new Result(Code.SUCCESS, "更新成功");
+            } else {
+                log.info("更新用户角色失败，用户未加入该项目: userId={}, projectId={}",
+                        role.getUserId(), role.getProjectId());
                 return new Result(Code.NOT_FOUND, "该用户未加入该项目");
             }
-            //删除用户
-            return roleMapper.delete(lqw) == 1 ? new Result(Code.CREATED, "删除成功") : new Result(Code.INTERNAL_ERROR, "删除失败");
         } catch (Exception e) {
-            log.error("删除用户角色失败",  e);
-            return new Result(Code.INTERNAL_ERROR, "删除失败");
+            log.error("更新用户角色失败: userId={}, projectId={}",
+                    role.getUserId(), role.getProjectId(), e);
+            return new Result(Code.INTERNAL_ERROR, "更新失败: " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public Result deleteRole(String projectId, Long userId) {
+        // 参数校验
+
+        if (projectId == null || userId == null) {
+            return new Result(Code.BAD_REQUEST, "用户ID和项目ID不能为空");
+        }
+
+        try {
+            // 构建删除条件
+            LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(Role::getUserId, userId)
+                    .eq(Role::getProjectId, projectId);
+
+            // 直接执行删除操作
+            int deleteResult = roleMapper.delete(lqw);
+
+            if (deleteResult > 0) {
+                log.info("删除用户角色成功，用户id： {}", userId);
+                return new Result(Code.SUCCESS, "删除成功");
+            } else {
+                log.info("删除用户角色失败，用户id： {}", userId);
+                return new Result(Code.NOT_FOUND, "该用户未加入该项目");
+            }
+        } catch (Exception e) {
+            log.error("删除用户角色失败: userId={}, projectId={}",
+                    userId, projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "删除失败: " + e.getMessage());
         }
     }
 

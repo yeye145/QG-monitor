@@ -1,9 +1,12 @@
 package com.qg.aggregator;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.gson.Gson;
 import com.qg.domain.BackendError;
+import com.qg.domain.Project;
 import com.qg.mapper.BackendErrorMapper;
+import com.qg.mapper.ProjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,6 +34,10 @@ public class BackendErrorAggregator {
 
     @Autowired
     private BackendErrorMapper backendErrorMapper;
+
+    // 在类的字段部分添加
+    @Autowired
+    private ProjectMapper projectMapper;
 
     /**
      * 添加错误信息到 Redis 缓存中
@@ -98,6 +105,16 @@ public class BackendErrorAggregator {
 
             // 处理每个 key（项目+模块+环境组合）
             for (String key : keys) {
+                // 从key中提取projectId
+                String projectId = extractProjectIdFromKey(key);
+
+                // 检查项目是否存在
+                if (!isProjectExists(projectId)) {
+                    log.warn("项目不存在，跳过处理并删除缓存数据，项目ID: {}", projectId);
+                    // 删除不存在项目的缓存数据
+                    stringRedisTemplate.delete(key);
+                    continue;
+                }
                 // 获取 key 对应的所有 field 和 value
                 Map<Object, Object> errorMap = stringRedisTemplate.opsForHash().entries(key);
 
@@ -130,6 +147,44 @@ public class BackendErrorAggregator {
         }
 
         log.info("后端错误信息处理并保存完成");
+    }
+
+    /**
+     * 从Redis key中提取项目ID
+     * @param key Redis key
+     * @return 项目ID
+     */
+    private String extractProjectIdFromKey(String key) {
+        // key格式: backend_error:projectId:module:environment
+        String[] parts = key.split(":");
+        if (parts.length >= 3) {
+            return parts[1]; // 第二个部分是projectId
+        }
+        return null;
+    }
+
+    /**
+     * 检查项目是否存在
+     * @param projectId 项目ID
+     * @return 项目是否存在
+     */
+    private boolean isProjectExists(String projectId) {
+        if (projectId == null || projectId.isEmpty()) {
+            return false;
+        }
+
+        try {
+            // 需要注入ProjectMapper来检查项目是否存在
+            // @Autowired
+            // private ProjectMapper projectMapper;
+
+            LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Project::getUuid, projectId).eq(Project::getIsDeleted, false);
+            return projectMapper.selectCount(queryWrapper) > 0;
+        } catch (Exception e) {
+            log.error("检查项目存在性时发生异常，项目ID: {}", projectId, e);
+            return false;
+        }
     }
 
     private String generateRedisKey(String projectId, String module, String environment) {
