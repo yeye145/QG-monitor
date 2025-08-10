@@ -17,4 +17,6 @@ public interface FrontendErrorService {
     Result selectByCondition(String projectId, String type);
 
     Integer saveFrontendError(List<FrontendError> frontendErrors);
+
+    Result addFrontendError(String errorData);
 }

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-@Configuration
+//@Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     /*@Autowired
@@ -19,4 +19,3 @@ public class WebConfig implements WebMvcConfigurer {
                         "/users/sendCodeByEmail"
                 ); // 排除路径
     }*/
-}

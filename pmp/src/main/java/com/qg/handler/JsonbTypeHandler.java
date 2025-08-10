@@ -16,55 +16,60 @@ import java.util.Map;
  * @Date: 2025/8/9 10:16   // 时间
  * @Version: 1.0     // 版本
  */
-public class JsonbTypeHandler extends BaseTypeHandler<Map<String,Object>> {
+public class JsonbTypeHandler extends BaseTypeHandler<Object> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, Map<String, Object> parameter, JdbcType jdbcType) throws SQLException {
+    public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType) throws SQLException {
         try {
-            ps.setObject(i, objectMapper.writeValueAsString(parameter), Types.OTHER);
+            String jsonValue;
+            if (parameter instanceof String) {
+                // 如果参数已经是字符串，验证是否为有效的JSON
+                String stringValue = (String) parameter;
+                try {
+                    objectMapper.readTree(stringValue);
+                    jsonValue = stringValue;
+                } catch (JsonProcessingException e) {
+                    // 如果不是有效的JSON，将其转换为JSON字符串
+                    jsonValue = objectMapper.writeValueAsString(parameter);
+                }
+            } else {
+                // 其他类型都转换为JSON字符串
+                jsonValue = objectMapper.writeValueAsString(parameter);
+            }
+            ps.setObject(i, jsonValue, Types.OTHER);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new SQLException("Failed to serialize parameter to JSON", e);
         }
     }
 
     @Override
-    public Map<String, Object> getNullableResult(ResultSet rs, String columnName) throws SQLException {
+    public Object getNullableResult(java.sql.ResultSet rs, String columnName) throws SQLException {
         String json = rs.getString(columnName);
-        if (json != null) {
-            try {
-                return objectMapper.readValue(json, HashMap.class);
-            } catch (Exception e) {
-                throw new SQLException(e);
-            }
-        }
-        return null;
+        return parseJson(json);
     }
 
     @Override
-    public Map<String, Object> getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+    public Object getNullableResult(java.sql.ResultSet rs, int columnIndex) throws SQLException {
         String json = rs.getString(columnIndex);
-        if (json != null) {
-            try {
-                return objectMapper.readValue(json, HashMap.class);
-            } catch (Exception e) {
-                throw new SQLException(e);
-            }
-        }
-        return null;
+        return parseJson(json);
     }
 
     @Override
-    public Map<String, Object> getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+    public Object getNullableResult(java.sql.CallableStatement cs, int columnIndex) throws SQLException {
         String json = cs.getString(columnIndex);
-        if (json != null) {
-            try {
-                return objectMapper.readValue(json, HashMap.class);
-            } catch (Exception e) {
-                throw new SQLException(e);
-            }
+        return parseJson(json);
+    }
+
+    private Object parseJson(String json) throws SQLException {
+        if (json == null || json.isEmpty()) {
+            return null;
         }
-        return null;
+        try {
+            return objectMapper.readValue(json, Object.class);
+        } catch (JsonProcessingException e) {
+            throw new SQLException("Failed to parse JSON: " + json, e);
+        }
     }
 }

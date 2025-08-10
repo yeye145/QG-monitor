@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface FrontendPerformanceService {
 
-    Integer saveFrontendPerformance(List<FrontendPerformance> frontendPerformance);
+    Result saveFrontendPerformance(String data);
 
     Result selectByCondition(String projectId, String capture);
 }

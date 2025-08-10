@@ -1,6 +1,7 @@
 package com.qg.service;
 
 import com.qg.domain.FrontendBehavior;
+import com.qg.domain.Result;
 
 import java.util.List;
 
@@ -12,5 +13,6 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 public interface FrontendBehaviorService {
-    Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList);
+    Result saveFrontendBehavior(String data);
+
 }

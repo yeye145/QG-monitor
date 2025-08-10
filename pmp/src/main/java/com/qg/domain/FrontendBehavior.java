@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 前端行为类  // 类说明
@@ -28,8 +30,8 @@ public class FrontendBehavior {
     private String sessionId;
     private String userAgent;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String breadcrumbs;
+    private List<Map<String, Object>> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String pageInfo;
+    private Map<String, Object> pageInfo;
     private String captureType;
 }

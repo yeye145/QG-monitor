@@ -99,8 +99,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
             }
 
             // 设置当前时间戳（如果未设置）
-            if (backendError.getTimestamp() != null) {
-            } else {
+            if (backendError.getTimestamp() == null) {
                 backendError.setTimestamp(LocalDateTime.now());
             }
 

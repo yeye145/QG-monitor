@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 前端错误Vo  // 类说明
@@ -23,19 +25,26 @@ public class FrontendResponsibilityVO {
     private String projectId;
     private LocalDateTime timestamp;
     private String sessionId;
-    private String userAgent;
+    private String captureType;
+    private Long duration;
+
     private String errorType;
     private String message;
     private String stack;
-    private String requestInfo;
-    private String responseInfo;
-    private String resourceInfo;
-    private String breadcrumbs;
-    private String tags;
-    private String captureType;
-    private Long duration;
-    private String elementInfo;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> requestInfo;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> responseInfo;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> resourceInfo;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private List<Map<String, Object>> breadcrumbs;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> tags;
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    private Map<String, Object> elementInfo;
 
+    private String userAgent;
     private String Name;
     private Long delegatorId;
     private String avatarUrl;

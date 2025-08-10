@@ -1,17 +1,14 @@
 package com.qg.aggregator;
 
 import cn.hutool.json.JSONUtil;
-import com.google.gson.Gson;
-import com.qg.domain.BackendError;
-import com.qg.mapper.BackendErrorMapper;
+import com.qg.domain.FrontendError;
+import com.qg.mapper.FrontendErrorMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,31 +17,30 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class BackendErrorAggregator {
+public class FrontendErrorAggregator {
 
     // 使用 Redis 的 key 前缀
-    private static final String ERROR_CACHE_KEY_PREFIX = "backend_error:";
-    private static final String BATCH_COUNTER_KEY = "backend_error_batch_counter";
+    private static final String ERROR_CACHE_KEY_PREFIX = "frontend_error:";
+    private static final String BATCH_COUNTER_KEY = "frontend_error_batch_counter";
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    private BackendErrorMapper backendErrorMapper;
+    private FrontendErrorMapper frontendErrorMapper;
 
     /**
      * 添加错误信息到 Redis 缓存中
      */
-    public void addErrorToCache(BackendError backendError) {
-        // 构建 Redis key，包含 environment
-        String key = generateRedisKey(backendError.getProjectId(),
-                backendError.getModule(),
-                backendError.getEnvironment());
+    public void addErrorToCache(FrontendError frontendError) {
+        // 构建 Redis key，不包含 module 字段
+        String key = generateRedisKey(frontendError.getProjectId(),
+                frontendError.getSessionId());
 
         // 使用错误类型作为 field
-        String field = backendError.getErrorType();
+        String field = frontendError.getErrorType();
 
-        // 将整个 BackendError 对象序列化为 JSON 字符串
+        // 将整个 FrontendError 对象序列化为 JSON 字符串
         String errorJson;
 
         // 使用 Redis 的 Hash 数据结构
@@ -53,21 +49,21 @@ public class BackendErrorAggregator {
 
         if (existingErrorJson != null) {
             // 如果已存在该类型的错误，合并处理
-            BackendError existingError = JSONUtil.toBean(existingErrorJson, BackendError.class);
+            FrontendError existingError = JSONUtil.toBean(existingErrorJson, FrontendError.class);
             existingError.setEvent(existingError.getEvent() + 1); // 增加计数
 
-            // 保留最早的时间戳
-            if (backendError.getTimestamp().isBefore(existingError.getTimestamp())) {
-                existingError.setTimestamp(backendError.getTimestamp());
-                existingError.setStack(backendError.getStack());
-                existingError.setEnvironmentSnapshot(backendError.getEnvironmentSnapshot());
+            // 保留最早的时间戳（这里使用 timestamp 字段）
+            if (frontendError.getTimestamp().isBefore(existingError.getTimestamp())) {
+                existingError.setTimestamp(frontendError.getTimestamp());
+                existingError.setStack(frontendError.getStack());
+                // 可以根据需要更新其他字段
             }
 
             errorJson = JSONUtil.toJsonStr(existingError);
         } else {
             // 第一次出现该类型错误，初始化计数为1
-            backendError.setEvent(1);
-            errorJson = JSONUtil.toJsonStr(backendError);
+            frontendError.setEvent(1);
+            errorJson = JSONUtil.toJsonStr(frontendError);
         }
 
         // 存储到 Redis
@@ -82,21 +78,21 @@ public class BackendErrorAggregator {
      */
     @Scheduled(fixedRate = 600000) // 10分钟 = 600000毫秒
     public void processAndSaveErrors() {
-        log.info("开始处理并保存后端错误信息");
+        log.info("开始处理并保存前端错误信息");
 
         try {
             // 获取所有匹配的 keys
             Set<String> keys = stringRedisTemplate.keys(ERROR_CACHE_KEY_PREFIX + "*");
 
             if (keys.isEmpty()) {
-                log.info("没有需要处理的后端错误信息");
+                log.info("没有需要处理的前端错误信息");
                 return;
             }
 
             // 获取批次号
             Long batchId = stringRedisTemplate.opsForValue().increment(BATCH_COUNTER_KEY, 1);
 
-            // 处理每个 key（项目+模块+环境组合）
+            // 处理每个 key（项目+会话组合）
             for (String key : keys) {
                 // 获取 key 对应的所有 field 和 value
                 Map<Object, Object> errorMap = stringRedisTemplate.opsForHash().entries(key);
@@ -106,19 +102,19 @@ public class BackendErrorAggregator {
                 }
 
                 // 处理并保存数据
-                List<BackendError> errorsToSave = new ArrayList<>();
+                List<FrontendError> errorsToSave = new ArrayList<>();
                 for (Map.Entry<Object, Object> entry : errorMap.entrySet()) {
                     String errorJson = (String) entry.getValue();
-                    BackendError error = JSONUtil.toBean(errorJson, BackendError.class);
+                    FrontendError error = JSONUtil.toBean(errorJson, FrontendError.class);
                     errorsToSave.add(error);
                 }
 
                 // 批量保存到数据库
                 if (!errorsToSave.isEmpty()) {
-                    for (BackendError error : errorsToSave) {
-                        backendErrorMapper.insert(error);
+                    for (FrontendError error : errorsToSave) {
+                        frontendErrorMapper.insert(error);
                     }
-                    log.info("保存了 {} 条后端错误信息，批次ID: {}", errorsToSave.size(), batchId);
+                    log.info("保存了 {} 条前端错误信息，批次ID: {}", errorsToSave.size(), batchId);
                 }
 
                 // 删除已处理的 key
@@ -126,13 +122,13 @@ public class BackendErrorAggregator {
             }
 
         } catch (Exception e) {
-            log.error("处理后端错误信息时发生异常", e);
+            log.error("处理前端错误信息时发生异常", e);
         }
 
-        log.info("后端错误信息处理并保存完成");
+        log.info("前端错误信息处理并保存完成");
     }
 
-    private String generateRedisKey(String projectId, String module, String environment) {
-        return ERROR_CACHE_KEY_PREFIX + projectId + ":" + module + ":" + environment;
+    private String generateRedisKey(String projectId, String sessionId) {
+        return ERROR_CACHE_KEY_PREFIX + projectId + ":" + sessionId;
     }
 }
