@@ -68,6 +68,13 @@ public class FileUploadHandler {
         return fileExtension.matches("\\.(zip|tar|tar.gz)$");
     }
 
+    /**
+     * 文件类型校验
+     */
+    public static boolean isValidFile(MultipartFile file) {
+        return isValidImageFile(file) || isValidDocumentFile(file) || isValidInstallFile(file);
+    }
+
 
     // 根据数据库中的相对路径生成完整URL
     public static String generatePublicUrl(String relativePath, String subDir) {
