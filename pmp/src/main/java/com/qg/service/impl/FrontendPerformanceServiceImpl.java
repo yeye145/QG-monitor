@@ -1,14 +1,20 @@
 package com.qg.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.qg.domain.Code;
 import com.qg.domain.FrontendPerformance;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendPerformanceMapper;
 import com.qg.service.FrontendPerformanceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.qg.domain.Code.*;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * @Description: 前端性能应用  // 类说明
@@ -18,24 +24,33 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 @Service
+@Slf4j
 public class FrontendPerformanceServiceImpl implements FrontendPerformanceService {
 
     @Autowired
     private FrontendPerformanceMapper frontendPerformanceMapper;
 
     @Override
-    public Integer saveFrontendPerformance(List<FrontendPerformance> frontendPerformance) {
-        if (frontendPerformance == null || frontendPerformance.isEmpty()) {
-            return 0; // 返回0表示没有数据需要保存
-        }
-        int count = 0;
+    public Result saveFrontendPerformance(String data) {
+        try {
+            List<FrontendPerformance> frontendPerformanceList = JSONUtil.toList(data, FrontendPerformance.class);
 
-        for (FrontendPerformance performance : frontendPerformance) {
-            // 假设有一个方法来保存单个性能数据条目
-            count += frontendPerformanceMapper.insert(performance);
-        }
+            if (frontendPerformanceList == null || frontendPerformanceList.isEmpty()) {
+                log.error("前端性能数据为空");
+                return new Result(BAD_REQUEST, "前端性能数据为空"); // 返回0表示没有数据需要保存
+            }
+            int count = 0;
 
-        return frontendPerformance.size() == count ? count : 0; // 返回保存的记录数
+            for (FrontendPerformance performance : frontendPerformanceList) {
+                // 假设有一个方法来保存单个性能数据条目
+                count += frontendPerformanceMapper.insert(performance);
+            }
+            log.info("保存前端性能数据成功，保存了" + count + "条数据");
+            return new Result(SUCCESS, "保存前端性能数据成功"); // 返回保存的记录数
+        } catch (Exception e) {
+            log.error("保存前端性能数据出错：{}", e.getMessage());
+            return new Result(INTERNAL_ERROR, "保存前端性能数据出错");
+        }
 
     }
 

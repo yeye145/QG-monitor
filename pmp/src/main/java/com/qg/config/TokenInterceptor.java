@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import static com.qg.domain.Code.UNAUTHORIZED;
 import static com.qg.utils.CryptoUtils.decryptWithAESAndRSA;
 @Slf4j
-//@Component
+@Component
 public class TokenInterceptor implements HandlerInterceptor {
     /**
      * 在请求处理之前调用（Controller方法调用之前）

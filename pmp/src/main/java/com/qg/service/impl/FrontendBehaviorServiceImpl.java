@@ -30,19 +30,21 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
     @Autowired
     private FrontendBehaviorMapper frontendBehaviorMapper;
 
-
-
     @Override
-    public Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList) {
+    public Result saveFrontendBehavior(String data) {
+        List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);
+
         if (behaviorList == null || behaviorList.isEmpty()) {
-            return 0; // 返回0表示没有数据需要保存
+            log.error("接收到的前端用户行为数据为空");
+            return new Result(BAD_REQUEST, "前端用户行为数据为空"); // 返回0表示没有数据需要保存
         }
         int count = 0;
         for (FrontendBehavior behavior : behaviorList) {
             // 假设有一个方法来保存单个行为数据条目
             count += frontendBehaviorMapper.insert(behavior);
         }
-        return behaviorList.size() == count ? count : 0; // 返回保存的记录
+        log.info("保存前端用户行为数据成功，保存了" + count + "条数据");
+        return new Result(SUCCESS, "保存前端用户行为数据成功"); // 返回保存的记录
     }
 
 

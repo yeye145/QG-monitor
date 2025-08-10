@@ -75,22 +75,25 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
         }
 
         try {
-            FrontendError frontendError = JSONUtil.toBean(errorData, FrontendError.class);
-            if (frontendError.getProjectId() == null ||
-                    frontendError.getErrorType() == null ||
-                    frontendError.getSessionId() == null
-            ) {
-                log.error("参数错误");
-                return new Result(BAD_REQUEST, "参数错误");
-            }
+            List<FrontendError> frontendErrorList = JSONUtil.toList(errorData, FrontendError.class);
+            log.debug("前端错误信息list长度： {}", frontendErrorList.size());
+            for (FrontendError frontendError : frontendErrorList) {
+                if (frontendError.getProjectId() == null ||
+                        frontendError.getErrorType() == null ||
+                        frontendError.getSessionId() == null
+                ) {
+                    log.error("参数错误");
+                    return new Result(BAD_REQUEST, "参数错误");
+                }
 
-            // 设置当前时间戳（如果未设置）
-            if (frontendError.getTimestamp() == null) {
-                frontendError.setTimestamp(LocalDateTime.now());
-            }
+                // 设置当前时间戳（如果未设置）
+                if (frontendError.getTimestamp() == null) {
+                    frontendError.setTimestamp(LocalDateTime.now());
+                }
 
-            // 添加到 Redis 聚合器缓存中
-            frontendErrorAggregator.addErrorToCache(frontendError);
+                // 添加到 Redis 聚合器缓存中
+                frontendErrorAggregator.addErrorToCache(frontendError);
+            }
             return new Result(SUCCESS, "添加错误信息成功");
         } catch (Exception e) {
             log.error("添加错误信息时出错，错误信息： {}", errorData, e);
