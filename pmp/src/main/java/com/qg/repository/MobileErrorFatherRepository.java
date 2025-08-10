@@ -40,7 +40,11 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
 
     @Override
     protected void saveToDatabase(MobileError error) {
-        mobileErrorMapper.insert(error);
+        try {
+            mobileErrorMapper.insert(error);
+        } catch (Exception e) {
+            log.error("移动端错误统计失败,项目ID: {}: {}", error.getProjectId(), e.getMessage());
+        }
     }
 
     @Override
