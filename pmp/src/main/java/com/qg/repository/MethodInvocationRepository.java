@@ -23,6 +23,10 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
     @Autowired
     private MethodInvocationMapper methodInvocationMapper;
 
+    /**
+     * 统计方法调用
+     * @param methodMap
+     */
     public void statisticsMethod(Map<String, Integer> methodMap) {
         // 批量更新Redis
         stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -79,6 +83,9 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
     protected void incrementEvent(MethodInvocation entity) {
     }
 
+    /**
+     * 重写父类逻辑
+     */
     @Override
     @Scheduled(fixedRate = FIXED_RATE_METHOD)
     public void scheduleSaveToDatabase() {
