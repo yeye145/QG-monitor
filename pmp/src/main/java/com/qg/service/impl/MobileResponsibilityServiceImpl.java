@@ -87,6 +87,6 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
         }
 
 
-        return new Result(200, mobileResponsibilityVOList, "查询成功");
+        return new Result(200, List.of(new ArrayList<>(),new ArrayList<>(),mobileResponsibilityVOList), "查询成功");
     }
 }
