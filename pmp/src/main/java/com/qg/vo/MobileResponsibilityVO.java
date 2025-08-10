@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class MobileResponsibilityVO {
 
+    private Long id;
     private String projectId;
     private LocalDateTime timestamp;
     private String errorType;

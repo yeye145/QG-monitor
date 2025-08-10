@@ -67,6 +67,7 @@ public class FrontendResponsibilityServiceImpl implements FrontendResponsibility
             frontendResponsibilityVO.setProjectId(frontendError.getProjectId());
             frontendResponsibilityVO.setBreadcrumbs(frontendError.getBreadcrumbs());
             frontendResponsibilityVO.setErrorType(frontendError.getErrorType());
+            frontendResponsibilityVO.setId(id);
             frontendResponsibilityVO.setCaptureType(frontendError.getCaptureType());
             frontendResponsibilityVO.setDuration(frontendError.getDuration());
             frontendResponsibilityVO.setElementInfo(frontendError.getElementInfo());

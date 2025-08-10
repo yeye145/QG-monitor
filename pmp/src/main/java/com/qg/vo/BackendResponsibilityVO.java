@@ -21,6 +21,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class BackendResponsibilityVO {
 
+    private Long id;
     private LocalDateTime timestamp;
     private String module;
     private String projectId;
