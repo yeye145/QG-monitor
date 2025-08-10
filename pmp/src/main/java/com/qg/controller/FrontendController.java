@@ -103,6 +103,13 @@ public class FrontendController {
                         @RequestParam String buildVersion, @RequestParam MultipartFile[] files,
                         @RequestParam String [] jsFilenames, @RequestParam String fileHashes) {
         log.info("接收到前端上传的文件数据");
+        log.info("项目ID: " + projectId,
+                "时间戳: " + timestamp,
+                "版本: " + version,
+                "构建版本: " + buildVersion,
+                "文件数量: " + files.length,
+                "JS文件名: " + String.join(", ", jsFilenames),
+                "文件哈希: " + fileHashes);
     }
 
 
