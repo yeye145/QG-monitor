@@ -33,17 +33,17 @@ public class FrontendResponsibilityVO {
     private String message;
     private String stack;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Object requestInfo;
+    private Map<String, Object> requestInfo;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Object responseInfo;
+    private Map<String, Object> responseInfo;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Object resourceInfo;
+    private Map<String, Object> resourceInfo;
+    @TableField(typeHandler = com.qg.handler.ListHandler.class)
+    private List<Map<String, Object>> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Object breadcrumbs;
+    private Map<String, Object> tags;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Object tags;
-    @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Object elementInfo;
+    private Map<String, Object> elementInfo;
 
     private String userAgent;
     private String name;
