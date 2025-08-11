@@ -27,8 +27,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.qg.domain.Code.*;
-import static com.qg.utils.Constants.PERMISSION_OP;
-import static com.qg.utils.Constants.USER_ROLE_MEMBER;
+import static com.qg.utils.Constants.*;
 import static com.qg.utils.RedisConstants.INVITE_CODE_KEY;
 import static com.qg.utils.RedisConstants.INVITE_CODE_TTL;
 
@@ -45,26 +44,65 @@ public class ProjectServiceImpl implements ProjectService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
-    public Result addProject(Project project){
-        int attempts = 0;
-        while (attempts < 10) { // 限制尝试次数，避免无限循环
-            // 生成pro-加8位随机数字的标识符
-            String projectUuid = "pro-" + String.format("%08d", new java.util.Random().nextInt(100000000));
-            LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(Project::getUuid, projectUuid);
-            Project project1 = projectMapper.selectOne(lqw);
-            if(project1 == null) {
-                project.setUuid(projectUuid);
-                // 执行插入操作
-                return projectMapper.insert(project) == 1 ? new Result(Code.CREATED, "添加成功") : new Result(INTERNAL_ERROR, "添加失败");
-            }
-            attempts++;
+    public Result addProject(PersonalProjectVO personalProjectVO) {
+        // 参数校验
+        if (personalProjectVO == null) {
+            return new Result(Code.BAD_REQUEST, "参数不能为空");
         }
 
-        // 如果尝试次数过多仍未找到唯一ID
-        return new Result(INTERNAL_ERROR, "生成唯一标识符失败，请重试");
-    }
+        if (personalProjectVO.getUserId() == null) {
+            return new Result(Code.BAD_REQUEST, "用户ID不能为空");
+        }
 
+        int attempts = 0;
+        Project project = new Project();
+        Role role = new Role();
+
+        try {
+            while (attempts < 10) { // 限制尝试次数，避免无限循环
+                // 生成pro-加8位随机数字的标识符
+                String projectUuid = "pro-" + String.format("%08d", new Random().nextInt(100000000));
+                LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
+                lqw.eq(Project::getUuid, projectUuid);
+                Project project1 = projectMapper.selectOne(lqw);
+
+                if (project1 == null) {
+                    // 设置项目信息
+                    personalProjectVO.setUuid(projectUuid);
+                    BeanUtils.copyProperties(personalProjectVO, project);
+
+                    // 执行插入项目操作
+                    int projectInsertResult = projectMapper.insert(project);
+                    if (projectInsertResult != 1) {
+                        return new Result(INTERNAL_ERROR, "项目创建失败");
+                    }
+
+                    // 设置角色信息
+                    role.setUserId(personalProjectVO.getUserId());
+                    role.setProjectId(projectUuid);
+                    role.setUserRole(USER_ROLE_ADMIN);
+                    role.setPower(PERMISSION_OP);
+
+                    // 执行插入角色操作
+                    int roleInsertResult = roleMapper.insert(role);
+                    if (roleInsertResult != 1) {
+                        // 如果角色插入失败，可以考虑回滚项目插入（这里简化处理）
+                        return new Result(INTERNAL_ERROR, "角色关联失败");
+                    }
+
+                    return new Result(SUCCESS, personalProjectVO, "创建成功");
+                }
+                attempts++;
+            }
+
+            // 如果尝试次数过多仍未找到唯一ID
+            return new Result(INTERNAL_ERROR, "生成唯一标识符失败，请重试");
+
+        } catch (Exception e) {
+            log.error("创建项目失败: userId={}", personalProjectVO.getUserId(), e);
+            return new Result(INTERNAL_ERROR, "创建项目失败:");
+        }
+    }
 
     //管理员修改项目
     @Override
@@ -272,6 +310,37 @@ public class ProjectServiceImpl implements ProjectService {
         } catch (Exception e) {
             log.error("加入项目失败");
             return new Result(INTERNAL_ERROR, "加入项目失败");
+        }
+    }
+
+    @Override
+    public Result selectProjectByName(String name) {
+        // 参数校验
+        if (name == null || name.trim().isEmpty()) {
+            return new Result(BAD_REQUEST, "项目名称不能为空");
+        }
+
+        try {
+            // 根据项目名模糊查询项目
+            LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.like(Project::getName, name.trim())
+                    .eq(Project::getIsDeleted, false)
+                    .orderByDesc(Project::getCreatedTime); // 按创建时间倒序排列
+
+            List<Project> projects = projectMapper.selectList(queryWrapper);
+
+            // 检查查询结果
+            if (projects == null || projects.isEmpty()) {
+                log.info("未找到匹配的项目，搜索关键词: {}", name);
+                return new Result(Code.NOT_FOUND, "未找到匹配的项目");
+            }
+
+            log.info("项目搜索成功，关键词: {}，结果数量: {}", name, projects.size());
+            return new Result(SUCCESS, projects, "查询项目成功");
+
+        } catch (Exception e) {
+            log.error("查询项目失败，搜索关键词: {}", name, e);
+            return new Result(INTERNAL_ERROR, "查询项目失败: " + e.getMessage());
         }
     }
 }

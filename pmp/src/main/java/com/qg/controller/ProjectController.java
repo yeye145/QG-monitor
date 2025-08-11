@@ -4,6 +4,7 @@ import com.qg.domain.Project;
 import com.qg.domain.Result;
 import com.qg.dto.InviteDto;
 import com.qg.service.ProjectService;
+import com.qg.vo.PersonalProjectVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,12 @@ public class ProjectController {
 
     /**
      * 创建项目
-     * @param project
+     * @param personalProjectVO
      * @return
      */
     @PostMapping
-    public Result addProject(@RequestBody Project project){
-        return ProjectService.addProject(project);
+    public Result addProject(@RequestBody PersonalProjectVO personalProjectVO){
+        return ProjectService.addProject(personalProjectVO);
     }
 
     /**
@@ -105,5 +106,15 @@ public class ProjectController {
     @PostMapping("/joinProject")
     public Result joinProject(@RequestBody InviteDto inviteDto){
         return ProjectService.joinProject(inviteDto);
+    }
+
+    /**
+     * 根据名称查询项目
+     * @param name
+     * @return
+     */
+    @GetMapping("/selectProjectByName")
+    public Result selectProjectByName(@RequestParam String name){
+        return ProjectService.selectProjectByName(name);
     }
 }

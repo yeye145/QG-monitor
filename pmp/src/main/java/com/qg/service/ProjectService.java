@@ -3,9 +3,10 @@ package com.qg.service;
 import com.qg.domain.Project;
 import com.qg.domain.Result;
 import com.qg.dto.InviteDto;
+import com.qg.vo.PersonalProjectVO;
 
 public interface ProjectService {
-     Result addProject(Project project);
+     Result addProject(PersonalProjectVO personalProjectVO);
 
      Result updateProject(Project project);
 
@@ -22,4 +23,6 @@ public interface ProjectService {
     Result getInviteDCode(String projectId);
 
      Result joinProject(InviteDto inviteDto);
+
+    Result selectProjectByName(String name);
 }

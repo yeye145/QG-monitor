@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.qg.utils.RedisConstants.*;
@@ -147,7 +144,7 @@ public class NotificationServiceImpl implements NotificationService {
                     // 根据senderId是否存在进行分类
                     if (notification.getSenderId() != null) {
                         designateNotifications.add(notification);
-                        log.debug("添加指定通知成功: {}", notification);
+                        log.debug("添加委派通知成功: {}", notification);
                     } else {
                         generalNotifications.add(notification);
                         log.debug("添加通用通知成功: {}", notification);
@@ -158,7 +155,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
 
             if (successCount > 0) {
-                log.info("批量添加通知完成，总数量: {}，成功: {}，通用通知: {}，指定通知: {}",
+                log.info("批量添加通知完成，总数量: {}，成功: {}，通用通知: {}，委派通知: {}",
                         notificationList.size(), successCount,
                         generalNotifications.size(), designateNotifications.size());
 
@@ -172,7 +169,7 @@ public class NotificationServiceImpl implements NotificationService {
                 }
 
                 return new Result(Code.SUCCESS,
-                        String.format("批量添加通知成功，共处理 %d 条，成功 %d 条，通用 %d 条，指定 %d 条",
+                        String.format("批量添加通知成功，共处理 %d 条，成功 %d 条，通用 %d 条，委派 %d 条",
                                 notificationList.size(), successCount,
                                 generalNotifications.size(), designateNotifications.size()));
             } else {
@@ -277,11 +274,11 @@ public class NotificationServiceImpl implements NotificationService {
             webSocketHandler.sendMessageByType(messageType, message);
 
             log.debug("批量{}通知广播成功，数量: {}",
-                    "notifications".equals(messageType) ? "通用" : "指定",
+                    "notifications".equals(messageType) ? "通用" : "",
                     notifications.size());
         } catch (Exception e) {
             log.error("批量广播{}通知失败，通知数量: {}",
-                    "notifications".equals(messageType) ? "通用" : "指定",
+                    "notifications".equals(messageType) ? "通用" : "委派",
                     notifications.size(), e);
         }
     }
@@ -297,9 +294,9 @@ public class NotificationServiceImpl implements NotificationService {
         // 提取所有需要查询的ID
         List<String> projectIds = new ArrayList<>();
         List<Long> senderIds = new ArrayList<>();
-        List<Long> backendErrorIds = new ArrayList<>();
-        List<Long> frontendErrorIds = new ArrayList<>();
-        List<Long> mobileErrorIds = new ArrayList<>();
+        List<String> backendErrorTypes = new ArrayList<>();
+        List<String> frontendErrorTypes = new ArrayList<>();
+        List<String> mobileErrorTypes = new ArrayList<>();
 
         for (Notification notification : notificationList) {
             // 收集项目ID
@@ -312,26 +309,26 @@ public class NotificationServiceImpl implements NotificationService {
                 senderIds.add(notification.getSenderId());
             }
 
-            // 根据类型分类错误ID
-            if (notification.getErrorId() != null && notification.getType() != null) {
-                switch (notification.getType().toLowerCase()) {
+            // 根据类型分类错误类型
+            if (notification.getErrorType() != null && notification.getPlatform() != null) {
+                switch (notification.getPlatform().toLowerCase()) {
                     case "backend":
-                        if (!backendErrorIds.contains(notification.getErrorId())) {
-                            backendErrorIds.add(notification.getErrorId());
+                        if (!backendErrorTypes.contains(notification.getErrorType())) {
+                            backendErrorTypes.add(notification.getErrorType());
                         }
                         break;
                     case "frontend":
-                        if (!frontendErrorIds.contains(notification.getErrorId())) {
-                            frontendErrorIds.add(notification.getErrorId());
+                        if (!frontendErrorTypes.contains(notification.getErrorType())) {
+                            frontendErrorTypes.add(notification.getErrorType());
                         }
                         break;
                     case "mobile":
-                        if (!mobileErrorIds.contains(notification.getErrorId())) {
-                            mobileErrorIds.add(notification.getErrorId());
+                        if (!mobileErrorTypes.contains(notification.getErrorType())) {
+                            mobileErrorTypes.add(notification.getErrorType());
                         }
                         break;
                     default:
-                        log.warn("未知的错误类型: {}", notification.getType());
+                        log.warn("未知的平台类型: {}", notification.getPlatform());
                         break;
                 }
             }
@@ -340,9 +337,9 @@ public class NotificationServiceImpl implements NotificationService {
         // 批量查询关联数据
         Map<String, Project> projectMap = getProjectMap(projectIds);
         Map<Long, Users> userMap = getUserMap(senderIds);
-        Map<Long, BackendError> backendErrorMap = getBackendErrorMap(backendErrorIds);
-        Map<Long, FrontendError> frontendErrorMap = getFrontendErrorMap(frontendErrorIds);
-        Map<Long, MobileError> mobileErrorMap = getMobileErrorMap(mobileErrorIds);
+        Map<String, BackendError> backendErrorMap = getBackendErrorMapByType(backendErrorTypes);
+        Map<String, FrontendError> frontendErrorMap = getFrontendErrorMapByType(frontendErrorTypes);
+        Map<String, MobileError> mobileErrorMap = getMobileErrorMapByType(mobileErrorTypes);
 
         // 转换为VO对象
         List<NotificationVO> notificationVOList = new ArrayList<>();
@@ -368,31 +365,31 @@ public class NotificationServiceImpl implements NotificationService {
             }
 
             // 设置错误信息
-            if (notification.getErrorId() != null && notification.getType() != null) {
-                switch (notification.getType().toLowerCase()) {
+            if (notification.getErrorType() != null && notification.getPlatform() != null) {
+                switch (notification.getPlatform().toLowerCase()) {
                     case "backend":
-                        BackendError backendError = backendErrorMap.get(notification.getErrorId());
+                        BackendError backendError = backendErrorMap.get(notification.getErrorType());
                         if (backendError != null) {
                             notificationVO.setErrorType(backendError.getErrorType());
                             notificationVO.setErrorMessage(backendError.getStack());
                         }
                         break;
                     case "frontend":
-                        FrontendError frontendError = frontendErrorMap.get(notification.getErrorId());
+                        FrontendError frontendError = frontendErrorMap.get(notification.getErrorType());
                         if (frontendError != null) {
                             notificationVO.setErrorType(frontendError.getErrorType());
                             notificationVO.setErrorMessage(frontendError.getMessage());
                         }
                         break;
                     case "mobile":
-                        MobileError mobileError = mobileErrorMap.get(notification.getErrorId());
+                        MobileError mobileError = mobileErrorMap.get(notification.getErrorType());
                         if (mobileError != null) {
                             notificationVO.setErrorType(mobileError.getErrorType());
                             notificationVO.setErrorMessage(mobileError.getMessage());
                         }
                         break;
                     default:
-                        log.warn("未知的错误类型: {}", notification.getType());
+                        log.warn("未知的平台类型: {}", notification.getPlatform());
                         break;
                 }
             }
@@ -435,50 +432,70 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
-     * 获取后端错误信息映射
+     * 获取后端错误信息映射（按错误类型，获取最新的记录）
      */
-    private Map<Long, BackendError> getBackendErrorMap(List<Long> errorIds) {
-        if (errorIds.isEmpty()) {
+    private Map<String, BackendError> getBackendErrorMapByType(List<String> errorTypes) {
+        if (errorTypes.isEmpty()) {
             return new HashMap<>();
         }
 
+        // 查询所有匹配的错误记录
         LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(BackendError::getId, errorIds);
+        queryWrapper.in(BackendError::getErrorType, errorTypes);
         List<BackendError> errors = backendErrorMapper.selectList(queryWrapper);
 
+        // 按errorType分组，并取每组中时间最新的记录
         return errors.stream()
-                .collect(Collectors.toMap(BackendError::getId, error -> error));
+                .collect(Collectors.groupingBy(
+                        BackendError::getErrorType,
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(BackendError::getTimestamp)),
+                                Optional::get
+                        )
+                ));
     }
 
     /**
-     * 获取前端错误信息映射
+     * 获取前端错误信息映射（按错误类型，获取最新的记录）
      */
-    private Map<Long, FrontendError> getFrontendErrorMap(List<Long> errorIds) {
-        if (errorIds.isEmpty()) {
+    private Map<String, FrontendError> getFrontendErrorMapByType(List<String> errorTypes) {
+        if (errorTypes.isEmpty()) {
             return new HashMap<>();
         }
 
         LambdaQueryWrapper<FrontendError> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(FrontendError::getId, errorIds);
+        queryWrapper.in(FrontendError::getErrorType, errorTypes);
         List<FrontendError> errors = frontendErrorMapper.selectList(queryWrapper);
 
         return errors.stream()
-                .collect(Collectors.toMap(FrontendError::getId, error -> error));
+                .collect(Collectors.groupingBy(
+                        FrontendError::getErrorType,
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(FrontendError::getTimestamp)),
+                                Optional::get
+                        )
+                ));
     }
 
     /**
-     * 获取移动端错误信息映射
+     * 获取移动端错误信息映射（按错误类型，获取最新的记录）
      */
-    private Map<Long, MobileError> getMobileErrorMap(List<Long> errorIds) {
-        if (errorIds.isEmpty()) {
+    private Map<String, MobileError> getMobileErrorMapByType(List<String> errorTypes) {
+        if (errorTypes.isEmpty()) {
             return new HashMap<>();
         }
 
         LambdaQueryWrapper<MobileError> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(MobileError::getId, errorIds);
+        queryWrapper.in(MobileError::getErrorType, errorTypes);
         List<MobileError> errors = mobileErrorMapper.selectList(queryWrapper);
 
         return errors.stream()
-                .collect(Collectors.toMap(MobileError::getId, error -> error));
+                .collect(Collectors.groupingBy(
+                        MobileError::getErrorType,
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(MobileError::getTimestamp)),
+                                Optional::get
+                        )
+                ));
     }
 }
