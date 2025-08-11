@@ -22,4 +22,7 @@ public interface FrontendBehaviorService {
 
     List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRangeAndRoute
             (String projectId, String route, LocalDateTime startTime, LocalDateTime endTime);
+
+
+
 }

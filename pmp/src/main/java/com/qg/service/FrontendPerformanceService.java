@@ -17,4 +17,6 @@ public interface FrontendPerformanceService {
     Result saveFrontendPerformance(String data);
 
     Result selectByCondition(String projectId, String capture);
+
+    Result getVisits(String projectId, String timeType, Integer number);
 }

@@ -1,5 +1,7 @@
 package com.qg;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.qg.domain.FrontendBehavior;
 import com.qg.domain.FrontendError;
 import com.qg.domain.FrontendPerformance;
@@ -184,5 +186,19 @@ public class FrontendDataTest {
         System.out.println();
 
         System.out.println("所有前端数据测试完成！");
+    }
+
+    @Test
+    public void testFrontendData() {
+        LambdaQueryWrapper<FrontendPerformance> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FrontendPerformance::getProjectId, "1");
+
+        List<FrontendPerformance> performances = frontendPerformanceMapper.selectList(queryWrapper);
+
+        for (FrontendPerformance performance : performances) {
+            System.out.println("event: " + performance.getEvent());
+            System.out.println(performance);
+        }
+
     }
 }

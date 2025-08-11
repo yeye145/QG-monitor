@@ -1,6 +1,7 @@
 package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.FrontendBehavior;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendBehaviorMapper;
@@ -97,4 +98,6 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
         return frontendBehaviorMapper
                 .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
     }
+
+
 }

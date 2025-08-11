@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
 import com.qg.service.FrontendBehaviorService;
+import com.qg.service.FrontendPerformanceService;
 import com.qg.vo.FrontendBehaviorVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,9 @@ public class GraphController {
 
     @Autowired
     private FrontendBehaviorService frontendBehaviorService;
+
+    @Autowired
+    private FrontendPerformanceService frontendPerformanceService;
 
     @GetMapping("/pageStateAndEnterCount")
     public Result pageStateAndEnterCount(
@@ -80,5 +84,15 @@ public class GraphController {
         return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "查询成功");
 
     }
+
+    @GetMapping("/getVisits")
+    public Result getVisits(@RequestParam String projectId, @RequestParam String timeType,
+                            @RequestParam (required = false) Integer number) {
+
+        return frontendPerformanceService.getVisits(projectId, timeType, number);
+
+    }
+
+
 
 }
