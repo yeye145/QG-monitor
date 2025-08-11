@@ -1,13 +1,11 @@
 package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.qg.aggregator.FrontendErrorAggregator;
-import com.qg.domain.BackendError;
 import com.qg.domain.FrontendBehavior;
-import com.qg.domain.FrontendError;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendBehaviorMapper;
 import com.qg.service.FrontendBehaviorService;
+import com.qg.vo.FrontendBehaviorVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,5 +66,35 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
     }
 
 
+    /**
+     * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
+     *
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRange
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return frontendBehaviorMapper
+                .queryTimeDataByProjectIdAndTimeRange(projectId, startTime, endTime);
+    }
 
+
+    /**
+     * 查询指定时间段内某项目中，用户页面停留《在某路由下》的时间数据
+     *
+     * @param projectId
+     * @param route
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRangeAndRoute
+    (String projectId, String route, LocalDateTime startTime, LocalDateTime endTime) {
+        return frontendBehaviorMapper
+                .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
+    }
 }
