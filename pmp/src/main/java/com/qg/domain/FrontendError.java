@@ -7,8 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 前端错误类  // 类说明
@@ -30,18 +31,19 @@ public class FrontendError {
     private String errorType;
     private String message;
     private String stack;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String requestInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String responseInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String resourceInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String breadcrumbs;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String tags;
+    private Integer event;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Map<String, Object> requestInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Map<String, Object> responseInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Map<String, Object> resourceInfo;
+    @TableField(typeHandler = com.qg.handler.ListHandler.class)
+    private List<Map<String, Object>> breadcrumbs;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Map<String, Object> tags;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Map<String, Object> elementInfo;
     private String captureType;
     private Long duration;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private String elementInfo;
 }

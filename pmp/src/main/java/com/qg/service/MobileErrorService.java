@@ -13,5 +13,5 @@ import com.qg.domain.Result;
 public interface MobileErrorService {
     Result selectByCondition(String projectId, String type);
 
-    String receiveErrorFromSDK(String mobileErrorJSON);
+    void receiveErrorFromSDK(String mobileErrorJSON);
 }

@@ -1,5 +1,6 @@
 package com.qg.repository;
 
+import com.qg.domain.MobileError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import static com.qg.repository.RepositoryConstants.FIXED_RATE_DEFAULT;
 
 @Repository
 @Slf4j
@@ -27,7 +30,7 @@ public abstract class StatisticsDataRepository<T> {
     protected abstract void incrementEvent(T entity);
 
     /**
-     * 统计并缓存日志/错误
+     * 统计并缓存数据
      */
     public void statistics(T entity) {
         // 获取前缀
@@ -46,13 +49,19 @@ public abstract class StatisticsDataRepository<T> {
             // 更新内存缓存
             T cached = cacheMap.computeIfAbsent(key, k -> entity);
             incrementEvent(cached);
+
+            // 如果是MobileError类型，触发告警检查
+            if (entity instanceof MobileError) {
+                MobileErrorFatherRepository repository = (MobileErrorFatherRepository) this;
+                repository.sendWechatAlert((MobileError) cached);
+            }
         }
     }
 
     /**
      * 定时将缓存中的数据批量存入数据库
      */
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = FIXED_RATE_DEFAULT)
     public void scheduleSaveToDatabase() {
         cacheMap.forEach((key, entity) -> {
             try {

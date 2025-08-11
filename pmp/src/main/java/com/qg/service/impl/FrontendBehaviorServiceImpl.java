@@ -1,12 +1,19 @@
 package com.qg.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.qg.domain.FrontendBehavior;
+import com.qg.domain.Result;
 import com.qg.mapper.FrontendBehaviorMapper;
 import com.qg.service.FrontendBehaviorService;
+import com.qg.vo.FrontendBehaviorVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.qg.domain.Code.*;
 
 /**
  * @Description: 前端行为应用  // 类说明
@@ -16,20 +23,78 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 @Service
+@Slf4j
 public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
     @Autowired
     private FrontendBehaviorMapper frontendBehaviorMapper;
 
     @Override
-    public Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList) {
-        if (behaviorList == null || behaviorList.isEmpty()) {
-            return 0; // 返回0表示没有数据需要保存
+    public Result saveFrontendBehavior(String data) {
+        // 参数校验
+        if (data == null || data.trim().isEmpty()) {
+            log.warn("前端用户行为数据为空");
+            return new Result(BAD_REQUEST, "前端用户行为数据为空");
         }
-        int count = 0;
-        for (FrontendBehavior behavior : behaviorList) {
-            // 假设有一个方法来保存单个行为数据条目
-            count += frontendBehaviorMapper.insert(behavior);
+
+        try {
+            List<FrontendBehavior> behaviorList = JSONUtil.toList(data, FrontendBehavior.class);
+
+            if (behaviorList == null || behaviorList.isEmpty()) {
+                log.warn("解析后的前端用户行为数据为空");
+                return new Result(BAD_REQUEST, "解析前端用户行为数据为空");
+            }
+
+            // 批量插入数据
+            int successCount = 0;
+            for (FrontendBehavior behavior : behaviorList) {
+                if (behavior != null) { // 额外的空值检查
+                    int result = frontendBehaviorMapper.insert(behavior);
+                    successCount += result;
+                }
+            }
+
+            log.info("保存前端用户行为数据完成，总共{}条，成功{}条", behaviorList.size(), successCount);
+            return new Result(SUCCESS, "保存前端用户行为数据成功，共处理" + behaviorList.size() + "条数据");
+
+        } catch (cn.hutool.json.JSONException e) {
+            log.error("前端用户行为数据JSON解析失败: ", e);
+            return new Result(BAD_REQUEST, "数据格式错误: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("保存前端用户行为数据时发生异常: ", e);
+            return new Result(INTERNAL_ERROR, "保存前端用户行为数据失败: " + e.getMessage());
         }
-        return behaviorList.size() == count ? count : 0; // 返回保存的记录
+    }
+
+
+    /**
+     * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
+     *
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRange
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return frontendBehaviorMapper
+                .queryTimeDataByProjectIdAndTimeRange(projectId, startTime, endTime);
+    }
+
+
+    /**
+     * 查询指定时间段内某项目中，用户页面停留《在某路由下》的时间数据
+     *
+     * @param projectId
+     * @param route
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRangeAndRoute
+    (String projectId, String route, LocalDateTime startTime, LocalDateTime endTime) {
+        return frontendBehaviorMapper
+                .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
     }
 }

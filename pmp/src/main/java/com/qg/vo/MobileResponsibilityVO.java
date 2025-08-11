@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class MobileResponsibilityVO {
 
+    private Long id;
     private String projectId;
     private LocalDateTime timestamp;
     private String errorType;
@@ -27,7 +28,8 @@ public class MobileResponsibilityVO {
     private String className;
 
 
-    private String Name;
+    private String name;
     private Long delegatorId;
+    private Long responsibleId;
     private String avatarUrl;
 }

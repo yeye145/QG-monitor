@@ -1,7 +1,10 @@
 package com.qg.service;
 
 import com.qg.domain.FrontendBehavior;
+import com.qg.domain.Result;
+import com.qg.vo.FrontendBehaviorVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -12,5 +15,11 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 public interface FrontendBehaviorService {
-    Integer saveFrontendBehavior(List<FrontendBehavior> behaviorList);
+    Result saveFrontendBehavior(String data);
+
+    List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRange
+            (String projectId, LocalDateTime startTime, LocalDateTime endTime);
+
+    List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRangeAndRoute
+            (String projectId, String route, LocalDateTime startTime, LocalDateTime endTime);
 }

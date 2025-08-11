@@ -14,12 +14,10 @@ import java.util.List;
  */
 public interface BackendLogService {
 
-    Integer saveBackendLogs(List<BackendLog> backendLogs);
-
     List<BackendLog> getAllLogs(String projectId);
 
     List<BackendLog> getLogsByCondition(String evn, String logLevel, String projectId);
 
-    String receiveLogFromSDK(String logJSON);
+    void receiveLogFromSDK(String logJSON);
 
 }

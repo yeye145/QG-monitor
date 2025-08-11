@@ -17,14 +17,10 @@ public class PersonalProjectVO {
     private LocalDateTime createTime;
     private Boolean isPublic;
 
-    @TableLogic
-    @TableField("is_deleted")
-    private Boolean isDeleted;
-
     private Long id;
     private Long userId;
 
-    private String power;
-    private int userRole;
+    private Integer power;
+    private Integer userRole;
 
 }

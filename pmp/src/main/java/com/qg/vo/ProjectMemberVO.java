@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProjectMemberVO {
     private Long id;
+    private Long userId;
     private String username;
     private String avatar;
-    private String userRole;
+    private Integer userRole;
     private Integer power;
 
 }

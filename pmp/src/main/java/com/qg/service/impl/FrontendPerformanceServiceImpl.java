@@ -1,14 +1,20 @@
 package com.qg.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.qg.domain.Code;
 import com.qg.domain.FrontendPerformance;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendPerformanceMapper;
 import com.qg.service.FrontendPerformanceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.qg.domain.Code.*;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 /**
  * @Description: 前端性能应用  // 类说明
@@ -18,26 +24,49 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 @Service
+@Slf4j
 public class FrontendPerformanceServiceImpl implements FrontendPerformanceService {
 
     @Autowired
     private FrontendPerformanceMapper frontendPerformanceMapper;
 
     @Override
-    public Integer saveFrontendPerformance(List<FrontendPerformance> frontendPerformance) {
-        if (frontendPerformance == null || frontendPerformance.isEmpty()) {
-            return 0; // 返回0表示没有数据需要保存
-        }
-        int count = 0;
-
-        for (FrontendPerformance performance : frontendPerformance) {
-            // 假设有一个方法来保存单个性能数据条目
-            count += frontendPerformanceMapper.insert(performance);
+    public Result saveFrontendPerformance(String data) {
+        // 参数校验
+        if (data == null || data.trim().isEmpty()) {
+            log.warn("前端性能数据为空");
+            return new Result(BAD_REQUEST, "前端性能数据为空");
         }
 
-        return frontendPerformance.size() == count ? count : 0; // 返回保存的记录数
+        try {
+            List<FrontendPerformance> frontendPerformanceList = JSONUtil.toList(data, FrontendPerformance.class);
 
+            if (frontendPerformanceList == null || frontendPerformanceList.isEmpty()) {
+                log.warn("解析后的前端性能数据为空");
+                return new Result(BAD_REQUEST, "解析前端性能数据为空");
+            }
+
+            // 计数成功插入的记录数
+            int successCount = 0;
+            for (FrontendPerformance performance : frontendPerformanceList) {
+                if (performance != null) { // 额外的空值检查
+                    int result = frontendPerformanceMapper.insert(performance);
+                    successCount += result;
+                }
+            }
+
+            log.info("保存前端性能数据完成，总共{}条，成功{}条", frontendPerformanceList.size(), successCount);
+            return new Result(SUCCESS, "保存前端性能数据成功，共处理" + frontendPerformanceList.size() + "条数据");
+
+        } catch (cn.hutool.json.JSONException e) {
+            log.error("前端性能数据JSON解析失败: ", e);
+            return new Result(BAD_REQUEST, "数据格式错误: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("保存前端性能数据时发生异常: ", e);
+            return new Result(INTERNAL_ERROR, "保存前端性能数据失败: " + e.getMessage());
+        }
     }
+
 
     @Override
     public Result selectByCondition(String projectId, String capture) {

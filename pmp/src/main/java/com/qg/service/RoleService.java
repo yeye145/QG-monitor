@@ -8,11 +8,11 @@ public interface RoleService {
 
     Result updateRole(Role role);
 
-    Result deleteRole(Role role);
+    Result deleteRole(String projectId, Long userId);
 
     Result getMemberList(String projectId);
 
-    Result getRole(String userId, String projectId);
+    Result getRole(Long userId, String projectId);
 
     Result updateUserRole(Role role);
 }

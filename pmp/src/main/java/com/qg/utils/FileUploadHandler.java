@@ -63,7 +63,27 @@ public class FileUploadHandler {
         if (fileName == null) return false;
 
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-        return fileExtension.matches("\\.(zip|tar|tar.gz)$");
+        return fileExtension.matches("\\.(zip|tar|tar.gz|map|html|js)$");
+    }
+
+    /**
+     * 文件类型校验
+     */
+    public static boolean isValidFile(MultipartFile file) {
+        return isValidImageFile(file) || isValidDocumentFile(file) || isValidInstallFile(file);
+    }
+
+    /**
+     * 根据文件类型确定存储目录
+     */
+    public static String determineSubDirectory(MultipartFile file) {
+        if (FileUploadHandler.isValidImageFile(file)) {
+            return FileUploadHandler.IMAGE_DIR;
+        } else if (FileUploadHandler.isValidDocumentFile(file)) {
+            return FileUploadHandler.DOCUMENT_DIR;
+        } else {
+            return FileUploadHandler.INSTALL_DIR;
+        }
     }
 
 

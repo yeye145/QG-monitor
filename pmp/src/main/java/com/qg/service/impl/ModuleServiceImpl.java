@@ -1,5 +1,6 @@
 package com.qg.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.Code;
@@ -11,6 +12,7 @@ import com.qg.mapper.ProjectMapper;
 import com.qg.service.ModuleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -77,8 +79,7 @@ public class ModuleServiceImpl implements ModuleService {
         }
         try {
             LambdaQueryWrapper<Module> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Module::getProjectId, projectId.trim())
-                    .isNull(Module::getDeletedTime);
+            queryWrapper.eq(Module::getProjectId, projectId.trim());
             List<Module> moduleList = moduleMapper.selectList(queryWrapper);
             log.info("成功查询模块: {}", moduleList);
             return new Result(Code.SUCCESS, moduleList, "查询成功");
@@ -97,11 +98,10 @@ public class ModuleServiceImpl implements ModuleService {
 
         try {
             // 创建更新包装器
-            LambdaUpdateWrapper<Module> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Module::getId, id)
-                    .set(Module::getDeletedTime, LocalDateTime.now());
+//            LambdaUpdateWrapper<Module> updateWrapper = new LambdaUpdateWrapper<>();
+//            updateWrapper.eq(Module::getId, id);
             // 执行更新操作
-            int result = moduleMapper.update(null, updateWrapper);
+            int result = moduleMapper.deleteById(id);
             if (result > 0) {
                 log.info("删除模块成功，id: {}", id);
                 return new Result(Code.SUCCESS, "删除成功");
@@ -112,6 +112,27 @@ public class ModuleServiceImpl implements ModuleService {
         } catch (Exception e) {
             log.error("删除模块失败，模块ID: {}", id, e);
             return new Result(Code.INTERNAL_ERROR, "删除模块失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 添加不存在的模块工具方法
+     *
+     * @param moduleName
+     * @param projectId
+     */
+    @Override
+    public void putModuleIfAbsent(String moduleName, String projectId) {
+        if (StrUtil.isBlank(moduleName)) {
+            log.warn("添加模块失败，模块名称为空");
+            return;
+        }
+
+        try {
+            moduleMapper.insert(new Module(projectId, moduleName));
+        } catch (DuplicateKeyException ignored) {
+        } catch (Exception e) {
+            log.error("添加模块失败:{}", e.getMessage());
         }
     }
 }

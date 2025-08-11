@@ -8,11 +8,13 @@ import com.qg.service.AllErrorService;
 import com.qg.vo.BackendResponsibilityVO;
 import com.qg.vo.FrontendResponsibilityVO;
 import com.qg.vo.MobileResponsibilityVO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 所有错误应用类  // 类说明
@@ -22,6 +24,7 @@ import java.util.List;
  * @Version: 1.0     // 版本
  */
 @Service
+@Slf4j
 public class AllErrorServiceImpl implements AllErrorService {
     @Autowired
     private BackendErrorMapper backendErrorMapper;
@@ -42,163 +45,329 @@ public class AllErrorServiceImpl implements AllErrorService {
     private UsersMapper usersMapper;
 
 
-    @Override
-    public Result selectByCondition(String projectId, Long moduleId, String type) {
-        if (projectId == null || projectId.isEmpty()) {
-            return new Result(400, "参数错误");
-        }
+//    @Override
+//    public Result selectByCondition(String projectId, Long moduleId, String type) {
+//        if (projectId == null || projectId.isEmpty()) {
+//            return new Result(400, "参数错误");
+//        }
+//        LambdaQueryWrapper<BackendError> backendQueryWrapper = new LambdaQueryWrapper<>();
+//        LambdaQueryWrapper<FrontendError> frontendQueryWrapper = new LambdaQueryWrapper<>();
+//        LambdaQueryWrapper<MobileError> mobileQueryWrapper = new LambdaQueryWrapper<>();
+//
+//
+//        Module module = moduleMapper.selectById(moduleId);
+//        if (module != null) {
+//            backendQueryWrapper
+//                    .eq(BackendError::getModule, module.getModuleName());
+//        }
+//
+//        backendQueryWrapper.eq(BackendError::getProjectId, projectId);
+//
+//        frontendQueryWrapper.eq(FrontendError::getProjectId, projectId);
+//
+//        mobileQueryWrapper.eq(MobileError::getProjectId, projectId);
+//
+//
+//        if (type != null && !type.isEmpty()) {
+//            backendQueryWrapper.eq(BackendError::getErrorType, type);
+//            frontendQueryWrapper.eq(FrontendError::getErrorType, type);
+//            mobileQueryWrapper.eq(MobileError::getErrorType, type);
+//
+//        }
+//
+//        List<BackendError> backendErrors = backendErrorMapper.selectList(backendQueryWrapper);
+//        List<FrontendError> frontendErrors = frontendErrorMapper.selectList(frontendQueryWrapper);
+//        List<MobileError> mobileErrors = mobileErrorMapper.selectList(mobileQueryWrapper);
+//
+//
+//        List<Responsibility> BackendResponsibilityList = responsibilityMapper.selectList(new LambdaQueryWrapper<Responsibility>()
+//                .eq(Responsibility::getProjectId, projectId)
+//                .eq(Responsibility::getPlatform, "backend"));
+//
+//        List<BackendResponsibilityVO>backendResponsibilityVOList = new ArrayList<>();
+//
+//        for (BackendError error : backendErrors) {
+//            Long id = error.getId();
+//            BackendResponsibilityVO backendResponsibilityVO = new BackendResponsibilityVO();
+//            backendResponsibilityVO.setEnvironment(error.getEnvironment());
+//            backendResponsibilityVO.setId(id);
+//            backendResponsibilityVO.setEnvironmentSnapshot(error.getEnvironmentSnapshot());
+//            backendResponsibilityVO.setProjectId(error.getProjectId());
+//            backendResponsibilityVO.setTimestamp(error.getTimestamp());
+//            backendResponsibilityVO.setErrorType(error.getErrorType());
+//            backendResponsibilityVO.setStack(error.getStack());
+//            backendResponsibilityVO.setModule(error.getModule());
+//
+//            for (Responsibility responsibility : BackendResponsibilityList) {
+//                if (responsibility.getErrorId().equals(id)) {
+//                    Long responsibleId = responsibility.getResponsibleId();
+//                    Long delegatorId = responsibility.getDelegatorId();
+//
+//                    if (responsibleId != null && delegatorId != null) {
+//                        backendResponsibilityVO.setDelegatorId(delegatorId);
+//                        Users responsibleUser = usersMapper.selectById(responsibleId);
+//                        if (responsibleUser != null) {
+//                            backendResponsibilityVO.setName(responsibleUser.getUsername());
+//                            backendResponsibilityVO.setAvatarUrl(responsibleUser.getAvatar());
+//                        }
+//
+//                    }
+//                }
+//            }
+//            backendResponsibilityVOList.add(backendResponsibilityVO);
+//        }
+//
+//        List<FrontendResponsibilityVO>frontendResponsibilityVOList = new ArrayList<>();
+//
+//        List<Responsibility> FrontendResponsibilityList = responsibilityMapper.selectList(new LambdaQueryWrapper<Responsibility>()
+//                .eq(Responsibility::getProjectId, projectId)
+//                .eq(Responsibility::getPlatform, "frontend"));
+//
+//        for (FrontendError frontendError : frontendErrors) {
+//            FrontendResponsibilityVO frontendResponsibilityVO = new FrontendResponsibilityVO();
+//            Long id = frontendError.getId();
+//
+//            frontendResponsibilityVO.setProjectId(frontendError.getProjectId());
+//            frontendResponsibilityVO.setId(id);
+//            frontendResponsibilityVO.setBreadcrumbs(frontendError.getBreadcrumbs());
+//            frontendResponsibilityVO.setErrorType(frontendError.getErrorType());
+//            frontendResponsibilityVO.setCaptureType(frontendError.getCaptureType());
+//            frontendResponsibilityVO.setDuration(frontendError.getDuration());
+//            frontendResponsibilityVO.setElementInfo(frontendError.getElementInfo());
+//            frontendResponsibilityVO.setMessage(frontendError.getMessage());
+//            frontendResponsibilityVO.setStack(frontendError.getStack());
+//            frontendResponsibilityVO.setRequestInfo(frontendError.getRequestInfo());
+//            frontendResponsibilityVO.setResponseInfo(frontendError.getResponseInfo());
+//            frontendResponsibilityVO.setTags(frontendError.getTags());
+//            frontendResponsibilityVO.setSessionId(frontendError.getSessionId());
+//            frontendResponsibilityVO.setResourceInfo(frontendError.getResourceInfo());
+//            frontendResponsibilityVO.setTimestamp(frontendError.getTimestamp());
+//            frontendResponsibilityVO.setUserAgent(frontendError.getUserAgent());
+//
+//
+//            for (Responsibility responsibility : FrontendResponsibilityList) {
+//                if (responsibility.getErrorId().equals(id)) {
+//                    Long responsibleId = responsibility.getResponsibleId();
+//                    Long delegatorId = responsibility.getDelegatorId();
+//
+//                    if (responsibleId != null && delegatorId != null) {
+//                        frontendResponsibilityVO.setDelegatorId(delegatorId);
+//                        Users responsibleUser = usersMapper.selectById(responsibleId);
+//                        if (responsibleUser != null) {
+//                            frontendResponsibilityVO.setName(responsibleUser.getUsername());
+//                            frontendResponsibilityVO.setAvatarUrl(responsibleUser.getAvatar());
+//                        }
+//
+//                    }
+//                }
+//            }
+//            frontendResponsibilityVOList.add(frontendResponsibilityVO);
+//        }
+//
+//
+//        List<Responsibility> MobileResponsibilities = responsibilityMapper.selectList(new LambdaQueryWrapper<Responsibility>()
+//                .eq(Responsibility::getProjectId, projectId)
+//                .eq(Responsibility::getPlatform, "mobile"));
+//
+//        List<MobileResponsibilityVO>mobileResponsibilityVOList = new ArrayList<>();
+//
+//        for (MobileError error : mobileErrors) {
+//            Long id = error.getId();
+//            MobileResponsibilityVO mobileResponsibilityVO = new MobileResponsibilityVO();
+//            mobileResponsibilityVO.setId(id);
+//            mobileResponsibilityVO.setClassName(error.getClassName());
+//            mobileResponsibilityVO.setErrorType(error.getErrorType());
+//            mobileResponsibilityVO.setMessage(error.getMessage());
+//            mobileResponsibilityVO.setProjectId(error.getProjectId());
+//            mobileResponsibilityVO.setTimestamp(error.getTimestamp());
+//            mobileResponsibilityVO.setStack(error.getStack());
+//
+//            for (Responsibility responsibility : MobileResponsibilities) {
+//                if (responsibility.getErrorId().equals(id)) {
+//                    Long responsibleId = responsibility.getResponsibleId();
+//                    Long delegatorId = responsibility.getDelegatorId();
+//
+//                    if (responsibleId != null && delegatorId != null) {
+//                        mobileResponsibilityVO.setDelegatorId(delegatorId);
+//                        Users responsibleUser = usersMapper.selectById(responsibleId);
+//                        if (responsibleUser != null) {
+//                            mobileResponsibilityVO.setName(responsibleUser.getUsername());
+//                            mobileResponsibilityVO.setAvatarUrl(responsibleUser.getAvatar());
+//                        }
+//
+//                    }
+//                }
+//            }
+//            mobileResponsibilityVOList.add(mobileResponsibilityVO);
+//        }
+//
+//        return new Result(200,
+//                List.of(backendResponsibilityVOList, frontendResponsibilityVOList, mobileResponsibilityVOList),
+//                "查询成功");
+//    }
+@Override
+public Result selectByCondition(String projectId, Long moduleId, String type) {
+    // 参数校验
+    if (projectId == null || projectId.isEmpty()) {
+        return new Result(Code.BAD_REQUEST, "项目ID不能为空");
+    }
+
+    try {
+        // 查询条件构建
         LambdaQueryWrapper<BackendError> backendQueryWrapper = new LambdaQueryWrapper<>();
         LambdaQueryWrapper<FrontendError> frontendQueryWrapper = new LambdaQueryWrapper<>();
         LambdaQueryWrapper<MobileError> mobileQueryWrapper = new LambdaQueryWrapper<>();
 
-
-        Module module = moduleMapper.selectById(moduleId);
-        if (module != null) {
-            backendQueryWrapper
-                    .eq(BackendError::getModule, module.getModuleName());
+        // 处理模块条件
+        if (moduleId != null) {
+            Module module = moduleMapper.selectById(moduleId);
+            if (module != null) {
+                backendQueryWrapper.eq(BackendError::getModule, module.getModuleName());
+            }
         }
 
+        // 添加项目ID条件
         backendQueryWrapper.eq(BackendError::getProjectId, projectId);
-
         frontendQueryWrapper.eq(FrontendError::getProjectId, projectId);
-
         mobileQueryWrapper.eq(MobileError::getProjectId, projectId);
 
-
+        // 添加错误类型条件
         if (type != null && !type.isEmpty()) {
             backendQueryWrapper.eq(BackendError::getErrorType, type);
             frontendQueryWrapper.eq(FrontendError::getErrorType, type);
             mobileQueryWrapper.eq(MobileError::getErrorType, type);
-
         }
 
+        // 执行查询
         List<BackendError> backendErrors = backendErrorMapper.selectList(backendQueryWrapper);
         List<FrontendError> frontendErrors = frontendErrorMapper.selectList(frontendQueryWrapper);
         List<MobileError> mobileErrors = mobileErrorMapper.selectList(mobileQueryWrapper);
 
+        // 查询责任人信息（一次性查询，避免在循环中多次查询）
+        List<Responsibility> allResponsibilities = responsibilityMapper.selectList(
+                new LambdaQueryWrapper<Responsibility>().eq(Responsibility::getProjectId, projectId)
+        );
 
-        List<Responsibility> BackendResponsibilityList = responsibilityMapper.selectList(new LambdaQueryWrapper<Responsibility>()
-                .eq(Responsibility::getProjectId, projectId)
-                .eq(Responsibility::getPlatform, "backend"));
+        // 分类处理责任人信息
+        Map<String, List<Responsibility>> responsibilityByPlatform = allResponsibilities.stream()
+                .collect(Collectors.groupingBy(Responsibility::getPlatform));
 
-        List<BackendResponsibilityVO>backendResponsibilityVOList = new ArrayList<>();
+        List<Responsibility> backendResponsibilities = responsibilityByPlatform.getOrDefault("backend", new ArrayList<>());
+        List<Responsibility> frontendResponsibilities = responsibilityByPlatform.getOrDefault("frontend", new ArrayList<>());
+        List<Responsibility> mobileResponsibilities = responsibilityByPlatform.getOrDefault("mobile", new ArrayList<>());
 
-        for (BackendError error : backendErrors) {
-            Long id = error.getId();
-            BackendResponsibilityVO backendResponsibilityVO = new BackendResponsibilityVO();
-            backendResponsibilityVO.setEnvironment(error.getEnvironment());
-            backendResponsibilityVO.setEnvironmentSnapshot(error.getEnvironmentSnapshot());
-            backendResponsibilityVO.setProjectId(error.getProjectId());
-            backendResponsibilityVO.setTimestamp(error.getTimestamp());
-            backendResponsibilityVO.setErrorType(error.getErrorType());
-            backendResponsibilityVO.setStack(error.getStack());
-            backendResponsibilityVO.setModule(error.getModule());
+        // 获取所有相关的用户信息（一次性查询）
+        Set<Long> userIds = allResponsibilities.stream()
+                .filter(r -> r.getResponsibleId() != null)
+                .map(Responsibility::getResponsibleId)
+                .collect(Collectors.toSet());
 
-            for (Responsibility responsibility : BackendResponsibilityList) {
-                if (responsibility.getErrorId().equals(id)) {
-                    Long responsibleId = responsibility.getResponsibleId();
-                    Long delegatorId = responsibility.getDelegatorId();
-
-                    if (responsibleId != null && delegatorId != null) {
-                        backendResponsibilityVO.setDelegatorId(delegatorId);
-                        Users responsibleUser = usersMapper.selectById(responsibleId);
-                        if (responsibleUser != null) {
-                            backendResponsibilityVO.setName(responsibleUser.getUsername());
-                            backendResponsibilityVO.setAvatarUrl(responsibleUser.getAvatar());
-                        }
-
-                    }
-                }
-            }
-            backendResponsibilityVOList.add(backendResponsibilityVO);
+        Map<Long, Users> userMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<Users> usersList = usersMapper.selectBatchIds(userIds);
+            userMap = usersList.stream().collect(Collectors.toMap(Users::getId, u -> u));
         }
 
-        List<FrontendResponsibilityVO>frontendResponsibilityVOList = new ArrayList<>();
+        // 处理后端错误数据
+        List<BackendResponsibilityVO> backendResponsibilityVOList = processBackendErrors(backendErrors, backendResponsibilities, userMap);
 
-        List<Responsibility> FrontendResponsibilityList = responsibilityMapper.selectList(new LambdaQueryWrapper<Responsibility>()
-                .eq(Responsibility::getProjectId, projectId)
-                .eq(Responsibility::getPlatform, "frontend"));
+        // 处理前端错误数据
+        List<FrontendResponsibilityVO> frontendResponsibilityVOList = processFrontendErrors(frontendErrors, frontendResponsibilities, userMap);
 
-        for (FrontendError frontendError : frontendErrors) {
-            FrontendResponsibilityVO frontendResponsibilityVO = new FrontendResponsibilityVO();
-            Long id = frontendError.getId();
+        // 处理移动端错误数据
+        List<MobileResponsibilityVO> mobileResponsibilityVOList = processMobileErrors(mobileErrors, mobileResponsibilities, userMap);
 
-            frontendResponsibilityVO.setProjectId(frontendError.getProjectId());
-            frontendResponsibilityVO.setBreadcrumbs(frontendError.getBreadcrumbs());
-            frontendResponsibilityVO.setErrorType(frontendError.getErrorType());
-            frontendResponsibilityVO.setCaptureType(frontendError.getCaptureType());
-            frontendResponsibilityVO.setDuration(frontendError.getDuration());
-            frontendResponsibilityVO.setElementInfo(frontendError.getElementInfo());
-            frontendResponsibilityVO.setMessage(frontendError.getMessage());
-            frontendResponsibilityVO.setStack(frontendError.getStack());
-            frontendResponsibilityVO.setRequestInfo(frontendError.getRequestInfo());
-            frontendResponsibilityVO.setResponseInfo(frontendError.getResponseInfo());
-            frontendResponsibilityVO.setTags(frontendError.getTags());
-            frontendResponsibilityVO.setSessionId(frontendError.getSessionId());
-            frontendResponsibilityVO.setResourceInfo(frontendError.getResourceInfo());
-            frontendResponsibilityVO.setTimestamp(frontendError.getTimestamp());
-            frontendResponsibilityVO.setUserAgent(frontendError.getUserAgent());
-
-
-            for (Responsibility responsibility : FrontendResponsibilityList) {
-                if (responsibility.getErrorId().equals(id)) {
-                    Long responsibleId = responsibility.getResponsibleId();
-                    Long delegatorId = responsibility.getDelegatorId();
-
-                    if (responsibleId != null && delegatorId != null) {
-                        frontendResponsibilityVO.setDelegatorId(delegatorId);
-                        Users responsibleUser = usersMapper.selectById(responsibleId);
-                        if (responsibleUser != null) {
-                            frontendResponsibilityVO.setName(responsibleUser.getUsername());
-                            frontendResponsibilityVO.setAvatarUrl(responsibleUser.getAvatar());
-                        }
-
-                    }
-                }
-            }
-            frontendResponsibilityVOList.add(frontendResponsibilityVO);
-        }
-
-
-        List<Responsibility> MobileResponsibilities = responsibilityMapper.selectList(new LambdaQueryWrapper<Responsibility>()
-                .eq(Responsibility::getProjectId, projectId)
-                .eq(Responsibility::getPlatform, "mobile"));
-
-        List<MobileResponsibilityVO>mobileResponsibilityVOList = new ArrayList<>();
-
-        for (MobileError error : mobileErrors) {
-            Long id = error.getId();
-            MobileResponsibilityVO mobileResponsibilityVO = new MobileResponsibilityVO();
-            mobileResponsibilityVO.setClassName(error.getClassName());
-            mobileResponsibilityVO.setErrorType(error.getErrorType());
-            mobileResponsibilityVO.setMessage(error.getMessage());
-            mobileResponsibilityVO.setProjectId(error.getProjectId());
-            mobileResponsibilityVO.setTimestamp(error.getTimestamp());
-            mobileResponsibilityVO.setStack(error.getStack());
-
-            for (Responsibility responsibility : MobileResponsibilities) {
-                if (responsibility.getErrorId().equals(id)) {
-                    Long responsibleId = responsibility.getResponsibleId();
-                    Long delegatorId = responsibility.getDelegatorId();
-
-                    if (responsibleId != null && delegatorId != null) {
-                        mobileResponsibilityVO.setDelegatorId(delegatorId);
-                        Users responsibleUser = usersMapper.selectById(responsibleId);
-                        if (responsibleUser != null) {
-                            mobileResponsibilityVO.setName(responsibleUser.getUsername());
-                            mobileResponsibilityVO.setAvatarUrl(responsibleUser.getAvatar());
-                        }
-
-                    }
-                }
-            }
-            mobileResponsibilityVOList.add(mobileResponsibilityVO);
-        }
-
-        return new Result(200,
-                List.of(backendResponsibilityVOList, frontendResponsibilityVOList, mobileResponsibilityVOList),
+        return new Result(Code.SUCCESS,
+                Arrays.asList(backendResponsibilityVOList, frontendResponsibilityVOList, mobileResponsibilityVOList),
                 "查询成功");
+
+    } catch (Exception e) {
+        log.error("查询错误信息时发生异常: projectId={}, moduleId={}, type={}", projectId, moduleId, type, e);
+        return new Result(Code.INTERNAL_ERROR, "查询失败: " + e.getMessage());
     }
+}
+
+    /**
+     * 处理后端错误数据
+     */
+    private List<BackendResponsibilityVO> processBackendErrors(List<BackendError> errors,
+                                                               List<Responsibility> responsibilities, Map<Long, Users> userMap) {
+
+        Map<String, Responsibility> responsibilityMap = responsibilities.stream()
+                .collect(Collectors.toMap(Responsibility::getErrorType, r -> r, (r1, r2) -> r1));
+
+        return errors.stream().map(error -> {
+            BackendResponsibilityVO vo = new BackendResponsibilityVO();
+            BeanUtils.copyProperties(error, vo);
+            vo.setId(error.getId());
+
+            Responsibility responsibility = responsibilityMap.get(error.getErrorType());
+            if (responsibility != null && responsibility.getResponsibleId() != null && responsibility.getDelegatorId() != null) {
+                vo.setDelegatorId(responsibility.getDelegatorId());
+                Users responsibleUser = userMap.get(responsibility.getResponsibleId());
+                if (responsibleUser != null) {
+                    vo.setName(responsibleUser.getUsername());
+                    vo.setAvatarUrl(responsibleUser.getAvatar());
+                }
+            }
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 处理前端错误数据
+     */
+    private List<FrontendResponsibilityVO> processFrontendErrors(List<FrontendError> errors,
+                                                                 List<Responsibility> responsibilities, Map<Long, Users> userMap) {
+
+        Map<String, Responsibility> responsibilityMap = responsibilities.stream()
+                .collect(Collectors.toMap(Responsibility::getErrorType, r -> r, (r1, r2) -> r1));
+
+        return errors.stream().map(error -> {
+            FrontendResponsibilityVO vo = new FrontendResponsibilityVO();
+            BeanUtils.copyProperties(error, vo);
+            vo.setId(error.getId());
+
+            Responsibility responsibility = responsibilityMap.get(error.getErrorType());
+            if (responsibility != null && responsibility.getResponsibleId() != null && responsibility.getDelegatorId() != null) {
+                vo.setDelegatorId(responsibility.getDelegatorId());
+                Users responsibleUser = userMap.get(responsibility.getResponsibleId());
+                if (responsibleUser != null) {
+                    vo.setName(responsibleUser.getUsername());
+                    vo.setAvatarUrl(responsibleUser.getAvatar());
+                }
+            }
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 处理移动端错误数据
+     */
+    private List<MobileResponsibilityVO> processMobileErrors(List<MobileError> errors,
+                                                             List<Responsibility> responsibilities, Map<Long, Users> userMap) {
+
+        Map<String, Responsibility> responsibilityMap = responsibilities.stream()
+                .collect(Collectors.toMap(Responsibility::getErrorType, r -> r, (r1, r2) -> r1));
+
+        return errors.stream().map(error -> {
+            MobileResponsibilityVO vo = new MobileResponsibilityVO();
+            BeanUtils.copyProperties(error, vo);
+            vo.setId(error.getId());
+
+            Responsibility responsibility = responsibilityMap.get(error.getErrorType());
+            if (responsibility != null && responsibility.getResponsibleId() != null && responsibility.getDelegatorId() != null) {
+                vo.setDelegatorId(responsibility.getDelegatorId());
+                Users responsibleUser = userMap.get(responsibility.getResponsibleId());
+                if (responsibleUser != null) {
+                    vo.setName(responsibleUser.getUsername());
+                    vo.setAvatarUrl(responsibleUser.getAvatar());
+                }
+            }
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
 
     @Override
     public Result selectById(Long id) {
