@@ -19,6 +19,7 @@ public class Responsibility {
     private Long delegatorId;
     private Long responsibleId;
     private Long errorId;
+    private String errorType;
     private OffsetDateTime createTime;
 
 
