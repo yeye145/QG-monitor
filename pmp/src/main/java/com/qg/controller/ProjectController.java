@@ -60,14 +60,22 @@ public class ProjectController {
     }
 
     /**
-     * 公开项目查看列表
+     * 获取公开项目
      * @return
      */
-    @GetMapping("/getProjectList")
-    public Result getProjectList(){
-        return ProjectService.getProjectList();
+    @GetMapping("/getPublicProjectList")
+    public Result getPublicProjectList(){
+        return ProjectService.getPublicProjectList();
     }
 
+    /**
+     * 获取私有项目
+     * @return
+     */
+    @GetMapping("/getPrivateProject")
+    public Result getPrivateProjectList() {
+        return ProjectService.getPrivateProjectList();
+    }
     /**
      * 获取个人公开项目列表
      * @param userId

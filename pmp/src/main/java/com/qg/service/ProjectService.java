@@ -14,7 +14,7 @@ public interface ProjectService {
 
      Result getProject(String uuid);
 
-     Result getProjectList();
+     Result getPublicProjectList();
 
      Result getPersonalPublicProject(Long userId);
 
@@ -25,4 +25,6 @@ public interface ProjectService {
      Result joinProject(InviteDto inviteDto);
 
     Result selectProjectByName(String name);
+
+    Result getPrivateProjectList();
 }
