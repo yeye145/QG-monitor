@@ -30,7 +30,7 @@ public class BackendError {
     private String environment;
     private String errorType;
     private String stack;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> environmentSnapshot;
     private Integer event;
 }
