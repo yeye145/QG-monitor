@@ -24,6 +24,12 @@ public class RedisConstants {
     public static final Integer MAX_ERROR_TIME = 10;
 
     /**
+     * 邀请码
+     */
+    public static final String INVITE_CODE_KEY = "inviteCode:";
+    public static final Long INVITE_CODE_TTL = 10L;
+
+    /**
      * 通知是否已读
      */
     public static final Integer IS_READ = 1;

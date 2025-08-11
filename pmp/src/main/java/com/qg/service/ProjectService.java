@@ -2,6 +2,7 @@ package com.qg.service;
 
 import com.qg.domain.Project;
 import com.qg.domain.Result;
+import com.qg.dto.InviteDto;
 
 public interface ProjectService {
      Result addProject(Project project);
@@ -17,4 +18,8 @@ public interface ProjectService {
      Result getPersonalPublicProject(Long userId);
 
      Result getPersonalUnpublicProject(Long userId);
+
+    Result getInviteDCode(String projectId);
+
+     Result joinProject(InviteDto inviteDto);
 }
