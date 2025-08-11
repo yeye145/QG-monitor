@@ -3,9 +3,14 @@ package com.qg.controller;
 import cn.hutool.core.util.StrUtil;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
+
+
+import com.qg.service.FrontendPerformanceService;
+
 import com.qg.service.FrontendErrorService;
 import com.qg.service.GraphService;
 import com.qg.vo.ErrorTrendVO;
+
 import com.qg.vo.FrontendBehaviorVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +36,11 @@ public class GraphController {
     @Autowired
     private FrontendErrorService frontendErrorService;
 
+
+    @Autowired
+    private FrontendPerformanceService frontendPerformanceService;
+
+
     /**
      * 页面停留时间，页面进入次数
      *
@@ -40,6 +50,7 @@ public class GraphController {
      * @param endTime
      * @return
      */
+
     @GetMapping("/pageStateAndEnterCount")
     public Result pageStateAndEnterCount(
             @RequestParam String projectId,
@@ -95,6 +106,18 @@ public class GraphController {
         }
 
     }
+
+
+    @GetMapping("/getVisits")
+    public Result getVisits(@RequestParam String projectId, @RequestParam String timeType,
+                            @RequestParam (required = false) Integer number) {
+
+        return frontendPerformanceService.getVisits(projectId, timeType, number);
+
+    }
+
+
+
 
 
     /**
@@ -159,4 +182,5 @@ public class GraphController {
         }
         return true;
     }
+
 }

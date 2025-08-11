@@ -31,4 +31,5 @@ public class FrontendPerformance {
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> metrics;
     private String captureType;
+    private Integer event;
 }
