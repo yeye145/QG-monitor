@@ -65,36 +65,4 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
         }
     }
 
-
-    /**
-     * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
-     *
-     * @param projectId
-     * @param startTime
-     * @param endTime
-     * @return
-     */
-    @Override
-    public List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRange
-    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
-        return frontendBehaviorMapper
-                .queryTimeDataByProjectIdAndTimeRange(projectId, startTime, endTime);
-    }
-
-
-    /**
-     * 查询指定时间段内某项目中，用户页面停留《在某路由下》的时间数据
-     *
-     * @param projectId
-     * @param route
-     * @param startTime
-     * @param endTime
-     * @return
-     */
-    @Override
-    public List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRangeAndRoute
-    (String projectId, String route, LocalDateTime startTime, LocalDateTime endTime) {
-        return frontendBehaviorMapper
-                .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
-    }
 }

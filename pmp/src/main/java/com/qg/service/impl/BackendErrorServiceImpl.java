@@ -108,4 +108,5 @@ public class BackendErrorServiceImpl implements BackendErrorService {
             return new Result(INTERNAL_ERROR, "添加错误信息失败");
         }
     }
+
 }
