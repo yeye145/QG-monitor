@@ -37,7 +37,7 @@ public class BackendLog {
     private String projectId;
     private String environment;
     private String logMessage;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> environmentSnapshot;
 
     private final AtomicInteger event = new AtomicInteger(0);

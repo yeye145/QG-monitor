@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.qg.handler.JsonbTypeHandler;
+import com.qg.handler.MapHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,7 @@ public class MobilePerformance {
     private String deviceModel;
     private String osVersion;
     private String batteryLevel;
-    @TableField(typeHandler = JsonbTypeHandler.class)
+    @TableField(typeHandler = MapHandler.class)
     private Map<String, Object> memoryUsage;
     private String operationFps;
 }

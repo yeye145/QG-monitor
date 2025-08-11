@@ -134,6 +134,11 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             // 执行查询
             List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
 
+
+            for (BackendError backendError : backendErrors) {
+                System.out.println(backendError.getEnvironmentSnapshot());
+            }
+
             // 查询责任人信息
             List<Responsibility> responsibilityList = responsibilityMapper.selectList(
                     new LambdaQueryWrapper<Responsibility>()
@@ -179,6 +184,10 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
                         return vo;
                     })
                     .collect(Collectors.toList());
+
+            for (BackendResponsibilityVO backendResponsibilityVO : backendResponsibilityVOList) {
+                System.out.println(backendResponsibilityVO.getEnvironmentSnapshot());
+            }
 
             return new Result(Code.SUCCESS,
                     List.of(backendResponsibilityVOList, new ArrayList<>(), new ArrayList<>()),

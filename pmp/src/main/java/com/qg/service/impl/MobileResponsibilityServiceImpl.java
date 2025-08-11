@@ -158,6 +158,9 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
                     })
                     .collect(Collectors.toList());
 
+
+
+
             return new Result(Code.SUCCESS,
                     List.of(new ArrayList<>(), new ArrayList<>(), mobileResponsibilityVOList),
                     "查询成功");
