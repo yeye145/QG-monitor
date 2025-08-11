@@ -67,6 +67,7 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
     }
 
 
+
     /**
      * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
      *
@@ -98,6 +99,7 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
         return frontendBehaviorMapper
                 .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
     }
+
 
 
 }

@@ -13,5 +13,6 @@ public class UsersDTO {
     private Long id;
     private String username;
     private String avatar;
+    private String phone;
     private LocalDateTime createdTime;
 }

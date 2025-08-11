@@ -162,7 +162,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     //获取项目列表
     @Override
-    public Result getProjectList() {
+    public Result getPublicProjectList() {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Project::getIsDeleted, false).eq(Project::getIsPublic, true);
         List<Project> list= projectMapper.selectList(lqw);
@@ -340,6 +340,20 @@ public class ProjectServiceImpl implements ProjectService {
 
         } catch (Exception e) {
             log.error("查询项目失败，搜索关键词: {}", name, e);
+            return new Result(INTERNAL_ERROR, "查询项目失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Result getPrivateProjectList() {
+        try {
+            LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Project::getIsPublic, false)
+                    .eq(Project::getIsDeleted,  false);
+            List<Project> projects = projectMapper.selectList(queryWrapper);
+            return new Result(SUCCESS, projects, "查询项目成功");
+        } catch (Exception e) {
+            log.error("查询项目失败", e);
             return new Result(INTERNAL_ERROR, "查询项目失败: " + e.getMessage());
         }
     }

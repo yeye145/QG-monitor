@@ -26,7 +26,7 @@ public class MapHandler extends BaseTypeHandler<Map<String, Object>> {
     public void setNonNullParameter(PreparedStatement ps, int i, Map<String, Object> parameter, JdbcType jdbcType) throws SQLException {
         try {
             String json = objectMapper.writeValueAsString(parameter);
-            System.out.println("MapHandler setNonNullParameter: " + json);
+//            System.out.println("MapHandler setNonNullParameter: " + json);
 
             // 使用 PGobject 来设置 jsonb 类型
             PGobject jsonObject = new PGobject();
@@ -41,21 +41,21 @@ public class MapHandler extends BaseTypeHandler<Map<String, Object>> {
     @Override
     public Map<String, Object> getNullableResult(ResultSet rs, String columnName) throws SQLException {
         String json = rs.getString(columnName);
-        System.out.println("MapHandler getNullableResult (columnName): " + json);
+//        System.out.println("MapHandler getNullableResult (columnName): " + json);
         return parseJson(json);
     }
 
     @Override
     public Map<String, Object> getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         String json = rs.getString(columnIndex);
-        System.out.println("MapHandler getNullableResult (columnIndex): " + json);
+//        System.out.println("MapHandler getNullableResult (columnIndex): " + json);
         return parseJson(json);
     }
 
     @Override
     public Map<String, Object> getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         String json = cs.getString(columnIndex);
-        System.out.println("MapHandler getNullableResult (CallableStatement): " + json);
+//        System.out.println("MapHandler getNullableResult (CallableStatement): " + json);
         return parseJson(json);
     }
 

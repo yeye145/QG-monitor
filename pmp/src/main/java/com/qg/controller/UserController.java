@@ -3,6 +3,7 @@ package com.qg.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qg.domain.Code;
 import com.qg.domain.Result;
 import com.qg.domain.Users;
 import com.qg.dto.EncryptedRequestDTO;
@@ -11,15 +12,19 @@ import com.qg.dto.RegisterDTO;
 import com.qg.dto.UsersDTO;
 import com.qg.service.UsersService;
 import com.qg.utils.CryptoUtils;
+import com.qg.utils.FileUploadHandler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 import static com.qg.domain.Code.*;
+import static com.qg.utils.FileUploadHandler.IMAGE_DIR;
+
 @Slf4j
 @Tag(name ="用户个人信息")
 @RestController
@@ -205,6 +210,49 @@ public class UserController {
             return usersService.findPassword(users, code);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 更新头像
+     * @param file
+     * @param userId
+     * @return
+     */
+    @PostMapping("/updateAvatar")
+    public Result updateAvatar(@RequestParam("avatar") MultipartFile file,
+                               @RequestParam("userId") Long userId) {
+        try {
+            // 验证文件是否为空
+            if (file.isEmpty()) {
+                return new Result(BAD_REQUEST, "请选择有效的头像文件");
+            }
+
+            // 判断是否为图片
+            if (!FileUploadHandler.isValidImageFile(file)) {
+                return new Result(Code.BAD_REQUEST, "上传的不是图片");
+            }
+
+            // 文件大小限制
+            if (file.getSize() > 2 * 1024 * 1024) {
+                return new Result(BAD_REQUEST, "图片大小不能超过2MB");
+            }
+
+            System.out.println("file ==> " + file);
+            System.out.println("fileName ==> " + file.getOriginalFilename());
+            String avatarUrl = FileUploadHandler.saveFile(file, IMAGE_DIR);
+
+            // 判断头像是否上传成功返回相应的结果
+            if (usersService.updateAvatar(userId, avatarUrl)) {
+                System.out.println("上传头像成功，url=====>" + avatarUrl);
+                return new Result(SUCCESS, avatarUrl, "头像上传成功");
+            } else {
+                return new Result(NOT_FOUND, "用户不存在");
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return new Result(INTERNAL_ERROR, "头像上传失败");
         }
     }
 }
