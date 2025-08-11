@@ -32,17 +32,17 @@ public class FrontendError {
     private String message;
     private String stack;
     private Integer event;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> requestInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> responseInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> resourceInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private List<Map<String, Object>> breadcrumbs;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> tags;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> elementInfo;
     private String captureType;
     private Long duration;

@@ -30,6 +30,7 @@ public class JsonbTypeHandler extends BaseTypeHandler<Object> {
         staticObjectMapper = objectMapper;
     }
 
+
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType) throws SQLException {
         try {
@@ -61,18 +62,21 @@ public class JsonbTypeHandler extends BaseTypeHandler<Object> {
     @Override
     public Object getNullableResult(ResultSet rs, String columnName) throws SQLException {
         String json = rs.getString(columnName);
+        System.out.println("JsonbTypeHandler getNullableResult: " + json);
         return parseJson(json);
     }
 
     @Override
     public Object getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         String json = rs.getString(columnIndex);
+        System.out.println("JsonbTypeHandler getNullableResult: " + json);
         return parseJson(json);
     }
 
     @Override
     public Object getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         String json = cs.getString(columnIndex);
+        System.out.println("JsonbTypeHandler getNullableResult: " + json);
         return parseJson(json);
     }
 

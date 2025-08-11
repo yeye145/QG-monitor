@@ -31,6 +31,6 @@ public class BackendPerformance {
     private String api;
     private Integer duration;
     private Boolean slow;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> environmentSnapshot;
 }
