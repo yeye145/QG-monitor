@@ -31,8 +31,9 @@ public class BackendResponsibilityVO {
     private String stack;
     @TableField(value = "environment_snapshot", typeHandler = com.qg.handler.MapHandler.class)
     private Object environmentSnapshot;
-    private String Name;
+    private String name;
     private Long delegatorId;
+    private Long responsibleId;
     private String avatarUrl;
 
 

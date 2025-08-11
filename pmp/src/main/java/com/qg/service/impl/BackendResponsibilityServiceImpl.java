@@ -175,6 +175,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
                                 responsibility.getDelegatorId() != null) {
 
                             vo.setDelegatorId(responsibility.getDelegatorId());
+                            vo.setResponsibleId(responsibility.getResponsibleId());
                             Users responsibleUser = userMap.get(responsibility.getResponsibleId());
                             if (responsibleUser != null) {
                                 vo.setName(responsibleUser.getUsername());

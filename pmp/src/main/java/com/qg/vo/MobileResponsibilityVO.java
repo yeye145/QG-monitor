@@ -28,7 +28,8 @@ public class MobileResponsibilityVO {
     private String className;
 
 
-    private String Name;
+    private String name;
     private Long delegatorId;
+    private Long responsibleId;
     private String avatarUrl;
 }

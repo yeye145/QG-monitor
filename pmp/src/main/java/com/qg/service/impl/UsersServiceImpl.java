@@ -157,7 +157,7 @@ public class UsersServiceImpl implements UsersService {
         map.put("token", token);
         EncryptionResultDTO encryptionResultDTO = null;
         try {
-            String jsonData = new ObjectMapper().writeValueAsString(map);//将map类型的数据转化为json字符串
+            String jsonData = objectMapper.writeValueAsString(map);//将map类型的数据转化为json字符串
             log.info("加密前的JSON: {}", jsonData);
 
             encryptionResultDTO = CryptoUtils.encryptWithAESAndRSA(jsonData, rsaPublicKey);
@@ -272,5 +272,10 @@ public class UsersServiceImpl implements UsersService {
             log.error("修改密码失败", e);
             return new Result(INTERNAL_ERROR, "修改密码失败");
         }
+    }
+
+    @Override
+    public boolean updateAvatar(Long userId, String avatarUrl) {
+        return usersMapper.updateAvatar(userId, avatarUrl) > 0;
     }
 }
