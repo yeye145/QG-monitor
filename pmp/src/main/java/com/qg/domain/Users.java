@@ -20,5 +20,6 @@ public class Users {
     private String avatar;
     private Boolean isDeleted;
     private LocalDateTime createdTime;
+    private String phone;
 
 }

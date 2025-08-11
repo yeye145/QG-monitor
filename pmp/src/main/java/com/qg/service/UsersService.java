@@ -16,4 +16,6 @@ public interface UsersService {
     Result getUser(Long id);
 
     Result findPassword(Users user, String code);
+
+    boolean updateAvatar(Long userId, String avatarUrl);
 }
