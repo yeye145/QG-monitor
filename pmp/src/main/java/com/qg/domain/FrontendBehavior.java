@@ -29,7 +29,7 @@ public class FrontendBehavior {
     private LocalDateTime timestamp;
     private String sessionId;
     private String userAgent;
-    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private List<Map<String, Object>> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> pageInfo;

@@ -38,7 +38,7 @@ public class FrontendError {
     private Map<String, Object> responseInfo;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> resourceInfo;
-    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
     private List<Map<String, Object>> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> tags;

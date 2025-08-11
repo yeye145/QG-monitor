@@ -46,7 +46,8 @@ public class FrontendResponsibilityVO {
     private Object elementInfo;
 
     private String userAgent;
-    private String Name;
+    private String name;
+    private Long responsibleId;
     private Long delegatorId;
     private String avatarUrl;
 }
