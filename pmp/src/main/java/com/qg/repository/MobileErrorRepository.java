@@ -40,7 +40,7 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
                 Notification notification = new Notification();
                 notification.setProjectId(error.getProjectId());
                 notification.setErrorId(error.getId());
-                notification.setType("mobile");
+                notification.setPlatform("mobile");
                 notification.setTimestamp(LocalDateTime.now());
                 // TODO: 根据项目配置设置发送人和接收人ID
                 // TODO: 问题1：先企业微信告警，同时异常发送到平台，管理员委派人去解决？
