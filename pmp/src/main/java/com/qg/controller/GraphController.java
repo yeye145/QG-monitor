@@ -3,6 +3,7 @@ package com.qg.controller;
 import cn.hutool.core.util.StrUtil;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
+import com.qg.service.FrontendErrorService;
 import com.qg.service.GraphService;
 import com.qg.vo.ErrorTrendVO;
 import com.qg.vo.FrontendBehaviorVO;
@@ -27,6 +28,8 @@ public class GraphController {
 
     @Autowired
     private GraphService graphService;
+    @Autowired
+    private FrontendErrorService frontendErrorService;
 
     /**
      * 页面停留时间，页面进入次数
@@ -87,7 +90,7 @@ public class GraphController {
             return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "查询成功");
 
         } catch (Exception e) {
-            log.error("查询页面停留时间，页面进入次数失败，项目id: {}", projectId, e);
+            log.error("查询页面停留时间，页面进入次数失败，项目id: {}:{}", projectId, e.getMessage());
             return new Result(Code.INTERNAL_ERROR, "查询页面停留时间，页面进入次数失败");
         }
 
@@ -118,8 +121,22 @@ public class GraphController {
             // 至少返回空集合
             return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "查询成功");
         } catch (Exception e) {
-            log.error("查询错误趋势时发生异常: projectId={}, startTime={}, endTime={}", projectId, startTime, endTime, e);
+            log.error("查询错误趋势时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
             return new Result(Code.INTERNAL_ERROR, "查询错误趋势失败 ");
+        }
+    }
+
+    @GetMapping("/getFrontendErrorStats")
+    public Result getFrontendErrorStats(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    frontendErrorService.getErrorStats(projectId), "查询近一周错误统计成功");
+        } catch (Exception e) {
+            log.error("查询错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周错误统计失败");
         }
     }
 
