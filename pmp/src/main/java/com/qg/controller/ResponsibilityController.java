@@ -15,7 +15,7 @@ public class ResponsibilityController {
    private ResponsibilityService responsibilityService;
 
     /**
-    * 添加责任
+    * 添加或修改责任
     * @param responsibility
     * @return
     */

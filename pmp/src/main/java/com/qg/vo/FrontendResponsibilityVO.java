@@ -32,18 +32,18 @@ public class FrontendResponsibilityVO {
     private String errorType;
     private String message;
     private String stack;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private Map<String, Object> requestInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private Map<String, Object> responseInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private Map<String, Object> resourceInfo;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private List<Map<String, Object>> breadcrumbs;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private Map<String, Object> tags;
-    @TableField(typeHandler = com.qg.handler.JsonbTypeHandler.class)
-    private Map<String, Object> elementInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Object requestInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Object responseInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Object resourceInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Object breadcrumbs;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Object tags;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class)
+    private Object elementInfo;
 
     private String userAgent;
     private String Name;

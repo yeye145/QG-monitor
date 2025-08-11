@@ -3,7 +3,12 @@ package com.qg.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qg.domain.BackendError;
 import com.qg.domain.BackendPerformance;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @Description: 后端错误mapper  // 类说明
@@ -14,4 +19,8 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface BackendErrorMapper extends BaseMapper<BackendError> {
+
+    @Select("select * from backend_error where backend_error.project_id = '1'")
+    List<BackendError> getBy1();
+
 }

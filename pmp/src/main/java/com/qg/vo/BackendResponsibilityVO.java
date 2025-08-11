@@ -1,5 +1,6 @@
 package com.qg.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,8 +29,8 @@ public class BackendResponsibilityVO {
     private String environment;
     private String errorType;
     private String stack;
-    private Map<String, Object> environmentSnapshot;
-
+    @TableField(value = "environment_snapshot", typeHandler = com.qg.handler.MapHandler.class)
+    private Object environmentSnapshot;
     private String Name;
     private Long delegatorId;
     private String avatarUrl;

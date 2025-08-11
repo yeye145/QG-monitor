@@ -10,6 +10,5 @@ import java.util.List;
 public class FrontendErrorVO {
     private String projectId;
     private LocalDateTime timestamp;
-
     private List<FrontendError> data;
 }

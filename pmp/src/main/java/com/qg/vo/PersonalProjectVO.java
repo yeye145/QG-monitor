@@ -20,7 +20,7 @@ public class PersonalProjectVO {
     private Long id;
     private Long userId;
 
-    private String power;
-    private int userRole;
+    private Integer power;
+    private Integer userRole;
 
 }
