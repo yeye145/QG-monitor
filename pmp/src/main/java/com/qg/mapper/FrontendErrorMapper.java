@@ -19,12 +19,19 @@ import java.util.List;
  */
 @Mapper
 public interface FrontendErrorMapper extends BaseMapper<FrontendError> {
+    /**
+     * 查询指定时间段内指定项目下的三端错误
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     @Select("""
             SELECT
               date_trunc('hour', timestamp) AS time,
-              COUNT(*) AS value,
+              SUM(event) AS value,
               'backend' AS category
-            FROM backend_error
+            FROM pmp.backend_error
             WHERE timestamp >= #{startTime}
               AND timestamp <= #{endTime}
               AND project_id = #{projectId}
@@ -34,9 +41,9 @@ public interface FrontendErrorMapper extends BaseMapper<FrontendError> {
             
             SELECT
               date_trunc('hour', timestamp) AS time,
-              COUNT(*) AS value,
+              SUM(event) AS value,
               'frontend' AS category
-            FROM frontend_error
+            FROM pmp.frontend_error
             WHERE timestamp >= #{startTime}
               AND timestamp <= #{endTime}
               AND project_id = #{projectId}
@@ -46,9 +53,9 @@ public interface FrontendErrorMapper extends BaseMapper<FrontendError> {
             
             SELECT
               date_trunc('hour', timestamp) AS time,
-              COUNT(*) AS value,
+              SUM(event) AS value,
               'mobile' AS category
-            FROM mobile_error
+            FROM pmp.mobile_error
             WHERE timestamp >= #{startTime}
               AND timestamp <= #{endTime}
                AND project_id = #{projectId}
