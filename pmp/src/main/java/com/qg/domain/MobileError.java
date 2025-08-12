@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * @Description: 移动错误类  // 类说明
  * @ClassName: MobileError    // 类名
  * @Author: lrt          // 创建者
- * @Date: 2025/8/7 21:18   // 时间
+ * @Date: 2025/8/12 10:51   // 时间
  * @Version: 1.0     // 版本
  */
 @Data
@@ -31,7 +31,6 @@ public class MobileError {
     private String className;
 
     private Integer event = 0;
-
     public synchronized void incrementEvent() {
         event++;
     }

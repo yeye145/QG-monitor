@@ -13,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.qg.domain.Code.*;
@@ -60,12 +64,14 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
         LambdaQueryWrapper<BackendPerformance> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BackendPerformance::getProjectId, projectId);
 
-        Module module = moduleMapper.selectById(moduleId);
-        if (module != null) {
-            String moduleName = module.getModuleName();
-            queryWrapper.eq(BackendPerformance::getModule, moduleName);
-        } else {
-            return new Result(400, "模块不存在");
+        if (moduleId != null) {
+            Module module = moduleMapper.selectById(moduleId);
+            if (module != null) {
+                String moduleName = module.getModuleName();
+                queryWrapper.eq(BackendPerformance::getModule, moduleName);
+            } else {
+                return new Result(400, "模块不存在");
+            }
         }
 
         if (api != null && !api.isEmpty()) {
@@ -79,7 +85,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
         List<BackendPerformance> backendPerformances = backendPerformanceMapper.selectList(queryWrapper);
 
 
-        return new Result(SUCCESS, backendPerformances, "查询成功" );
+        return new Result(SUCCESS, List.of(backendPerformances,new ArrayList<>(),new ArrayList<>()), "查询成功" );
     }
 
     @Override
@@ -128,6 +134,65 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
             log.error("后端性能数据保存失败: ", e);
             return new Result(INTERNAL_ERROR, "后端性能数据保存失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Result getAverageTime(String projectId, String timeType) {
+        if (projectId == null || projectId.isEmpty()) {
+            return new Result(BAD_REQUEST, "项目ID不能为空");
+        }
+
+        if (timeType == null || timeType.isEmpty()) {
+            return new Result(BAD_REQUEST, "时间类型不能为空");
+        }
+
+        LambdaQueryWrapper<BackendPerformance> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BackendPerformance::getProjectId, projectId);
+
+        LocalDateTime passTime;
+
+        switch (timeType) {
+            case "day":
+                passTime = LocalDateTime.now().minusDays(1);
+                break;
+            case "week":
+                passTime = LocalDateTime.now().minusWeeks(1);
+                break;
+            case "month":
+                passTime = LocalDateTime.now().minusMonths(1);
+                break;
+            default:
+                return new Result(BAD_REQUEST, "不支持的时间类型");
+        }
+        queryWrapper.ge(BackendPerformance::getTimestamp, passTime);
+
+        List<BackendPerformance> backendPerformances = backendPerformanceMapper.selectList(queryWrapper);
+
+        // 计算加权平均响应时间
+        Map<String, Double> averageTimeMap = backendPerformances.stream()
+                .filter(bp -> bp.getApi() != null && bp.getDuration() != null && bp.getEvent() != null)
+                .collect(Collectors.groupingBy(
+                        BackendPerformance::getApi,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> {
+                                    double totalTime = list.stream()
+                                            .mapToDouble(bp -> bp.getDuration() * bp.getEvent())
+                                            .sum();
+                                    int totalEvents = list.stream()
+                                            .mapToInt(BackendPerformance::getEvent)
+                                            .sum();
+                                    return totalEvents > 0 ? totalTime / totalEvents : 0.0;
+                                }
+                        )
+                ));
+
+
+        if (backendPerformances.isEmpty()) {
+            return new Result(NOT_FOUND, "没有找到相关数据");
+        }
+
+        return new Result(SUCCESS, averageTimeMap, "查询成功");
     }
 
 }
