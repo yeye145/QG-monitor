@@ -2,6 +2,7 @@ package com.qg.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qg.domain.FrontendBehavior;
+import com.qg.vo.ButtonVO;
 import com.qg.vo.FrontendBehaviorVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -80,4 +81,15 @@ public interface FrontendBehaviorMapper extends BaseMapper<FrontendBehavior> {
             @Param("endTime") LocalDateTime endTime);
 
 
+    @Select("""
+                SELECT
+                   (crumb->'data'->>'id') AS buttonId,
+                   SUM(event) AS eventCount
+                FROM pmp.frontend_behavior,
+                    jsonb_array_elements(breadcrumbs) AS crumb
+                WHERE project_id = #{projectId}
+                   AND (crumb->'data'->>'tagName') = 'BUTTON'
+                GROUP BY buttonId
+            """)
+    List<ButtonVO> queryFrontendButton(@Param("projectId") String projectId);
 }

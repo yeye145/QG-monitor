@@ -55,6 +55,9 @@ public class GraphController {
     @Autowired
     private MobileErrorService mobileErrorService;
 
+    @Autowired
+    private FrontendBehaviorService frontendBehaviorService;
+
 
     /**
      * 页面停留时间，页面进入次数
@@ -280,7 +283,7 @@ public class GraphController {
                                @RequestParam String timeType){
         switch (platform) {
             case "frontend":
-                return new Result(Code.SUCCESS, null, "功能尚未实现，敬请期待");
+                return frontendErrorService.getAverageTime(projectId, timeType);
             case "backend":
                 return backendPerformanceService.getAverageTime(projectId, timeType);
             case "mobile":
@@ -291,7 +294,18 @@ public class GraphController {
     }
 
 
-
+    /**
+     * @Author lrt
+     * @Description //TODO 获取前端按钮数据
+     * @Date 20:43 2025/8/12
+     * @Param
+ * @param projectId
+     * @return com.qg.domain.Result
+     **/
+    @GetMapping("/getFrontendButton")
+    public Result getFrontendButton(@RequestParam String projectId){
+        return frontendBehaviorService.getFrontendButton(projectId);
+    }
     /**
      * 查询查询前端性能数据-平均时间
      * @param projectId
@@ -346,5 +360,7 @@ public class GraphController {
         }
         return false;
     }
+
+
 
 }

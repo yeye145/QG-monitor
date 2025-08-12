@@ -22,4 +22,6 @@ public interface FrontendErrorService {
 
 
     Object[] getErrorStats(String projectId);
+
+    Result getAverageTime(String projectId, String timeType);
 }
