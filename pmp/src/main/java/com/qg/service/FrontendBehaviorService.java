@@ -17,9 +17,13 @@ import java.util.List;
 public interface FrontendBehaviorService {
     Result saveFrontendBehavior(String data);
 
+
     List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRange
             (String projectId, LocalDateTime startTime, LocalDateTime endTime);
 
     List<FrontendBehaviorVO> queryTimeDataByProjectIdAndTimeRangeAndRoute
             (String projectId, String route, LocalDateTime startTime, LocalDateTime endTime);
+
+
+
 }

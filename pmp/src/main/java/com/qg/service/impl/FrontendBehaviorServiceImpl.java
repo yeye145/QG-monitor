@@ -1,6 +1,7 @@
 package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.FrontendBehavior;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendBehaviorMapper;
@@ -66,6 +67,7 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
     }
 
 
+
     /**
      * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
      *
@@ -97,4 +99,7 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
         return frontendBehaviorMapper
                 .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
     }
+
+
+
 }
