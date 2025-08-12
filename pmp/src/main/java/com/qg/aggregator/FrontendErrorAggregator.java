@@ -46,7 +46,7 @@ public class FrontendErrorAggregator {
     public void addErrorToCache(FrontendError frontendError) {
         // 构建 Redis key，不包含 module 字段
         String key = generateRedisKey(frontendError.getProjectId(),
-                frontendError.getSessionId());
+                frontendError.getMessage());
 
         // 使用错误类型作为 field
         String field = frontendError.getErrorType();
@@ -169,8 +169,8 @@ public class FrontendErrorAggregator {
         log.info("前端错误信息处理并保存完成，key: {}", key);
     }
 
-    private String generateRedisKey(String projectId, String sessionId) {
-        return ERROR_CACHE_KEY_PREFIX + projectId + ":" + sessionId;
+    private String generateRedisKey(String projectId, String message) {
+        return ERROR_CACHE_KEY_PREFIX + projectId + ":" + message;
     }
 
     /**
@@ -179,7 +179,7 @@ public class FrontendErrorAggregator {
      * @return 项目ID
      */
     private String extractProjectIdFromKey(String key) {
-        // key格式: frontend_error:projectId:sessionId
+        // key格式: frontend_error:projectId:message
         String[] parts = key.split(":");
         if (parts.length >= 3) {
             return parts[1]; // 第二个部分是projectId
