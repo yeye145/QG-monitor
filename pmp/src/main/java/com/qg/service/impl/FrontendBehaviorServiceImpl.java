@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static com.qg.domain.Code.*;
 
@@ -100,6 +101,17 @@ public class FrontendBehaviorServiceImpl implements FrontendBehaviorService {
                 .queryTimeDataByProjectIdAndTimeRangeAndRoute(projectId, route, startTime, endTime);
     }
 
+
+
+
+    @Override
+    public Result getFrontendButton(String projectId) {
+        if (projectId == null || projectId.isEmpty()) {
+            return new Result(BAD_REQUEST, "项目ID不能为空");
+        }
+
+        return new Result(SUCCESS, frontendBehaviorMapper.queryFrontendButton(projectId),"查询成功");
+    }
 
 
 }
