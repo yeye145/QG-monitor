@@ -39,6 +39,12 @@ public class GraphController {
     private FrontendPerformanceService frontendPerformanceService;
 
     @Autowired
+    private BackendPerformanceService backendPerformanceService;
+
+    @Autowired
+    private MobilePerformanceService mobilePerformanceService;
+
+    @Autowired
     private BackendErrorService backendErrorService;
 
     @Autowired
@@ -112,12 +118,18 @@ public class GraphController {
     }
 
 
+    /**
+     * @Author lrt
+     * @Description //访问量
+     * @Date 17:23 2025/8/12
+     * @Param
+ * @param projectId
+ * @param timeType
+     * @return com.qg.domain.Result
+     **/
     @GetMapping("/getVisits")
-    public Result getVisits(@RequestParam String projectId, @RequestParam String timeType,
-                            @RequestParam (required = false) Integer number) {
-
-        return frontendPerformanceService.getVisits(projectId, timeType, number);
-
+    public Result getVisits(@RequestParam String projectId, @RequestParam String timeType) {
+        return frontendPerformanceService.getVisits(projectId, timeType);
     }
 
 
@@ -150,6 +162,7 @@ public class GraphController {
         }
     }
 
+
     @GetMapping("/getFrontendErrorStats")
     public Result getFrontendErrorStats(@RequestParam String projectId) {
         if (StrUtil.isBlank(projectId)) {
@@ -165,6 +178,15 @@ public class GraphController {
     }
 
 
+
+    /**
+     * @Author lrt
+     * @Description // 查询近一周后端错误
+     * @Date 17:25 2025/8/12
+     * @Param
+ * @param projectId
+     * @return com.qg.domain.Result
+     **/
     @GetMapping("/getBackendErrorStats")
     public Result getBackendErrorStats(@RequestParam String projectId) {
         if (StrUtil.isBlank(projectId)) {
@@ -179,6 +201,15 @@ public class GraphController {
         }
     }
 
+
+    /**
+     * @Author lrt
+     * @Description //TODO 近一周移动端错
+     * @Date 17:25 2025/8/12
+     * @Param
+ * @param projectId
+     * @return com.qg.domain.Result
+     **/
     @GetMapping("/getMobileErrorStats")
     public Result getMobileErrorStats(@RequestParam String projectId) {
         if (StrUtil.isBlank(projectId)) {
@@ -192,6 +223,33 @@ public class GraphController {
             return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
         }
     }
+
+
+    /**
+     * @Author lrt
+     * @Description //TODO api平均响应时间
+     * @Date 17:26 2025/8/12
+     * @Param
+ * @param projectId
+ * @param platform
+ * @param timeType
+     * @return com.qg.domain.Result
+     **/
+    @GetMapping("/getAverageTime")
+    public Result getAverageTime(@RequestParam String projectId, @RequestParam String platform,
+                               @RequestParam String timeType){
+        switch (platform) {
+            case "frontend":
+                return new Result(Code.SUCCESS, null, "功能尚未实现，敬请期待");
+            case "backend":
+                return backendPerformanceService.getAverageTime(projectId, timeType);
+            case "mobile":
+                return mobilePerformanceService.getAverageTime(projectId, timeType);
+            default:
+                return new Result(Code.BAD_REQUEST, "不支持的平台类型");
+        }
+    }
+
 
 
     /**
@@ -212,5 +270,7 @@ public class GraphController {
         }
         return true;
     }
+
+
 
 }

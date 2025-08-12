@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.*;
 import com.qg.domain.Error;
-import com.qg.dto.MobileError;
+import com.qg.domain.MobileError;
 import com.qg.mapper.*;
 import com.qg.service.NotificationService;
 import com.qg.service.ResponsibilityService;

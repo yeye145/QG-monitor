@@ -2,15 +2,18 @@ package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.qg.dto.MobileError;
+import com.qg.domain.BackendError;
+import com.qg.domain.MobileError;
 import com.qg.domain.Result;
 import com.qg.mapper.MobileErrorMapper;
 import com.qg.repository.MobileErrorRepository;
 import com.qg.service.MobileErrorService;
+import com.qg.utils.MathUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +71,9 @@ public class MobileErrorServiceImpl implements MobileErrorService {
         queryWrapper.eq(MobileError::getProjectId, projectId);
 
         List<MobileError> mobileErrors = mobileErrorMapper.selectList(queryWrapper);
-        System.out.println("mobileErrors: " + mobileErrors);
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        queryWrapper.ge(MobileError::getTimestamp, oneWeekAgo);
 
         Map<String ,Double> transformDataVOList = new HashMap<>();
         Map<String, Double>uvBillDataVOList = new HashMap<>();
@@ -94,7 +99,7 @@ public class MobileErrorServiceImpl implements MobileErrorService {
         System.out.println("uvBillDataVOList: " + uvBillDataVOList);
         System.out.println("finalCount: " + finalCount);
 
-        uvBillDataVOList.replaceAll((k, v) -> v / finalCount);
+        uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
 
         System.out.println("uvBillDataVOList after normalization: " + uvBillDataVOList);
 

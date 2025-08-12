@@ -18,5 +18,7 @@ public interface FrontendPerformanceService {
 
     Result selectByCondition(String projectId, String capture);
 
-    Result getVisits(String projectId, String timeType, Integer number);
+    Result getVisits(String projectId, String timeType);
+
+    Result getAverageTime(String projectId, String timeType);
 }

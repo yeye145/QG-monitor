@@ -11,6 +11,7 @@ import com.qg.mapper.BackendErrorMapper;
 import com.qg.mapper.ModuleMapper;
 import com.qg.service.BackendErrorService;
 import com.qg.service.ModuleService;
+import com.qg.utils.MathUtil;
 import com.qg.vo.TransformDataVO;
 import com.qg.vo.UvBillDataVO;
 import lombok.extern.slf4j.Slf4j;
@@ -118,6 +119,10 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
         List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
 
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        queryWrapper.ge(BackendError::getTimestamp, oneWeekAgo);
+
         Map<String ,Double> transformDataVOList = new HashMap<>();
         Map<String, Double>uvBillDataVOList = new HashMap<>();
 
@@ -139,12 +144,11 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         Integer finalCount = count;
 
         uvBillDataVOList.entrySet().removeIf(entry -> entry.getValue() == 0);
-        System.out.println("uvBillDataVOList: " + uvBillDataVOList);
-        System.out.println("finalCount: " + finalCount);
 
-        uvBillDataVOList.replaceAll((k, v) -> v / finalCount);
 
-        System.out.println("uvBillDataVOList after normalization: " + uvBillDataVOList);
+        uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
+
+
 
 
         return new Object[]{transformDataVOList, uvBillDataVOList};
@@ -156,10 +160,10 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         }
         if (transformDataVOList.containsKey(backendError.getErrorType()) ) {
             transformDataVOList.put(backendError.getErrorType(), transformDataVOList.get(backendError.getErrorType()) + backendError.getEvent());
-            System.out.println("更新错误类型: " + backendError.getErrorType() + ", 新的事件数: " + transformDataVOList.get(backendError.getErrorType()));
+
         } else {
             transformDataVOList.put(backendError.getErrorType(), Double.valueOf(backendError.getEvent()));
-            System.out.println("添加新的错误类型: " + backendError.getErrorType() + ", 事件数: " + backendError.getEvent());
+
         }
     }
 

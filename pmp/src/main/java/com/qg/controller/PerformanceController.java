@@ -66,17 +66,20 @@ public class PerformanceController {
     @GetMapping("/selectByCondition")
     public Result selectByCondition(@RequestParam String platform, @RequestParam String projectId,
                                     @RequestParam(required = false) Long moduleId, @RequestParam(required = false) String api, @RequestParam(required = false) String environment,
-                                    @RequestParam(required = false) String capture,
+                                    @RequestParam(required = false) String captureType,
                                     @RequestParam(required = false) String deviceModel, @RequestParam(required = false) String osVersion) {
+
+
+
         switch (platform) {
             case "backend":
                 return backendPerformanceService.selectByCondition(projectId, moduleId, api, environment);
             case "frontend":
-                return frontendPerformanceService.selectByCondition(projectId, capture);
+                return frontendPerformanceService.selectByCondition(projectId, captureType);
             case "mobile":
                 return mobilePerformanceService.selectByCondition(projectId, deviceModel, osVersion);
             case "all":
-                return allPerformanceService.selectByCondition(projectId, moduleId, api, environment, capture, deviceModel, osVersion);
+                return allPerformanceService.selectByCondition(projectId, moduleId, api, environment, captureType, deviceModel, osVersion);
             default:
                 return new Result(400, "平台参数错误");
         }

@@ -2,7 +2,7 @@ package com.qg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.*;
-import com.qg.dto.MobileError;
+import com.qg.domain.MobileError;
 import com.qg.mapper.MobileErrorMapper;
 import com.qg.mapper.ResponsibilityMapper;
 import com.qg.mapper.UsersMapper;

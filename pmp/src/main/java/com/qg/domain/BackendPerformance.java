@@ -33,4 +33,5 @@ public class BackendPerformance {
     private Boolean slow;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> environmentSnapshot;
+    private Integer event;
 }

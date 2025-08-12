@@ -1,6 +1,6 @@
 package com.qg.repository;
 
-import com.qg.dto.MobileError;
+import com.qg.domain.MobileError;
 import com.qg.domain.Notification;
 import org.springframework.stereotype.Repository;
 

@@ -8,6 +8,7 @@ import com.qg.domain.FrontendError;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendErrorMapper;
 import com.qg.service.FrontendErrorService;
+import com.qg.utils.MathUtil;
 import com.qg.vo.TransformDataVO;
 import com.qg.vo.UvBillDataVO;
 import lombok.extern.slf4j.Slf4j;
@@ -117,7 +118,7 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
                 .getFrontendErrorStats(projectId)
                 .forEach(errorStat -> {
                     uvBillDataVOList.add(new UvBillDataVO(errorStat.getErrorType(), errorStat.getCount()));
-                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), errorStat.getRatio()));
+                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), MathUtil.truncate(errorStat.getRatio(),3)));
                 });
 
         return new Object[]{uvBillDataVOList, transformDataVOList};
