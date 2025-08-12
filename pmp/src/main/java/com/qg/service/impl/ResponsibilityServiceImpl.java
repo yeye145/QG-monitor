@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qg.domain.Code.INTERNAL_ERROR;
 import static com.qg.domain.Code.SUCCESS;
 
 @Service
@@ -66,10 +67,10 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
                     return new Result(Code.BAD_REQUEST, "平台类型错误");
             }
         } catch (Exception e) {
-            log.error("处理责任链失败: projectId={}, errorType={}, platform={}",
-                    responsibility.getProjectId(), responsibility.getErrorType(),
+            log.error("处理责任链失败: projectId={}, errorId={}, platform={}",
+                    responsibility.getProjectId(), responsibility.getErrorId(),
                     responsibility.getPlatform(), e);
-            return new Result(Code.INTERNAL_ERROR, "处理责任链失败: " + e.getMessage());
+            return new Result(INTERNAL_ERROR, "处理责任链失败: " + e.getMessage());
         }
     }
 
@@ -171,7 +172,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
 
             return new Result(Code.SUCCESS, "委派任务成功");
         } else {
-            return new Result(Code.INTERNAL_ERROR, "委派任务失败");
+            return new Result(INTERNAL_ERROR, "委派任务失败");
         }
     }
 
@@ -251,7 +252,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         queryWrapper.eq(Responsibility::getProjectId, responsibility.getProjectId())
                 .eq(Responsibility::getErrorId, responsibility.getErrorId());
 
-        return responsibilityMapper.update(responsibility,queryWrapper) > 0 ? new Result(SUCCESS, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
+        return responsibilityMapper.update(responsibility,queryWrapper) > 0 ? new Result(SUCCESS, "更新成功") : new Result(INTERNAL_ERROR, "更新失败");
     }
 
     @Override
@@ -259,7 +260,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         if(id == null){
             return new Result(Code.BAD_REQUEST, "参数不能为空");
         }
-        return responsibilityMapper.deleteById(id) > 0 ? new Result(SUCCESS, "删除成功") : new Result(Code.INTERNAL_ERROR, "删除失败");
+        return responsibilityMapper.deleteById(id) > 0 ? new Result(SUCCESS, "删除成功") : new Result(INTERNAL_ERROR, "删除失败");
     }
 
     @Override
@@ -267,40 +268,45 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         if (projectId == null || projectId.isEmpty() || responsibleId == null) {
             return new Result(Code.BAD_REQUEST, "参数不能为空");
         }
-        LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Responsibility::getProjectId, projectId)
-                .eq(Responsibility::getResponsibleId, responsibleId);
+        try {
+            LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Responsibility::getProjectId, projectId)
+                    .eq(Responsibility::getResponsibleId, responsibleId);
 
-        if (errorType != null &&  !errorType.isEmpty()) {
-            queryWrapper.eq(Responsibility::getErrorType, errorType);
+            if (errorType != null &&  !errorType.isEmpty()) {
+                queryWrapper.eq(Responsibility::getErrorType, errorType);
+            }
+            if (platform == null || platform.isEmpty()) {
+                // 查询所有
+                List<BackendError> backendErrorList = getBackendErrors(queryWrapper, projectId);
+                List<FrontendError> frontendErrorList = getFrontendErrors(queryWrapper, projectId);
+                List<MobileError> mobileErrorList = getMobileErrors(queryWrapper, projectId);
+                return new Result(Code.SUCCESS,
+                        Arrays.asList(backendErrorList, frontendErrorList, mobileErrorList),
+                        "查询成功");
+            }
+            return switch (platform) {
+                case "backend" -> {
+                    // 查询后端
+                    List<BackendError> backendErrors = getBackendErrors(queryWrapper, projectId);
+                    yield new Result(Code.SUCCESS, backendErrors, "查询成功");
+                }
+                case "frontend" -> {
+                    // 查询前端
+                    List<FrontendError> frontendErrors = getFrontendErrors(queryWrapper, projectId);
+                    yield new Result(Code.SUCCESS, frontendErrors, "查询成功");
+                }
+                case "mobile" -> {
+                    // 查询移动端
+                    List<MobileError> mobileErrors = getMobileErrors(queryWrapper, projectId);
+                    yield new Result(Code.SUCCESS, mobileErrors, "查询成功");
+                }
+                default -> new Result(Code.BAD_REQUEST, "平台参数错误");
+            };
+        } catch (Exception e) {
+            log.error("查询错误失败，参数: {}", projectId, e);
+            return new Result(INTERNAL_ERROR, "查询所负责错误类型失败:");
         }
-        if (platform == null || platform.isEmpty()) {
-            // 查询所有
-            List<BackendError> backendErrorList = getBackendErrors(queryWrapper, projectId);
-            List<FrontendError> frontendErrorList = getFrontendErrors(queryWrapper, projectId);
-            List<MobileError> mobileErrorList = getMobileErrors(queryWrapper, projectId);
-            return new Result(Code.SUCCESS,
-                    Arrays.asList(backendErrorList, frontendErrorList, mobileErrorList),
-                    "查询成功");
-        }
-        return switch (platform) {
-            case "backend" -> {
-                // 查询后端
-                List<BackendError> backendErrors = getBackendErrors(queryWrapper, projectId);
-                yield new Result(Code.SUCCESS, backendErrors, "查询成功");
-            }
-            case "frontend" -> {
-                // 查询前端
-                List<FrontendError> frontendErrors = getFrontendErrors(queryWrapper, projectId);
-                yield new Result(Code.SUCCESS, frontendErrors, "查询成功");
-            }
-            case "mobile" -> {
-                // 查询移动端
-                List<MobileError> mobileErrors = getMobileErrors(queryWrapper, projectId);
-                yield new Result(Code.SUCCESS, mobileErrors, "查询成功");
-            }
-            default -> new Result(Code.BAD_REQUEST, "平台参数错误");
-        };
     }
 
     /**
