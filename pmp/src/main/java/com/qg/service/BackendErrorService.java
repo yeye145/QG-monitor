@@ -19,4 +19,6 @@ public interface BackendErrorService {
     Integer saveBackendError(BackendError backendError);
 
     Result addBackendError(String errorData);
+
+    Object[] getBackendErrorStats(String projectId);
 }

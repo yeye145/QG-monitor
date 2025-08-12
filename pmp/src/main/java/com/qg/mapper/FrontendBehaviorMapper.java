@@ -20,7 +20,6 @@ import java.util.List;
 @Mapper
 public interface FrontendBehaviorMapper extends BaseMapper<FrontendBehavior> {
 
-
     /**
      * 查询指定时间段内指定项目下的所有前端行为
      *
@@ -30,14 +29,14 @@ public interface FrontendBehaviorMapper extends BaseMapper<FrontendBehavior> {
      * @return
      */
     @Select("""
-            SELECT 
+            SELECT
               (crumb->'data'->>'route') AS route,
               AVG((crumb->'data'->>'totalTime')::BIGINT) AS avg_total_time,
               AVG((crumb->'data'->>'visibleTime')::BIGINT) AS avg_visible_time,
               COUNT(*) AS samples
             FROM frontend_behavior,
-                 jsonb_array_elements(breadcrumbs) AS crumb  -- 移除LATERAL，GaussDB可能不支持
-            WHERE 
+                 jsonb_array_elements(breadcrumbs) AS crumb
+            WHERE
               project_id = #{projectId}
               AND timestamp BETWEEN #{startTime} AND #{endTime}
               AND crumb->>'message' = 'Page stay time recorded'
@@ -59,18 +58,18 @@ public interface FrontendBehaviorMapper extends BaseMapper<FrontendBehavior> {
      * @return
      */
     @Select("""
-            SELECT 
+            SELECT
               (crumb->'data'->>'route') AS route,
               AVG((crumb->'data'->>'totalTime')::BIGINT) AS avg_total_time,
               AVG((crumb->'data'->>'visibleTime')::BIGINT) AS avg_visible_time,
               COUNT(*) AS samples
             FROM frontend_behavior,
                  jsonb_array_elements(breadcrumbs) AS crumb
-            WHERE 
+            WHERE
               project_id = #{projectId, jdbcType=VARCHAR}
               AND timestamp BETWEEN #{startTime, jdbcType=TIMESTAMP} AND #{endTime, jdbcType=TIMESTAMP}
               AND crumb->>'message' = 'Page stay time recorded'
-              AND (CAST(#{route, jdbcType=VARCHAR} AS TEXT) IS NULL 
+              AND (CAST(#{route, jdbcType=VARCHAR} AS TEXT) IS NULL
                    OR crumb->'data'->>'route' = CAST(#{route, jdbcType=VARCHAR} AS TEXT))
             GROUP BY route
             """)
@@ -79,4 +78,6 @@ public interface FrontendBehaviorMapper extends BaseMapper<FrontendBehavior> {
             @Param("route") String route,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
+
+
 }
