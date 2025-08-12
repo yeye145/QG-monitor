@@ -16,9 +16,9 @@ public interface ProjectService {
 
      Result getPublicProjectList();
 
-     Result getPersonalPublicProject(Long userId);
+     Result getPersonalProject(Long userId);
 
-     Result getPersonalUnpublicProject(Long userId);
+//     Result getPersonalUnpublicProject(Long userId);
 
     Result getInviteDCode(String projectId);
 

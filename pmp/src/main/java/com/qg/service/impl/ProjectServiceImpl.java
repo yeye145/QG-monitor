@@ -175,9 +175,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     //用户获取公开项目的列表
     @Override
-    public Result getPersonalPublicProject(Long userId) {
+    public Result getPersonalProject(Long userId) {
         LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Role::getUserId, userId );
+        lqw.eq(Role::getUserId, userId);
         List<Role> list = roleMapper.selectList(lqw);
         if (list == null) {
             return new Result(Code.NOT_FOUND, "用户暂无参与项目！");
@@ -190,7 +190,7 @@ public class ProjectServiceImpl implements ProjectService {
             String uuid = role.getProjectId();
 
             LambdaQueryWrapper< Project> lqw1 = new LambdaQueryWrapper<>();
-            lqw1.eq(Project::getUuid, uuid).eq(Project::getIsDeleted, false).eq(Project::getIsPublic, true);
+            lqw1.eq(Project::getUuid, uuid).eq(Project::getIsDeleted, false);
             Project project = projectMapper.selectOne(lqw1);
 
             if(project != null )
@@ -201,40 +201,40 @@ public class ProjectServiceImpl implements ProjectService {
             }
             // 复制属性
         }
-        if(personalProjectVOList.size() == 0)  return new Result(Code.NOT_FOUND, "没有项目");
+        if(personalProjectVOList.isEmpty())  return new Result(Code.NOT_FOUND, "没有项目");
         return new Result(SUCCESS, personalProjectVOList,"获取用户个人参与项目成功！");
     }
 
-    //用户获取非公开项目的列表
-    @Override
-    public Result getPersonalUnpublicProject(Long userId) {
-        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Role::getUserId, userId );
-        List<Role> list = roleMapper.selectList(lqw);
-        if (list == null) {
-            return new Result(Code.NOT_FOUND, "用户暂无参与项目！");
-        }
-        List<PersonalProjectVO> personalProjectVOList = new ArrayList<>();
-
-        // 遍历Role列表，转换为PersonalProjectVO
-        for (Role role : list) {
-            PersonalProjectVO vo = new PersonalProjectVO();
-            String uuid = role.getProjectId();
-            LambdaQueryWrapper< Project> lqw1 = new LambdaQueryWrapper<>();
-            lqw1.eq(Project::getUuid, uuid).eq(Project::getIsDeleted, false).eq(Project::getIsPublic, false);
-            Project project = projectMapper.selectOne(lqw1);
-            if(project != null)
-            {
-                // 复制属性
-                BeanUtils.copyProperties(role, vo);
-                BeanUtils.copyProperties(project, vo);
-                personalProjectVOList.add(vo);
-            }
-
-        }
-        if(personalProjectVOList.size() == 0)  return new Result(Code.NOT_FOUND, "没有项目");
-        return new Result(SUCCESS, personalProjectVOList,"获取用户个人参与项目成功！");
-    }
+//    //用户获取非公开项目的列表
+//    @Override
+//    public Result getPersonalUnpublicProject(Long userId) {
+//        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
+//        lqw.eq(Role::getUserId, userId );
+//        List<Role> list = roleMapper.selectList(lqw);
+//        if (list == null) {
+//            return new Result(Code.NOT_FOUND, "用户暂无参与项目！");
+//        }
+//        List<PersonalProjectVO> personalProjectVOList = new ArrayList<>();
+//
+//        // 遍历Role列表，转换为PersonalProjectVO
+//        for (Role role : list) {
+//            PersonalProjectVO vo = new PersonalProjectVO();
+//            String uuid = role.getProjectId();
+//            LambdaQueryWrapper< Project> lqw1 = new LambdaQueryWrapper<>();
+//            lqw1.eq(Project::getUuid, uuid).eq(Project::getIsDeleted, false).eq(Project::getIsPublic, false);
+//            Project project = projectMapper.selectOne(lqw1);
+//            if(project != null)
+//            {
+//                // 复制属性
+//                BeanUtils.copyProperties(role, vo);
+//                BeanUtils.copyProperties(project, vo);
+//                personalProjectVOList.add(vo);
+//            }
+//
+//        }
+//        if(personalProjectVOList.size() == 0)  return new Result(Code.NOT_FOUND, "没有项目");
+//        return new Result(SUCCESS, personalProjectVOList,"获取用户个人参与项目成功！");
+//    }
 
     @Override
     public Result getInviteDCode(String projectId) {
