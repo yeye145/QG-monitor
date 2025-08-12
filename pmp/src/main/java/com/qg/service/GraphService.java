@@ -2,6 +2,7 @@ package com.qg.service;
 
 import com.qg.vo.ErrorTrendVO;
 import com.qg.vo.FrontendBehaviorVO;
+import com.qg.vo.FrontendPerformanceAverageVO;
 import com.qg.vo.ManualTrackingVO;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,4 +24,7 @@ public interface GraphService {
             (String projectId, LocalDateTime startTime, LocalDateTime endTime);
 
     Object[] getErrorStats(String projectId);
+
+    FrontendPerformanceAverageVO getAverageFrontendPerformanceTime
+            (String projectId, LocalDateTime startTime, LocalDateTime endTime);
 }
