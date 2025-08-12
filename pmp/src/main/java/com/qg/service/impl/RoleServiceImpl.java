@@ -3,6 +3,7 @@ package com.qg.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.*;
 import com.qg.mapper.ProjectMapper;
+import com.qg.mapper.ResponsibilityMapper;
 import com.qg.mapper.RoleMapper;
 import com.qg.mapper.UsersMapper;
 import com.qg.service.RoleService;
@@ -28,6 +29,8 @@ public class RoleServiceImpl implements RoleService {
     private UsersMapper usersMapper;
     @Autowired
     private ProjectMapper projectMapper;
+    @Autowired
+    private ResponsibilityMapper responsibilityMapper;
     @Override
     public Result addRole(Role role) {
         //判断该用户是否在项目中
@@ -80,30 +83,47 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Result deleteRole(String projectId, Long userId) {
         // 参数校验
-
-        if (projectId == null || userId == null) {
+        if (projectId == null || projectId.isEmpty() || userId == null) {
             return new Result(Code.BAD_REQUEST, "用户ID和项目ID不能为空");
         }
 
         try {
-            // 构建删除条件
-            LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(Role::getUserId, userId)
+            // 检查用户是否在项目中
+            LambdaQueryWrapper<Role> roleQueryWrapper = new LambdaQueryWrapper<>();
+            roleQueryWrapper.eq(Role::getUserId, userId)
                     .eq(Role::getProjectId, projectId);
 
-            // 直接执行删除操作
-            int deleteResult = roleMapper.delete(lqw);
-
-            if (deleteResult > 0) {
-                log.info("删除用户角色成功，用户id： {}", userId);
-                return new Result(Code.SUCCESS, "删除成功");
-            } else {
-                log.info("删除用户角色失败，用户id： {}", userId);
+            Role existingRole = roleMapper.selectOne(roleQueryWrapper);
+            if (existingRole == null) {
+                log.info("删除用户角色失败，用户未加入该项目: userId={}, projectId={}", userId, projectId);
                 return new Result(Code.NOT_FOUND, "该用户未加入该项目");
             }
+
+            // 删除role记录
+            int deleteRoleResult = roleMapper.delete(roleQueryWrapper);
+
+            // 删除responsibility中相关用户数据
+            LambdaQueryWrapper<Responsibility> responsibilityQueryWrapper = new LambdaQueryWrapper<>();
+            responsibilityQueryWrapper
+                    .eq(Responsibility::getProjectId, projectId)
+                    .and(wrapper -> wrapper
+                            .eq(Responsibility::getDelegatorId, userId)
+                            .or()
+                            .eq(Responsibility::getResponsibleId, userId));
+
+            int deleteResponsibilityResult = responsibilityMapper.delete(responsibilityQueryWrapper);
+
+            if (deleteRoleResult > 0) {
+                log.info("删除用户角色成功: userId={}, projectId={}, 删除责任链记录数: {}",
+                        userId, projectId, deleteResponsibilityResult);
+                return new Result(Code.SUCCESS, "删除成功");
+            } else {
+                log.warn("删除用户角色失败: userId={}, projectId={}", userId, projectId);
+                return new Result(Code.INTERNAL_ERROR, "删除失败");
+            }
+
         } catch (Exception e) {
-            log.error("删除用户角色失败: userId={}, projectId={}",
-                    userId, projectId, e);
+            log.error("删除用户角色失败: userId={}, projectId={}", userId, projectId, e);
             return new Result(Code.INTERNAL_ERROR, "删除失败: " + e.getMessage());
         }
     }
