@@ -6,17 +6,15 @@ import com.qg.domain.BackendError;
 import com.qg.domain.Project;
 import com.qg.mapper.BackendErrorMapper;
 import com.qg.mapper.ProjectMapper;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PreDestroy;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.*;
 
 @Service

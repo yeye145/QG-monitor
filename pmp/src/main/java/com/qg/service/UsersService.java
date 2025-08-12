@@ -18,4 +18,6 @@ public interface UsersService {
     Result findPassword(Users user, String code);
 
     boolean updateAvatar(Long userId, String avatarUrl);
+
+    Result updateUser(Users users);
 }

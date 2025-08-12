@@ -1,5 +1,7 @@
 package com.qg.repository;
 
+import com.qg.domain.BackendError;
+import com.qg.domain.FrontendError;
 import com.qg.domain.MobileError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -34,12 +37,12 @@ public abstract class StatisticsDataRepository<T> {
     // 批量检查脚本
     private static final DefaultRedisScript<List> BATCH_CHECK_SCRIPT = new DefaultRedisScript<>(
             """
-            local result = {}
-            for i, key in ipairs(KEYS) do
-                result[i] = redis.call('EXISTS', key) == 0 and 1 or 0
-            end
-            return result
-            """,
+                    local result = {}
+                    for i, key in ipairs(KEYS) do
+                        result[i] = redis.call('EXISTS', key) == 0 and 1 or 0
+                    end
+                    return result
+                    """,
             List.class
     );
 
@@ -74,12 +77,23 @@ public abstract class StatisticsDataRepository<T> {
         T cached = cacheMap.computeIfAbsent(key, k -> entity);
         incrementEvent(cached);
 
-        // 如果是MobileError类型，触发告警检查
+
+        // 如果是MobileError类型，触发告警检查  ？
         if (entity instanceof MobileError) {
             MobileErrorFatherRepository repository = (MobileErrorFatherRepository) this;
             repository.sendWechatAlert((MobileError) cached);
         }
+        if (entity instanceof FrontendError) {
+            FrontendErrorFatherRepository repository = (FrontendErrorFatherRepository) this;
+            repository.sendWechatAlert((FrontendError) cached);
+        }
+        if (entity instanceof BackendError) {
+            BackendErrorFatherRepository repository = (BackendErrorFatherRepository) this;
+            repository.sendWechatAlert((BackendError) cached);
+        }
+
     }
+
 
     /**
      * 定时将缓存中的数据批量存入数据库
