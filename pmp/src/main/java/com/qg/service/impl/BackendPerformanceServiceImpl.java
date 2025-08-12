@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +80,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
         List<BackendPerformance> backendPerformances = backendPerformanceMapper.selectList(queryWrapper);
 
 
-        return new Result(SUCCESS, backendPerformances, "查询成功" );
+        return new Result(SUCCESS, List.of(backendPerformances,new ArrayList<>(),new ArrayList<>()), "查询成功" );
     }
 
     @Override

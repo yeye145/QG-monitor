@@ -33,5 +33,9 @@ public class MobilePerformance {
     private String batteryLevel;
     @TableField(typeHandler = MapHandler.class)
     private Map<String, Object> memoryUsage;
-    private String operationFps;
+    private Long operationFps;
+    private Integer event;
+    private String apiName;
+    private Long apiTime;
+    private String operationId;
 }

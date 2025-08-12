@@ -26,6 +26,7 @@ public class MobileResponsibilityVO {
     private String message;
     private String stack;
     private String className;
+    private Integer event;
 
 
     private String name;

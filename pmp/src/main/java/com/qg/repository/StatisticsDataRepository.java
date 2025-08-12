@@ -1,6 +1,6 @@
 package com.qg.repository;
 
-import com.qg.domain.MobileError;
+import com.qg.dto.MobileError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;

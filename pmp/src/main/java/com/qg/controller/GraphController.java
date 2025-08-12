@@ -5,10 +5,8 @@ import com.qg.domain.Code;
 import com.qg.domain.Result;
 
 
-import com.qg.service.FrontendPerformanceService;
+import com.qg.service.*;
 
-import com.qg.service.FrontendErrorService;
-import com.qg.service.GraphService;
 import com.qg.vo.ErrorTrendVO;
 
 import com.qg.vo.FrontendBehaviorVO;
@@ -39,6 +37,12 @@ public class GraphController {
 
     @Autowired
     private FrontendPerformanceService frontendPerformanceService;
+
+    @Autowired
+    private BackendErrorService backendErrorService;
+
+    @Autowired
+    private MobileErrorService mobileErrorService;
 
 
     /**
@@ -117,9 +121,6 @@ public class GraphController {
     }
 
 
-
-
-
     /**
      * 按时间（允许按照时间筛选）以及错误类别（前端/后端/移动）展示错误量
      *
@@ -160,6 +161,35 @@ public class GraphController {
         } catch (Exception e) {
             log.error("查询错误统计时发生异常: projectId={}", projectId, e);
             return new Result(Code.INTERNAL_ERROR, "查询近一周错误统计失败");
+        }
+    }
+
+
+    @GetMapping("/getBackendErrorStats")
+    public Result getBackendErrorStats(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    backendErrorService.getBackendErrorStats(projectId), "查询近一周后端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询后端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周后端错误统计失败");
+        }
+    }
+
+    @GetMapping("/getMobileErrorStats")
+    public Result getMobileErrorStats(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    mobileErrorService.getMobileErrorStats(projectId), "查询近一周移动端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询移动端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
         }
     }
 

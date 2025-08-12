@@ -8,6 +8,7 @@ import com.qg.service.MobilePerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,6 +52,6 @@ public class MobilePerformanceServiceImpl implements MobilePerformanceService {
 
         List<MobilePerformance> mobilePerformances = mobilePerformanceMapper.selectList(queryWrapper);
 
-        return new Result(200, mobilePerformances, "查询成功");
+        return new Result(200, List.of(new ArrayList<>(),new ArrayList<>(),mobilePerformances), "查询成功");
     }
 }

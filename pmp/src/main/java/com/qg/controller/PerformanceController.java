@@ -65,7 +65,7 @@ public class PerformanceController {
 
     @GetMapping("/selectByCondition")
     public Result selectByCondition(@RequestParam String platform, @RequestParam String projectId,
-                                    @RequestParam(required = false) Long moduleId, @RequestParam(required = false) String api,@RequestParam(required = false) String environment,
+                                    @RequestParam(required = false) Long moduleId, @RequestParam(required = false) String api, @RequestParam(required = false) String environment,
                                     @RequestParam(required = false) String capture,
                                     @RequestParam(required = false) String deviceModel, @RequestParam(required = false) String osVersion) {
         switch (platform) {

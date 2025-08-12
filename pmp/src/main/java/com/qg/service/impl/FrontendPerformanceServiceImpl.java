@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.qg.domain.Code.*;
@@ -84,7 +85,7 @@ public class FrontendPerformanceServiceImpl implements FrontendPerformanceServic
 
         List<FrontendPerformance> frontendPerformances = frontendPerformanceMapper.selectList(queryWrapper);
 
-        return new Result(SUCCESS, frontendPerformances, "查询成功");
+        return new Result(SUCCESS, List.of(new ArrayList<>(),frontendPerformances,new ArrayList<>()), "查询成功");
     }
 
     @Override

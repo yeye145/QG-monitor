@@ -1,7 +1,7 @@
 package com.qg.repository;
 
 import cn.hutool.core.util.StrUtil;
-import com.qg.domain.MobileError;
+import com.qg.dto.MobileError;
 import com.qg.mapper.AlertRuleMapper;
 import com.qg.mapper.MobileErrorMapper;
 import com.qg.mapper.ProjectMapper;
