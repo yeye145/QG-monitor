@@ -2,6 +2,7 @@ package com.qg.service.impl;
 
 import com.qg.mapper.FrontendBehaviorMapper;
 import com.qg.mapper.FrontendErrorMapper;
+import com.qg.mapper.FrontendPerformanceMapper;
 import com.qg.service.GraphService;
 import com.qg.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ public class GraphServiceImpl implements GraphService {
     private FrontendBehaviorMapper frontendBehaviorMapper;
     @Autowired
     private FrontendErrorMapper frontendErrorMapper;
+    @Autowired
+    private FrontendPerformanceMapper frontendPerformanceMapper;
 
     /**
      * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
@@ -55,6 +58,7 @@ public class GraphServiceImpl implements GraphService {
 
     /**
      * 按时间（允许按照时间筛选）以及错误类别（前端/后端/移动）展示错误量
+     *
      * @param projectId
      * @param startTime
      * @param endTime
@@ -68,6 +72,7 @@ public class GraphServiceImpl implements GraphService {
 
     /**
      * 获取埋点错误统计
+     *
      * @param projectId
      * @param startTime
      * @param endTime
@@ -81,6 +86,7 @@ public class GraphServiceImpl implements GraphService {
 
     /**
      * 获取两种前端错误信息
+     *
      * @param projectId
      * @return
      */
@@ -98,4 +104,18 @@ public class GraphServiceImpl implements GraphService {
 
         return new Object[]{uvBillDataVOList, transformDataVOList};
     }
+
+    /**
+     * 获取前端性能，加载时间数据
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public FrontendPerformanceAverageVO getAverageFrontendPerformanceTime
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return frontendPerformanceMapper.queryAverageFrontendPerformanceTime(projectId, startTime, endTime);
+    }
+
 }
