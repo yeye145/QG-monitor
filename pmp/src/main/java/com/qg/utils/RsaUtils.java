@@ -26,6 +26,7 @@ public class RsaUtils {
                     .replaceAll("-----END PUBLIC KEY-----", "")
                     .replaceAll("\\s", "");
 
+
             byte[] keyBytes = Base64.getDecoder().decode(publicKeyContent);
             PublicKey publicKey = KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(keyBytes));
@@ -51,12 +52,13 @@ public class RsaUtils {
     /**
      * RSA 私钥解密（兼容前端加密结果）
      */
-    public static String decrypt(String encryptedData, String privateKeyPem) throws Exception {
+    public static byte[] decrypt(String encryptedData, String privateKeyPem) throws Exception {
         try {
             // 移除 PEM 格式的标记
             String privateKeyContent = privateKeyPem.replaceAll("-----BEGIN PRIVATE KEY-----", "")
                     .replaceAll("-----END PRIVATE KEY-----", "")
                     .replaceAll("\\s", "");
+
 
             byte[] keyBytes = Base64.getDecoder().decode(privateKeyContent);
             PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
@@ -75,8 +77,9 @@ public class RsaUtils {
             cipher.init(Cipher.DECRYPT_MODE, keyFactory.generatePrivate(spec), oaepParams);
 
             byte[] decoded = Base64.getDecoder().decode(encryptedData);
-            byte[] decrypted = cipher.doFinal(decoded);
-            return new String(decrypted, StandardCharsets.UTF_8);
+            //byte[] decrypted = cipher.doFinal(decoded);
+
+            return cipher.doFinal(decoded);
         } catch (Exception e) {
             throw new RuntimeException("RSA 解密失败", e);
         }

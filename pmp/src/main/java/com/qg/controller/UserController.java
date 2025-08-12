@@ -70,7 +70,7 @@ public class UserController {
             // 3. 业务处理
             Map<String, Object> map = usersService.loginByPassword(email, password);
             if (map == null) {
-                return new Result(NOT_FOUND, "用户未注册");
+                return new Result(NOT_FOUND, "用户未注册或密码错误");
             }
             Users user = (Users) map.get("user");
             if (user == null) {
@@ -255,7 +255,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/updateUser")
+    @PutMapping("/updateUser")
     public Result updateUser(@RequestBody EncryptedRequestDTO request) {
         log.info("接收到的参数: {}",request);
         // 1. 使用CryptoUtils解密请求
@@ -269,7 +269,7 @@ public class UserController {
             log.info("解密后的JSON: {}", decryptedJson);
             Map<String, Object> params = new ObjectMapper()
                     .readValue(decryptedJson, new TypeReference<Map<String, Object>>() {});
-            Users users = new ObjectMapper().convertValue(params.get("users"), Users.class);
+            Users users = new ObjectMapper().convertValue(params.get("user"), Users.class);
             log.info("用户信息: {}", users);
             return usersService.updateUser(users);
         } catch (Exception e) {
