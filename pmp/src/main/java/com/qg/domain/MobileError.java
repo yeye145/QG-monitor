@@ -29,4 +29,13 @@ public class MobileError {
     private String message;
     private String stack;
     private String className;
+
+    private Integer event = 0;
+    public synchronized void incrementEvent() {
+        event++;
+    }
+
+    public synchronized int getEvent() {
+        return event;
+    }
 }

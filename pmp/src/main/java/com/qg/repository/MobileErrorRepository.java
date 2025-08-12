@@ -64,7 +64,7 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
             , String projectId, Long errorId, LocalDateTime timestamp) {
 
 
-        return true;
+        return false;
     }
 
     /**
