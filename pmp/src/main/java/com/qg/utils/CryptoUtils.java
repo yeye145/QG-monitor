@@ -32,10 +32,15 @@ public class CryptoUtils {
      */
     public static String decryptWithAESAndRSA(String encryptedData, String encryptedKey, String rsaPrivateKey) throws Exception {
         // 用 RSA 解密 AES 密钥
-        String aesKey = RsaUtils.decrypt(encryptedKey, rsaPrivateKey);
+        byte[] aesKey = RsaUtils.decrypt(encryptedKey, rsaPrivateKey);
         log.info("解密后的AES密钥：" + aesKey);
+
+        // 将二进制密钥转为Base64字符串（因为AES工具类需要Base64格式的密钥）
+        String aesKeyBase64 = Base64.getEncoder().encodeToString(aesKey);
+        log.info("Base64编码后的AES密钥: " + aesKeyBase64);
+
         // 用 AES 解密数据
-        return AesUtils.decrypt(encryptedData, aesKey);
+        return AesUtils.decrypt(encryptedData, aesKeyBase64);
     }
 
     public static String generateRandomAESKey(int keyLength) {

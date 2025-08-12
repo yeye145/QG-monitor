@@ -4,7 +4,6 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.aggregator.BackendErrorAggregator;
 import com.qg.domain.BackendError;
-import com.qg.domain.BackendPerformance;
 import com.qg.domain.Module;
 import com.qg.domain.Result;
 import com.qg.mapper.BackendErrorMapper;
@@ -78,6 +77,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
         return backendErrorMapper.insert(backendError);
     }
+
 
     @Override
     public Result addBackendError(String errorData) {

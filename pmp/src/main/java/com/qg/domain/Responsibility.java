@@ -21,6 +21,7 @@ public class Responsibility {
     private Long errorId;
     private String errorType;
     private OffsetDateTime createTime;
+    private Integer isHandle;
 
 
 }

@@ -282,11 +282,23 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Result updateUser(Users users) {
-        int count = usersMapper.updateById(users);
-        if(count == 0){
+        Long id = users.getId();
+        log.info("用户ID: {}", id);
+        // 1. 先查询确保用户存在
+        Users existingUser = usersMapper.selectById(id);
+        log.info("用户：{}", existingUser);
+        if(existingUser == null) {
             return new Result(NOT_FOUND, "用户不存在");
         }
-        Long id = users.getId();
+
+        LambdaQueryWrapper<Users> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Users::getId, id);
+
+        int count = usersMapper.update(users,queryWrapper);
+        if(count == 0){
+            return new Result(NOT_FOUND, "用户数据修改失败");
+        }
+
         Users user = usersMapper.selectById(id);
         user.setPassword(null);
         user.setIsDeleted(null);
