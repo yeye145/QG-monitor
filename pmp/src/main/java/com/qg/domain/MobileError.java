@@ -31,11 +31,12 @@ public class MobileError {
     private String className;
 
     private Integer event = 0;
+
     public synchronized void incrementEvent() {
         event++;
     }
 
-    public synchronized int getEvent() {
+    public synchronized Integer getEvent() {
         return event;
     }
 }
