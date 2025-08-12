@@ -5,15 +5,17 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.aggregator.FrontendErrorAggregator;
 import com.qg.domain.FrontendError;
-import com.qg.domain.FrontendPerformance;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendErrorMapper;
 import com.qg.service.FrontendErrorService;
+import com.qg.vo.TransformDataVO;
+import com.qg.vo.UvBillDataVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.qg.domain.Code.*;
@@ -79,8 +81,8 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
             log.debug("前端错误信息list长度： {}", frontendErrorList.size());
             for (FrontendError frontendError : frontendErrorList) {
                 if (frontendError.getProjectId() == null ||
-                        frontendError.getErrorType() == null ||
-                        frontendError.getSessionId() == null
+                    frontendError.getErrorType() == null ||
+                    frontendError.getSessionId() == null
                 ) {
                     log.error("参数错误");
                     return new Result(BAD_REQUEST, "参数错误");
@@ -99,5 +101,25 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
             log.error("添加错误信息时出错，错误信息： {}", errorData, e);
             return new Result(INTERNAL_ERROR, "添加错误信息失败");
         }
+    }
+
+    /**
+     * 获取两种前端错误信息
+     * @param projectId
+     * @return
+     */
+    @Override
+    public Object[] getErrorStats(String projectId) {
+
+        List<UvBillDataVO> uvBillDataVOList = new ArrayList<>();
+        List<TransformDataVO> transformDataVOList = new ArrayList<>();
+        frontendErrorMapper
+                .getFrontendErrorStats(projectId)
+                .forEach(errorStat -> {
+                    uvBillDataVOList.add(new UvBillDataVO(errorStat.getErrorType(), errorStat.getCount()));
+                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), errorStat.getRatio()));
+                });
+
+        return new Object[]{uvBillDataVOList, transformDataVOList};
     }
 }

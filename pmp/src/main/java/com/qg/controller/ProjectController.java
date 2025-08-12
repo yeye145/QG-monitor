@@ -60,33 +60,41 @@ public class ProjectController {
     }
 
     /**
-     * 公开项目查看列表
+     * 获取公开项目
      * @return
      */
-    @GetMapping("/getProjectList")
-    public Result getProjectList(){
-        return ProjectService.getProjectList();
+    @GetMapping("/getPublicProjectList")
+    public Result getPublicProjectList(){
+        return ProjectService.getPublicProjectList();
     }
 
     /**
-     * 获取个人公开项目列表
+     * 获取私有项目
+     * @return
+     */
+    @GetMapping("/getPrivateProject")
+    public Result getPrivateProjectList() {
+        return ProjectService.getPrivateProjectList();
+    }
+    /**
+     * 获取个人项目列表
      * @param userId
      * @return
      */
-    @GetMapping("/getPersonalPublicProject")
-    public Result getPersonalPublicProject(@RequestParam Long userId){
-        return ProjectService.getPersonalPublicProject(userId);
+    @GetMapping("/getPersonalProject")
+    public Result getPersonalProject(@RequestParam Long userId){
+        return ProjectService.getPersonalProject(userId);
     }
 
-    /**
-     * 获取个人非公开项目列表
-     * @param userId
-     * @return
-     */
-    @GetMapping("/getPersonalUnpublicProject")
-    public Result getPersonalUnpublicProject(@RequestParam Long userId){
-        return ProjectService.getPersonalUnpublicProject(userId);
-    }
+//    /**
+//     * 获取个人非公开项目列表
+//     * @param userId
+//     * @return
+//     */
+//    @GetMapping("/getPersonalUnpublicProject")
+//    public Result getPersonalUnpublicProject(@RequestParam Long userId){
+//        return ProjectService.getPersonalUnpublicProject(userId);
+//    }
 
     /**
      * 获取项目邀请码

@@ -238,13 +238,12 @@ public class UserController {
                 return new Result(BAD_REQUEST, "图片大小不能超过2MB");
             }
 
-            System.out.println("file ==> " + file);
-            System.out.println("fileName ==> " + file.getOriginalFilename());
+            log.info("file ==> " + file.getOriginalFilename());
             String avatarUrl = FileUploadHandler.saveFile(file, IMAGE_DIR);
 
             // 判断头像是否上传成功返回相应的结果
             if (usersService.updateAvatar(userId, avatarUrl)) {
-                System.out.println("上传头像成功，url=====>" + avatarUrl);
+                log.info("上传头像成功，url: {}", avatarUrl);
                 return new Result(SUCCESS, avatarUrl, "头像上传成功");
             } else {
                 return new Result(NOT_FOUND, "用户不存在");
@@ -282,7 +281,7 @@ public class UserController {
 
     @PostMapping("/password1")
     public Result loginByPassword(@RequestBody Users user) {
-        log.info("用户登录，用户名: {}, 密码: {}", user.getEmail(), user.getPassword());
+        log.info("用户登录，邮箱: {}, 密码: {}", user.getEmail(), user.getPassword());
         return new Result(200,"登录成功");
     }
 }

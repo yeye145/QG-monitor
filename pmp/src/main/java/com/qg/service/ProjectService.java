@@ -14,15 +14,17 @@ public interface ProjectService {
 
      Result getProject(String uuid);
 
-     Result getProjectList();
+     Result getPublicProjectList();
 
-     Result getPersonalPublicProject(Long userId);
+     Result getPersonalProject(Long userId);
 
-     Result getPersonalUnpublicProject(Long userId);
+//     Result getPersonalUnpublicProject(Long userId);
 
     Result getInviteDCode(String projectId);
 
      Result joinProject(InviteDto inviteDto);
 
     Result selectProjectByName(String name);
+
+    Result getPrivateProjectList();
 }

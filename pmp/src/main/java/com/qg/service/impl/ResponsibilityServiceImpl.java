@@ -46,8 +46,9 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         }
 
         if (responsibility.getProjectId() == null || responsibility.getProjectId().isEmpty()
-                || responsibility.getErrorType() == null || responsibility.getErrorType().isEmpty()
-                || responsibility.getPlatform() == null || responsibility.getPlatform().isEmpty()) {
+                || responsibility.getErrorId() == null
+                || responsibility.getPlatform() == null || responsibility.getPlatform().isEmpty()
+                || responsibility.getResponsibleId() == null || responsibility.getDelegatorId() == null) {
             return new Result(Code.BAD_REQUEST, "参数类型不能为空");
         }
 
@@ -78,12 +79,13 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         // 判断错误类型是否存在
         LambdaQueryWrapper<BackendError> backendQueryWrapper = new LambdaQueryWrapper<>();
         backendQueryWrapper.eq(BackendError::getProjectId, responsibility.getProjectId())
-                .eq(BackendError::getErrorType, responsibility.getErrorType());
+                .eq(BackendError::getId, responsibility.getErrorId());
 
-        if (backendErrorMapper.selectCount(backendQueryWrapper) == 0) {
+        BackendError backendError = backendErrorMapper.selectOne(backendQueryWrapper);
+        if (backendError == null) {
             return new Result(Code.BAD_REQUEST, "后端错误类型不存在");
         }
-
+        responsibility.setErrorType(backendError.getErrorType());
         // 处理责任链记录
         return saveOrUpdateResponsibility(responsibility, "backend");
     }
@@ -95,12 +97,13 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         // 判断错误类型是否存在
         LambdaQueryWrapper<FrontendError> frontendQueryWrapper = new LambdaQueryWrapper<>();
         frontendQueryWrapper.eq(FrontendError::getProjectId, responsibility.getProjectId())
-                .eq(FrontendError::getErrorType, responsibility.getErrorType());
+                .eq(FrontendError::getId, responsibility.getErrorId());
 
-        if (frontendErrorMapper.selectCount(frontendQueryWrapper) == 0) {
+        FrontendError frontendError = frontendErrorMapper.selectOne(frontendQueryWrapper);
+        if (frontendError == null) {
             return new Result(Code.BAD_REQUEST, "前端错误类型不存在");
         }
-
+        responsibility.setErrorType(frontendError.getErrorType());
         // 处理责任链记录
         return saveOrUpdateResponsibility(responsibility, "frontend");
     }
@@ -112,12 +115,13 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         // 判断错误类型是否存在
         LambdaQueryWrapper<MobileError> mobileQueryWrapper = new LambdaQueryWrapper<>();
         mobileQueryWrapper.eq(MobileError::getProjectId, responsibility.getProjectId())
-                .eq(MobileError::getErrorType, responsibility.getErrorType());
+                .eq(MobileError::getId, responsibility.getErrorId());
 
-        if (mobileErrorMapper.selectCount(mobileQueryWrapper) == 0) {
+        MobileError mobileError = mobileErrorMapper.selectOne(mobileQueryWrapper);
+        if (mobileError == null) {
             return new Result(Code.BAD_REQUEST, "移动端错误类型不存在");
         }
-
+        responsibility.setErrorType(mobileError.getErrorType());
         // 处理责任链记录
         return saveOrUpdateResponsibility(responsibility, "mobile");
     }
