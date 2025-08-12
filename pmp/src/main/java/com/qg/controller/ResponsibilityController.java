@@ -66,4 +66,16 @@ public class ResponsibilityController {
        return responsibilityService.deleteResponsibility(id);
    }
 
+
+    /**
+     * 获取个人被委派的错误
+     * @param responsibleId
+     * @return
+     */
+   @GetMapping("/selectResponsibleError")
+    public Result selectResponsibleError(@RequestParam String projectId, @RequestParam Long responsibleId,
+                                         @RequestParam(required = false) String errorType, @RequestParam(required = false) String platform) {
+       return responsibilityService.selectResponsibleError(projectId, responsibleId, errorType, platform);
+   }
+
 }

@@ -4,7 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
 
-
+import com.qg.mapper.FrontendPerformanceMapper;
+import com.qg.service.FrontendPerformanceService;
 import com.qg.service.*;
 
 import com.qg.service.GraphService;
@@ -39,6 +40,8 @@ public class GraphController {
 
     @Autowired
     private FrontendPerformanceService frontendPerformanceService;
+    @Autowired
+    private FrontendPerformanceMapper frontendPerformanceMapper;
 
     @Autowired
     private BackendPerformanceService backendPerformanceService;
@@ -303,6 +306,42 @@ public class GraphController {
     public Result getFrontendButton(@RequestParam String projectId){
         return frontendBehaviorService.getFrontendButton(projectId);
     }
+    /**
+     * 查询查询前端性能数据-平均时间
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getAverageFrontendPerformanceTime")
+    public Result getAverageFrontendPerformanceTime(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        // 时间需要有交集
+        if (startTime.isAfter(endTime)) {
+            log.warn("时间交集为空");
+            return new Result(Code.BAD_REQUEST, "时间交集为空");
+        }
+
+        try {
+            return new Result(Code.SUCCESS
+                    , frontendPerformanceMapper
+                    .queryAverageFrontendPerformanceTime(projectId, startTime, endTime)
+                    , "查询前端性能数据-平均时间,成功");
+        } catch (Exception e) {
+            log.error("查询查询前端性能数据-平均时间,失败:{}", e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "查询查询前端性能数据-平均时间,失败");
+        }
+
+    }
+
     /**
      * 判断项目id、时间是否为空
      *
