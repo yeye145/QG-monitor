@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.qg.domain.Code.*;
@@ -84,11 +85,11 @@ public class FrontendPerformanceServiceImpl implements FrontendPerformanceServic
 
         List<FrontendPerformance> frontendPerformances = frontendPerformanceMapper.selectList(queryWrapper);
 
-        return new Result(SUCCESS, frontendPerformances, "查询成功");
+        return new Result(SUCCESS, List.of(new ArrayList<>(),frontendPerformances,new ArrayList<>()), "查询成功");
     }
 
     @Override
-    public Result getVisits(String projectId, String timeType, Integer number) {
+    public Result getVisits(String projectId, String timeType) {
         // 参数校验
         if (projectId == null || projectId.trim().isEmpty()) {
             log.warn("项目ID不能为空");
@@ -99,56 +100,95 @@ public class FrontendPerformanceServiceImpl implements FrontendPerformanceServic
             return new Result(BAD_REQUEST, "时间类型不能为空");
         }
 
-
-
-        if (number <= 0 || timeType.equals("day") && number > 24 || timeType.equals("week") && number > 7 || timeType.equals("year") && number > 12) {
-            //参数不合法就默认
-            switch (timeType) {
-                case "day":
-                    number = 24; // 默认过去24小时
-                    break;
-                case "week":
-                    number = 7; // 默认过去7天
-                    break;
-                case "year":
-                    number = 12; // 默认过去12个月
-                    break;
-                default:
-                    log.warn("时间类型不合法");
-                    return new Result(BAD_REQUEST, "时间类型不合法");
-            }
+        Result count = new Result();
+        switch (timeType) {
+            case "day":
+            case "week":
+            case "month":
+            case "year":
+                count = getVisitCount(projectId, timeType);
+                break;
+            default:
+                log.warn("不支持的时间类型: {}", timeType);
+                return new Result(BAD_REQUEST, "不支持的时间类型: " + timeType);
         }
-        LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime;
+
+
+
+        if (count != null) return count;
+
+
+        return new Result(BAD_GATEWAY,"查询失败");
+    }
+
+    private Result getVisitCount(String projectId, String timeType) {
+
+        List<Integer> timeCount = new ArrayList<>();
 
         switch (timeType) {
             case "day":
-                startTime = endTime.minusHours(number);
+                for (int i = 0; i < 24; i++) {
+                    getCount(projectId, i, timeCount, timeType);
+                }
                 break;
             case "week":
-                startTime = endTime.minusDays(number);
+                for (int i = 0; i < 7; i++) {
+                    getCount(projectId, i, timeCount, timeType);
+                }
+                break;
+            case "month":
+                for (int i = 0; i < 30; i++) {
+                    getCount(projectId, i, timeCount, timeType);
+                }
                 break;
             case "year":
-                startTime = endTime.minusMonths(number);
+                for (int i = 0; i < 12; i++) {
+                    getCount(projectId, i, timeCount, timeType);
+                }
                 break;
             default:
-                log.warn("时间类型不合法");
-                return new Result(BAD_REQUEST, "时间类型不合法");
+                return new Result(BAD_REQUEST, "不支持的时间类型");
         }
-        // 查询数据
+        return new Result(SUCCESS, timeCount,"查询成功");
+    }
 
-        LambdaQueryWrapper<FrontendPerformance> queryWrapper = new LambdaQueryWrapper<>();
-
-        queryWrapper.eq(FrontendPerformance::getProjectId, projectId)
-                .between(FrontendPerformance::getTimestamp, startTime, endTime);
-
-        List<FrontendPerformance> performances = frontendPerformanceMapper.selectList(queryWrapper);
-
-        Integer count = 0 ;
-        for (FrontendPerformance performance : performances) {
-            count += performance.getEvent();
+    private void getCount(String projectId, int i, List<Integer> timeCount, String timeType) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start, end;
+        switch (timeType) {
+            case "day":
+                start = now.minusHours(i + 1);
+                end = now.minusHours(i);
+                break;
+            case "week":
+                start = now.minusDays(i + 1);
+                end = now.minusDays(i);
+                break;
+            case "month":
+                start = now.minusWeeks(i + 1);
+                end = now.minusWeeks(i);
+                break;
+            case "year":
+                start = now.minusMonths(i + 1);
+                end = now.minusMonths(i);
+                break;
+            default:
+                return;
         }
+        LambdaQueryWrapper<FrontendPerformance> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FrontendPerformance::getProjectId, projectId);
+        wrapper.between(FrontendPerformance::getTimestamp, start, end);
+        List<FrontendPerformance> list = frontendPerformanceMapper.selectList(wrapper);
+        int count = list.stream()
+                .filter(p -> p.getEvent() != null)
+                .mapToInt(FrontendPerformance::getEvent)
+                .sum();
+        timeCount.add(count);
+    }
 
-        return new Result(SUCCESS, count, "查询成功");
+    @Override
+    public Result getAverageTime(String projectId, String timeType) {
+
+        return new Result();
     }
 }

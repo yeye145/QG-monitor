@@ -4,15 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
 
-
 import com.qg.mapper.FrontendPerformanceMapper;
 import com.qg.service.FrontendPerformanceService;
+import com.qg.service.*;
 
 import com.qg.service.GraphService;
 import com.qg.vo.ErrorTrendVO;
 
 import com.qg.vo.FrontendBehaviorVO;
-import com.qg.vo.FrontendPerformanceAverageVO;
 import com.qg.vo.ManualTrackingVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -35,11 +34,26 @@ public class GraphController {
 
     @Autowired
     private GraphService graphService;
+    @Autowired
+    private FrontendErrorService frontendErrorService;
+
 
     @Autowired
     private FrontendPerformanceService frontendPerformanceService;
     @Autowired
     private FrontendPerformanceMapper frontendPerformanceMapper;
+
+    @Autowired
+    private BackendPerformanceService backendPerformanceService;
+
+    @Autowired
+    private MobilePerformanceService mobilePerformanceService;
+
+    @Autowired
+    private BackendErrorService backendErrorService;
+
+    @Autowired
+    private MobileErrorService mobileErrorService;
 
 
     /**
@@ -109,12 +123,18 @@ public class GraphController {
     }
 
 
+    /**
+     * @Author lrt
+     * @Description //访问量
+     * @Date 17:23 2025/8/12
+     * @Param
+ * @param projectId
+ * @param timeType
+     * @return com.qg.domain.Result
+     **/
     @GetMapping("/getVisits")
-    public Result getVisits(@RequestParam String projectId, @RequestParam String timeType,
-                            @RequestParam(required = false) Integer number) {
-
-        return frontendPerformanceService.getVisits(projectId, timeType, number);
-
+    public Result getVisits(@RequestParam String projectId, @RequestParam String timeType) {
+        return frontendPerformanceService.getVisits(projectId, timeType);
     }
 
 
@@ -197,6 +217,80 @@ public class GraphController {
             return new Result(Code.INTERNAL_ERROR, "查询近一周前端错误统计失败");
         }
     }
+
+
+    /**
+     * @Author lrt
+     * @Description // 查询近一周后端错误
+     * @Date 17:25 2025/8/12
+     * @Param
+ * @param projectId
+     * @return com.qg.domain.Result
+     **/
+    @GetMapping("/getBackendErrorStats")
+    public Result getBackendErrorStats(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    backendErrorService.getBackendErrorStats(projectId), "查询近一周后端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询后端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周后端错误统计失败");
+        }
+    }
+
+
+    /**
+     * @Author lrt
+     * @Description //TODO 近一周移动端错
+     * @Date 17:25 2025/8/12
+     * @Param
+ * @param projectId
+     * @return com.qg.domain.Result
+     **/
+    @GetMapping("/getMobileErrorStats")
+    public Result getMobileErrorStats(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    mobileErrorService.getMobileErrorStats(projectId), "查询近一周移动端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询移动端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
+        }
+    }
+
+
+    /**
+     * @Author lrt
+     * @Description //TODO api平均响应时间
+     * @Date 17:26 2025/8/12
+     * @Param
+ * @param projectId
+ * @param platform
+ * @param timeType
+     * @return com.qg.domain.Result
+     **/
+    @GetMapping("/getAverageTime")
+    public Result getAverageTime(@RequestParam String projectId, @RequestParam String platform,
+                               @RequestParam String timeType){
+        switch (platform) {
+            case "frontend":
+                return new Result(Code.SUCCESS, null, "功能尚未实现，敬请期待");
+            case "backend":
+                return backendPerformanceService.getAverageTime(projectId, timeType);
+            case "mobile":
+                return mobilePerformanceService.getAverageTime(projectId, timeType);
+            default:
+                return new Result(Code.BAD_REQUEST, "不支持的平台类型");
+        }
+    }
+
+
 
     /**
      * 查询查询前端性能数据-平均时间
