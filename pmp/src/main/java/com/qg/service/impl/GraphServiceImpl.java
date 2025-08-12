@@ -3,13 +3,13 @@ package com.qg.service.impl;
 import com.qg.mapper.FrontendBehaviorMapper;
 import com.qg.mapper.FrontendErrorMapper;
 import com.qg.service.GraphService;
-import com.qg.vo.ErrorTrendVO;
-import com.qg.vo.FrontendBehaviorVO;
+import com.qg.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -63,6 +63,39 @@ public class GraphServiceImpl implements GraphService {
     @Override
     public List<ErrorTrendVO> getErrorTrend
     (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
-        return frontendErrorMapper.getErrorTrend(projectId, startTime, endTime);
+        return frontendErrorMapper.queryErrorTrend(projectId, startTime, endTime);
+    }
+
+    /**
+     * 获取埋点错误统计
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<ManualTrackingVO> getManualTrackingStats
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return frontendErrorMapper.queryManualTrackingStats(projectId, startTime, endTime);
+    }
+
+    /**
+     * 获取两种前端错误信息
+     * @param projectId
+     * @return
+     */
+    @Override
+    public Object[] getErrorStats(String projectId) {
+
+        List<UvBillDataVO> uvBillDataVOList = new ArrayList<>();
+        List<TransformDataVO> transformDataVOList = new ArrayList<>();
+        frontendErrorMapper
+                .queryFrontendErrorStats(projectId)
+                .forEach(errorStat -> {
+                    uvBillDataVOList.add(new UvBillDataVO(errorStat.getErrorType(), errorStat.getCount()));
+                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), errorStat.getRatio()));
+                });
+
+        return new Object[]{uvBillDataVOList, transformDataVOList};
     }
 }
