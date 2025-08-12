@@ -14,4 +14,6 @@ public interface AllErrorService {
     Result selectByCondition(String projectId, Long moduleId, String type);
 
     Result selectById(Long id);
+
+    Result selectErrorDetail(Long errorId, String platform);
 }

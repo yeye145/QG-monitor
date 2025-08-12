@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qg.domain.Code.*;
+
 /**
  * @Description: 所有错误应用类  // 类说明
  * @ClassName: AllErrorServiceimpl    // 类名
@@ -210,7 +212,7 @@ public class AllErrorServiceImpl implements AllErrorService {
 public Result selectByCondition(String projectId, Long moduleId, String type) {
     // 参数校验
     if (projectId == null || projectId.isEmpty()) {
-        return new Result(Code.BAD_REQUEST, "项目ID不能为空");
+        return new Result(BAD_REQUEST, "项目ID不能为空");
     }
 
     try {
@@ -284,7 +286,7 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
 
     } catch (Exception e) {
         log.error("查询错误信息时发生异常: projectId={}, moduleId={}, type={}", projectId, moduleId, type, e);
-        return new Result(Code.INTERNAL_ERROR, "查询失败: " + e.getMessage());
+        return new Result(INTERNAL_ERROR, "查询失败: " + e.getMessage());
     }
 }
 
@@ -391,5 +393,33 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
         return new Result(200,
                 List.of(backendError, frontendError, mobileError),
                 "查询成功");
+    }
+
+    @Override
+    public Result selectErrorDetail(Long errorId, String platform) {
+        if (errorId == null || platform == null || platform.isEmpty()) {
+            return new Result(BAD_REQUEST, "参数错误");
+        }
+
+        try {
+            return switch (platform) {
+                case "backend" -> {
+                    BackendError backendError = backendErrorMapper.selectById(errorId);
+                    yield new Result(SUCCESS, backendError, "查询成功");
+                }
+                case "frontend" -> {
+                    FrontendError frontendError = frontendErrorMapper.selectById(errorId);
+                    yield new Result(SUCCESS, frontendError, "查询成功");
+                }
+                case "mobile" -> {
+                    MobileError mobileError = mobileErrorMapper.selectById(errorId);
+                    yield new Result(SUCCESS, mobileError, "查询成功");
+                }
+                default -> new Result(BAD_REQUEST, "不支持的平台类型");
+            };
+        } catch (Exception e) {
+            log.error("查询错误详情失败");
+            return new Result(INTERNAL_ERROR, "查询错误详情失败");
+        }
     }
 }

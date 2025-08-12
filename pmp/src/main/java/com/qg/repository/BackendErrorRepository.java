@@ -63,7 +63,6 @@ public class BackendErrorRepository extends BackendErrorFatherRepository {
     protected boolean checkNotificationNoExist(String type
             , String projectId, Long errorId, LocalDateTime timestamp) {
 
-
         return true;
     }
 

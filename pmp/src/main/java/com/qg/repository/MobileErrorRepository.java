@@ -2,17 +2,23 @@ package com.qg.repository;
 
 import com.qg.domain.MobileError;
 import com.qg.domain.Notification;
+import com.qg.mapper.NotificationMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.qg.repository.RepositoryConstants.DEFAULT_THRESHOLD;
-
+@Slf4j
 @Repository
 public class MobileErrorRepository extends MobileErrorFatherRepository {
 
+    @Autowired
+    private NotificationMapper notificationMapper;
     // TODO: 告警升级前先查看《前一毫秒》是否已经解决了
 
     /**
@@ -32,16 +38,12 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
 
         // TODO: 如果达到阈值，先检查10分钟内是否已经有相同的告警
         if(currentCount >= threshold) {
-            if(checkNotificationNoExist("mobile", error.getProjectId()
+            if(checkNotificationExist("mobile", error.getProjectId()
                     , error.getId(), LocalDateTime.now())) {
                 return false;
             } else {
-                // TODO: 如果没有相同的告警，创建Notification对象，存入缓存
-                Notification notification = new Notification();
-                notification.setProjectId(error.getProjectId());
-                notification.setErrorId(error.getId());
-                notification.setPlatform("mobile");
-                notification.setTimestamp(LocalDateTime.now());
+                log.info("存入数据库");
+
                 // TODO: 根据项目配置设置发送人和接收人ID
                 // TODO: 问题1：先企业微信告警，同时异常发送到平台，管理员委派人去解决？
                 // TODO: 问题2：我怎么知道前端后端异常《最近的连续10分钟内》有没有相同异常
@@ -50,9 +52,6 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
                 // TODO: 问题5：现在发送信息是不是指定在《企业微信》中发送，如果不是，我应该怎么发
                 // TODO: 问题6：（如果不是《全》发企业微信的话跳过此问题）我怎么知道通知已读？
                 // TODO: 问题7：委派表没有逻辑删，通知表有逻辑删，以通知表逻辑删为标记解决？
-                notification.setSenderId(1L); // 系统用户
-                notification.setReceiverId(1L); // 默认接收人
-
 
                 return true;
             }
@@ -60,9 +59,14 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
         return false;
     }
 
-    protected boolean checkNotificationNoExist(String type
+    // TODO: 检测通知是否已存在
+    protected boolean checkNotificationExist(String type
             , String projectId, Long errorId, LocalDateTime timestamp) {
-
+//        LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(Notification::, type)
+//                .eq(Notification::getProjectId, projectId)
+//                .eq(Notification::getErrorId, errorId)
+//                .eq()
 
         return false;
     }
@@ -88,5 +92,31 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
                 LocalDateTime.now()
                         .format(DateTimeFormatter
                                 .ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+    /**
+     * 存通知信息进数据库
+     */
+    @Override
+    protected boolean saveNotification(List<Long> alertReceiverID, MobileError error) {
+        int count = 0;
+        for(Long receiverID : alertReceiverID){
+            Notification notification = new Notification();
+            notification.setProjectId(error.getProjectId());
+            notification.setErrorType(error.getErrorType());
+            notification.setErrorId(error.getId());
+            notification.setPlatform("mobile");
+            notification.setEnvironment("dev"); //TODO: 获取环境在哪里？！
+            notification.setTimestamp(LocalDateTime.now());
+            notification.setReceiverId(receiverID);
+            notification.setSenderId(1L);
+            count++;
+            notificationMapper.insert(notification);
+        }
+        if(count == alertReceiverID.size()){
+            return true;
+        }
+        return false;
+
     }
 }
