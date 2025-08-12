@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+
 /**
  * @Description: 移动错误类  // 类说明
  * @ClassName: MobileError    // 类名
@@ -19,7 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MobileError {
-
     @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     private String projectId;
@@ -31,12 +31,11 @@ public class MobileError {
     private String className;
 
     private Integer event = 0;
-
     public synchronized void incrementEvent() {
         event++;
     }
 
-    public synchronized Integer getEvent() {
+    public synchronized int getEvent() {
         return event;
     }
 }

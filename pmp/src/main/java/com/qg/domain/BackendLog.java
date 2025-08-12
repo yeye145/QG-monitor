@@ -40,13 +40,13 @@ public class BackendLog {
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> environmentSnapshot;
 
-    private  Integer event ;
+    private Integer event = 0;
 
     public synchronized void incrementEvent() {
         event++;
     }
 
-    public synchronized Integer getEvent() {
+    public synchronized int getEvent() {
         return event;
     }
 

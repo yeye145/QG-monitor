@@ -18,6 +18,7 @@ import com.qg.utils.EmailService;
 import com.qg.utils.HashSaltUtil;
 import com.qg.utils.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -277,5 +278,28 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public boolean updateAvatar(Long userId, String avatarUrl) {
         return usersMapper.updateAvatar(userId, avatarUrl) > 0;
+    }
+
+    @Override
+    public Result updateUser(Users users) {
+        int count = usersMapper.updateById(users);
+        if(count == 0){
+            return new Result(NOT_FOUND, "用户不存在");
+        }
+        Long id = users.getId();
+        Users user = usersMapper.selectById(id);
+        user.setPassword(null);
+        user.setIsDeleted(null);
+
+        try {
+            String jsonData = objectMapper.writeValueAsString(user);
+            EncryptionResultDTO encryptionResultDTO = CryptoUtils.encryptWithAESAndRSA(jsonData, rsaPublicKey);
+            return new Result(SUCCESS, encryptionResultDTO, "更新用户信息成功");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
     }
 }

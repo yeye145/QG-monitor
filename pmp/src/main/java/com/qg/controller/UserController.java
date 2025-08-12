@@ -254,4 +254,34 @@ public class UserController {
             return new Result(INTERNAL_ERROR, "头像上传失败");
         }
     }
+
+    @PostMapping("/updateUser")
+    public Result updateUser(@RequestBody EncryptedRequestDTO request) {
+        log.info("接收到的参数: {}",request);
+        // 1. 使用CryptoUtils解密请求
+        String decryptedJson = null;
+        try {
+            decryptedJson = CryptoUtils.decryptWithAESAndRSA(
+                    request.getEncryptedData(),
+                    request.getEncryptedKey(),
+                    rsaPrivateKey
+            );
+            log.info("解密后的JSON: {}", decryptedJson);
+            Map<String, Object> params = new ObjectMapper()
+                    .readValue(decryptedJson, new TypeReference<Map<String, Object>>() {});
+            Users users = new ObjectMapper().convertValue(params.get("users"), Users.class);
+            log.info("用户信息: {}", users);
+            return usersService.updateUser(users);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+    @PostMapping("/password1")
+    public Result loginByPassword(@RequestBody Users user) {
+        log.info("用户登录，邮箱: {}, 密码: {}", user.getEmail(), user.getPassword());
+        return new Result(200,"登录成功");
+    }
 }

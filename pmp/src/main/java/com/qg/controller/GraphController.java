@@ -7,9 +7,11 @@ import com.qg.domain.Result;
 
 import com.qg.service.*;
 
+import com.qg.service.GraphService;
 import com.qg.vo.ErrorTrendVO;
 
 import com.qg.vo.FrontendBehaviorVO;
+import com.qg.vo.ManualTrackingVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +71,7 @@ public class GraphController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
 
         // 参数合法性校验
-        if (!checkProjectIdAndTimeNoNull(projectId, startTime, endTime)) {
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
             return new Result(Code.BAD_REQUEST, "必需参数存在空");
         }
 
@@ -148,7 +150,7 @@ public class GraphController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
 
         // 参数合法性校验
-        if (!checkProjectIdAndTimeNoNull(projectId, startTime, endTime)) {
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
             return new Result(Code.BAD_REQUEST, "必需参数存在空");
         }
 
@@ -163,6 +165,12 @@ public class GraphController {
     }
 
 
+    /**
+     * 获取前端错误周报
+     *
+     * @param projectId
+     * @return
+     */
     @GetMapping("/getFrontendErrorStats")
     public Result getFrontendErrorStats(@RequestParam String projectId) {
         if (StrUtil.isBlank(projectId)) {
@@ -170,13 +178,42 @@ public class GraphController {
         }
         try {
             return new Result(Code.SUCCESS,
-                    frontendErrorService.getErrorStats(projectId), "查询近一周错误统计成功");
+                    graphService.getErrorStats(projectId), "查询近一周前端错误统计成功");
         } catch (Exception e) {
-            log.error("查询错误统计时发生异常: projectId={}", projectId, e);
-            return new Result(Code.INTERNAL_ERROR, "查询近一周错误统计失败");
+            log.error("查询错误统计时发生异常: projectId={}:{}", projectId, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "查询近一周前端错误统计失败");
         }
     }
 
+
+    @GetMapping("/getManualTrackingStats")
+    public Result getManualTrackingStats(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        // 时间需要有交集
+        if (startTime.isAfter(endTime)) {
+            log.warn("时间交集为空");
+            return new Result(Code.BAD_REQUEST, "时间交集为空");
+        }
+
+        try {
+            List<ManualTrackingVO> list = graphService.getManualTrackingStats(projectId, startTime, endTime);
+            return new Result(
+                    Code.SUCCESS,
+                    list.isEmpty() ? Collections.emptyList() : list,
+                    "查询前端埋点统计错误成功");
+        } catch (Exception e) {
+            log.error("查询前端埋点统计错误时发生异常: projectId={}:{}", projectId, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "查询近一周前端错误统计失败");
+        }
+    }
 
 
     /**
@@ -260,17 +297,15 @@ public class GraphController {
      * @param endTime
      * @return
      */
-    private boolean checkProjectIdAndTimeNoNull(String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+    private boolean isProjectIdAndTimeNull(String projectId, LocalDateTime startTime, LocalDateTime endTime) {
         if (StrUtil.isBlank(projectId) || startTime == null || endTime == null) {
             log.warn("参数为空" +
                      ",projectId:" + projectId +
                      ",startTime:" + startTime +
                      ",endTime:" + endTime);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
-
-
 
 }

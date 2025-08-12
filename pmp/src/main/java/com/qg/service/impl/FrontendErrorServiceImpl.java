@@ -115,7 +115,7 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
         List<UvBillDataVO> uvBillDataVOList = new ArrayList<>();
         List<TransformDataVO> transformDataVOList = new ArrayList<>();
         frontendErrorMapper
-                .getFrontendErrorStats(projectId)
+                .queryFrontendErrorStats(projectId)
                 .forEach(errorStat -> {
                     uvBillDataVOList.add(new UvBillDataVO(errorStat.getErrorType(), errorStat.getCount()));
                     transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), MathUtil.truncate(errorStat.getRatio(),3)));
