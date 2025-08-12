@@ -89,6 +89,7 @@ public class FrontendErrorAggregator {
 
     /**
      * 为指定key安排聚合任务
+     *
      * @param key Redis key
      */
     private void scheduleAggregation(String key) {
@@ -116,6 +117,7 @@ public class FrontendErrorAggregator {
 
     /**
      * 处理并保存指定key的错误信息
+     *
      * @param key Redis key
      */
     private void processAndSaveErrorsForKey(String key) {
@@ -175,6 +177,7 @@ public class FrontendErrorAggregator {
 
     /**
      * 从Redis key中提取项目ID
+     *
      * @param key Redis key
      * @return 项目ID
      */
@@ -189,6 +192,7 @@ public class FrontendErrorAggregator {
 
     /**
      * 检查项目是否存在
+     *
      * @param projectId 项目ID
      * @return 项目是否存在
      */
