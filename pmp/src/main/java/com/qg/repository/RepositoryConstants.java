@@ -11,6 +11,8 @@ public enum RepositoryConstants {
     BACKEND_LOG_PREFIX("backend:log"),
     MOBILE_ERROR_PREFIX("mobile:error"),
     REDIS_KEY_PREFIX("backend:method:"),
+    FRONTEND_ERROR_PREFIX("frontend:error"),
+    BACKEND_ERROR_PREFIX("backend:error"),
 
 
     // TTL时间（分钟）

@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.type.JdbcType;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -34,5 +33,17 @@ public class BackendError {
     private String stack;
     @TableField(value = "environment_snapshot", typeHandler = com.qg.handler.MapHandler.class,jdbcType = JdbcType.OTHER)
     private Map<String, Object> environmentSnapshot;
-    private Integer event;
+    private Integer event = 0;
+
+    // 原子性递增
+    public synchronized void incrementEvent() {
+        event++;
+    }
+
+    // 获取当前值
+    public synchronized Integer getEvent() {
+        return event;
+    }
+
+
 }

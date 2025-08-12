@@ -1,5 +1,7 @@
 package com.qg.repository;
 
+import com.qg.domain.BackendError;
+import com.qg.domain.FrontendError;
 import com.qg.domain.MobileError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,6 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
-
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -50,10 +51,18 @@ public abstract class StatisticsDataRepository<T> {
             T cached = cacheMap.computeIfAbsent(key, k -> entity);
             incrementEvent(cached);
 
-            // 如果是MobileError类型，触发告警检查
+            // 如果是MobileError类型，触发告警检查  ？
             if (entity instanceof MobileError) {
                 MobileErrorFatherRepository repository = (MobileErrorFatherRepository) this;
                 repository.sendWechatAlert((MobileError) cached);
+            }
+            if (entity instanceof FrontendError) {
+                FrontendErrorFatherRepository repository = (FrontendErrorFatherRepository) this;
+                repository.sendWechatAlert((FrontendError) cached);
+            }
+            if(entity instanceof BackendError){
+                BackendErrorFatherRepository repository = (BackendErrorFatherRepository) this;
+                repository.sendWechatAlert((BackendError) cached);
             }
         }
     }

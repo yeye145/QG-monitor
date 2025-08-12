@@ -31,7 +31,9 @@ public class FrontendError {
     private String errorType;
     private String message;
     private String stack;
-    private Integer event;
+
+    private Integer event = 0;
+
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> requestInfo;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
@@ -46,4 +48,15 @@ public class FrontendError {
     private Map<String, Object> elementInfo;
     private String captureType;
     private Long duration;
+
+
+    // 原子性递增
+    public synchronized void incrementEvent() {
+        event++;
+    }
+
+    // 获取当前值
+    public synchronized Integer getEvent() {
+        return event;
+    }
 }

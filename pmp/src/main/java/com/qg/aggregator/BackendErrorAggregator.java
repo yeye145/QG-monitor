@@ -2,7 +2,6 @@ package com.qg.aggregator;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.gson.Gson;
 import com.qg.domain.BackendError;
 import com.qg.domain.Project;
 import com.qg.mapper.BackendErrorMapper;
@@ -13,8 +12,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
