@@ -1,6 +1,5 @@
 package com.qg.service;
 
-import com.qg.domain.MobileError;
 import com.qg.domain.Result;
 
 /**
@@ -14,4 +13,6 @@ public interface MobileErrorService {
     Result selectByCondition(String projectId, String type);
 
     void receiveErrorFromSDK(String mobileErrorJSON);
+
+    Object[] getMobileErrorStats(String projectId);
 }

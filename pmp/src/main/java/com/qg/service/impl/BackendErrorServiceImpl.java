@@ -10,12 +10,15 @@ import com.qg.mapper.BackendErrorMapper;
 import com.qg.mapper.ModuleMapper;
 import com.qg.service.BackendErrorService;
 import com.qg.service.ModuleService;
+import com.qg.utils.MathUtil;
+import com.qg.vo.TransformDataVO;
+import com.qg.vo.UvBillDataVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 import static com.qg.domain.Code.*;
 
@@ -106,6 +109,61 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         } catch (Exception e) {
             log.error("添加错误信息时出错，错误信息： {}", errorData, e);
             return new Result(INTERNAL_ERROR, "添加错误信息失败");
+        }
+    }
+
+    @Override
+    public Object[] getBackendErrorStats(String projectId) {
+        LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BackendError::getProjectId, projectId);
+
+        List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
+
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        queryWrapper.ge(BackendError::getTimestamp, oneWeekAgo);
+
+        Map<String ,Double> transformDataVOList = new HashMap<>();
+        Map<String, Double>uvBillDataVOList = new HashMap<>();
+
+        Integer count = 0;
+
+        for (BackendError backendError : backendErrors) {
+            if (backendError.getEvent() != null && backendError.getErrorType() != null) {
+                addToMap(backendError, transformDataVOList);
+                addToMap(backendError, uvBillDataVOList);
+                count += backendError.getEvent();
+            }
+
+        }
+
+        if (count == 0) {
+            return new Object[0]; // 如果没有数据，直接返回空数组
+        }
+
+        Integer finalCount = count;
+
+        uvBillDataVOList.entrySet().removeIf(entry -> entry.getValue() == 0);
+
+
+        uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
+
+
+
+
+        return new Object[]{transformDataVOList, uvBillDataVOList};
+    }
+
+    private static void addToMap(BackendError backendError, Map<String, Double> transformDataVOList) {
+        if (backendError.getErrorType() == null || backendError.getEvent() == null) {
+            return; // 如果错误类型或事件为空，则不处理
+        }
+        if (transformDataVOList.containsKey(backendError.getErrorType()) ) {
+            transformDataVOList.put(backendError.getErrorType(), transformDataVOList.get(backendError.getErrorType()) + backendError.getEvent());
+
+        } else {
+            transformDataVOList.put(backendError.getErrorType(), Double.valueOf(backendError.getEvent()));
+
         }
     }
 

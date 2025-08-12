@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.*;
 import com.qg.domain.Error;
+import com.qg.domain.MobileError;
 import com.qg.mapper.*;
 import com.qg.service.NotificationService;
 import com.qg.service.ResponsibilityService;
@@ -260,6 +261,119 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         }
         return responsibilityMapper.deleteById(id) > 0 ? new Result(SUCCESS, "删除成功") : new Result(Code.INTERNAL_ERROR, "删除失败");
     }
+
+    @Override
+    public Result selectResponsibleError(String projectId, Long responsibleId, String errorType, String platform) {
+        if (projectId == null || projectId.isEmpty() || responsibleId == null) {
+            return new Result(Code.BAD_REQUEST, "参数不能为空");
+        }
+        LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Responsibility::getProjectId, projectId)
+                .eq(Responsibility::getResponsibleId, responsibleId);
+
+        if (errorType != null &&  !errorType.isEmpty()) {
+            queryWrapper.eq(Responsibility::getErrorType, errorType);
+        }
+        if (platform == null || platform.isEmpty()) {
+            // 查询所有
+            List<BackendError> backendErrorList = getBackendErrors(queryWrapper, projectId);
+            List<FrontendError> frontendErrorList = getFrontendErrors(queryWrapper, projectId);
+            List<MobileError> mobileErrorList = getMobileErrors(queryWrapper, projectId);
+            return new Result(Code.SUCCESS,
+                    Arrays.asList(backendErrorList, frontendErrorList, mobileErrorList),
+                    "查询成功");
+        }
+        return switch (platform) {
+            case "backend" -> {
+                // 查询后端
+                List<BackendError> backendErrors = getBackendErrors(queryWrapper, projectId);
+                yield new Result(Code.SUCCESS, backendErrors, "查询成功");
+            }
+            case "frontend" -> {
+                // 查询前端
+                List<FrontendError> frontendErrors = getFrontendErrors(queryWrapper, projectId);
+                yield new Result(Code.SUCCESS, frontendErrors, "查询成功");
+            }
+            case "mobile" -> {
+                // 查询移动端
+                List<MobileError> mobileErrors = getMobileErrors(queryWrapper, projectId);
+                yield new Result(Code.SUCCESS, mobileErrors, "查询成功");
+            }
+            default -> new Result(Code.BAD_REQUEST, "平台参数错误");
+        };
+    }
+
+    /**
+     * 获取后端错误数据
+     */
+    private List<BackendError> getBackendErrors(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
+        LambdaQueryWrapper<Responsibility> queryWrapper = baseQueryWrapper.clone();
+        queryWrapper.eq(Responsibility::getPlatform, "backend");
+        List<Responsibility> backendResponsibilities = responsibilityMapper.selectList(queryWrapper);
+        if (backendResponsibilities.isEmpty()) {
+            return null;
+        }
+
+        List<String> errorTypes = backendResponsibilities.stream()
+                .map(Responsibility::getErrorType)
+                .collect(Collectors.toList());
+
+        LambdaQueryWrapper<BackendError> backendErrorQueryWrapper = new LambdaQueryWrapper<>();
+        backendErrorQueryWrapper.in(BackendError::getErrorType, errorTypes)
+                .eq(BackendError::getProjectId, projectId)
+                .orderByDesc(BackendError::getTimestamp);
+
+        return backendErrorMapper.selectList(backendErrorQueryWrapper);
+    }
+
+    /**
+     * 获取前端错误数据
+     */
+    private List<FrontendError> getFrontendErrors(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
+        LambdaQueryWrapper<Responsibility> queryWrapper = baseQueryWrapper.clone();
+        queryWrapper.eq(Responsibility::getPlatform, "frontend");
+        List<Responsibility> frontendResponsibilities = responsibilityMapper.selectList(queryWrapper);
+
+        if (frontendResponsibilities.isEmpty()) {
+            return null;
+        }
+
+        List<String> errorTypes = frontendResponsibilities.stream()
+                .map(Responsibility::getErrorType)
+                .collect(Collectors.toList());
+
+        LambdaQueryWrapper<FrontendError> frontendErrorQueryWrapper = new LambdaQueryWrapper<>();
+        frontendErrorQueryWrapper.in(FrontendError::getErrorType, errorTypes)
+                .eq(FrontendError::getProjectId, projectId)
+                .orderByDesc(FrontendError::getTimestamp);
+
+        return frontendErrorMapper.selectList(frontendErrorQueryWrapper);
+    }
+
+    /**
+     * 获取移动端错误数据
+     */
+    private List<MobileError> getMobileErrors(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
+        LambdaQueryWrapper<Responsibility> queryWrapper = baseQueryWrapper.clone();
+        queryWrapper.eq(Responsibility::getPlatform, "mobile");
+        List<Responsibility> mobileResponsibilities = responsibilityMapper.selectList(queryWrapper);
+
+        if (mobileResponsibilities.isEmpty()) {
+            return null;
+        }
+
+        List<String> errorTypes = mobileResponsibilities.stream()
+                .map(Responsibility::getErrorType)
+                .collect(Collectors.toList());
+
+        LambdaQueryWrapper<MobileError> mobileErrorQueryWrapper = new LambdaQueryWrapper<>();
+        mobileErrorQueryWrapper.in(MobileError::getErrorType, errorTypes)
+                .eq(MobileError::getProjectId, projectId)
+                .orderByDesc(MobileError::getTimestamp);
+
+        return mobileErrorMapper.selectList(mobileErrorQueryWrapper);
+    }
+
     //填充VO
     public ResponsibilityVO fillResponsibilityVO(ResponsibilityVO responsibilityVO) {
         // 批量收集ID

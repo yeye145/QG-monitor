@@ -3,6 +3,7 @@ package com.qg.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qg.domain.*;
+import com.qg.domain.MobileError;
 import com.qg.mapper.*;
 import com.qg.service.NotificationService;
 import com.qg.vo.NotificationVO;

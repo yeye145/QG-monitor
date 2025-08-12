@@ -6,16 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
 import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * @Description: 移动错误类  // 类说明
  * @ClassName: MobileError    // 类名
  * @Author: lrt          // 创建者
- * @Date: 2025/8/7 21:18   // 时间
+ * @Date: 2025/8/12 10:51   // 时间
  * @Version: 1.0     // 版本
  */
 @Data

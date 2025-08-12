@@ -20,5 +20,8 @@ public interface FrontendErrorService {
 
     Result addFrontendError(String errorData);
 
+
     Object[] getErrorStats(String projectId);
+
+    Result getAverageTime(String projectId, String timeType);
 }

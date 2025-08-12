@@ -18,4 +18,6 @@ public interface BackendPerformanceService {
     Result selectByCondition(String projectId, Long moduleId, String api, String environment);
 
     Result addPerformance(String performanceData);
+
+    Result getAverageTime(String projectId, String timeType);
 }

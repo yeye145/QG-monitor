@@ -15,4 +15,6 @@ public interface MobilePerformanceService {
 
 
     Result selectByCondition(String projectId, String deviceModel, String osVersion);
+
+    Result getAverageTime(String projectId, String timeType);
 }

@@ -1,13 +1,16 @@
 package com.qg.service.impl;
 
 
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.aggregator.FrontendErrorAggregator;
+import com.qg.domain.BackendPerformance;
 import com.qg.domain.FrontendError;
 import com.qg.domain.Result;
 import com.qg.mapper.FrontendErrorMapper;
 import com.qg.service.FrontendErrorService;
+import com.qg.utils.MathUtil;
 import com.qg.vo.TransformDataVO;
 import com.qg.vo.UvBillDataVO;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.qg.domain.Code.*;
 
@@ -78,11 +83,13 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
 
         try {
             List<FrontendError> frontendErrorList = JSONUtil.toList(errorData, FrontendError.class);
+            System.out.println("前端错误信息list: " + frontendErrorList);
+
             log.debug("前端错误信息list长度： {}", frontendErrorList.size());
             for (FrontendError frontendError : frontendErrorList) {
                 if (frontendError.getProjectId() == null ||
-                    frontendError.getErrorType() == null ||
-                    frontendError.getSessionId() == null
+                        frontendError.getErrorType() == null ||
+                        frontendError.getSessionId() == null
                 ) {
                     log.error("参数错误");
                     return new Result(BAD_REQUEST, "参数错误");
@@ -105,6 +112,7 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
 
     /**
      * 获取两种前端错误信息
+     *
      * @param projectId
      * @return
      */
@@ -114,12 +122,67 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
         List<UvBillDataVO> uvBillDataVOList = new ArrayList<>();
         List<TransformDataVO> transformDataVOList = new ArrayList<>();
         frontendErrorMapper
-                .getFrontendErrorStats(projectId)
+                .queryFrontendErrorStats(projectId)
                 .forEach(errorStat -> {
                     uvBillDataVOList.add(new UvBillDataVO(errorStat.getErrorType(), errorStat.getCount()));
-                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), errorStat.getRatio()));
+                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), MathUtil.truncate(errorStat.getRatio(), 3)));
                 });
 
         return new Object[]{uvBillDataVOList, transformDataVOList};
+    }
+
+    @Override
+    public Result getAverageTime(String projectId, String timeType) {
+        if (projectId == null || timeType == null) {
+            return new Result(BAD_REQUEST, "参数不能为空");
+        }
+        LambdaQueryWrapper<FrontendError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FrontendError::getProjectId, projectId);
+
+        LocalDateTime passTime;
+
+        switch (timeType) {
+            case "day":
+                passTime = LocalDateTime.now().minusDays(1);
+                break;
+            case "week":
+                passTime = LocalDateTime.now().minusWeeks(1);
+                break;
+            case "month":
+                passTime = LocalDateTime.now().minusMonths(1);
+                break;
+            default:
+                return new Result(BAD_REQUEST, "不支持的时间类型");
+        }
+        queryWrapper.ge(FrontendError::getTimestamp, passTime);
+
+        List<FrontendError> frontendErrors = frontendErrorMapper.selectList(queryWrapper);
+
+        // 计算加权平均响应时间
+        Map<String, Double> averageTimeMap = frontendErrors.stream()
+                .filter(bp -> bp.getRequest() != null && bp.getDuration() != null && bp.getEvent() != null)
+                .collect(Collectors.groupingBy(bp -> {
+                            // 解析 request 字段，提取 url
+                            try {
+                                JSONObject json = JSONUtil.parseObj(bp.getRequest());
+                                return json.getStr("url");
+                            } catch (Exception e) {
+                                return "unknown";
+                            }
+                        },
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> {
+                                    double totalTime = list.stream()
+                                            .mapToDouble(bp -> bp.getDuration() * bp.getEvent())
+                                            .sum();
+                                    int totalEvents = list.stream()
+                                            .mapToInt(FrontendError::getEvent)
+                                            .sum();
+                                    return totalEvents > 0 ? totalTime / totalEvents : 0.0;
+                                }
+                        )));
+
+        return new Result(SUCCESS, averageTimeMap, "查询成功");
     }
 }

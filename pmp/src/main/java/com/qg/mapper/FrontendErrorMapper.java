@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.qg.domain.FrontendError;
 import com.qg.dto.ErrorStatsDTO;
 import com.qg.vo.ErrorTrendVO;
+import com.qg.vo.ManualTrackingVO;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDateTime;
@@ -61,7 +62,7 @@ public interface FrontendErrorMapper extends BaseMapper<FrontendError> {
             GROUP BY time
             ORDER BY time, category;
             """)
-    List<ErrorTrendVO> getErrorTrend(
+    List<ErrorTrendVO> queryErrorTrend(
             @Param("projectId") String projectId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
@@ -103,5 +104,66 @@ public interface FrontendErrorMapper extends BaseMapper<FrontendError> {
             @Result(property = "count", column = "count"),
             @Result(property = "ratio", column = "ratio")
     })
-    List<ErrorStatsDTO> getFrontendErrorStats(@Param("projectId") String projectId);
+    List<ErrorStatsDTO> queryFrontendErrorStats(@Param("projectId") String projectId);
+
+
+    /**
+     * 查询指定时间段内手动埋点统计数据
+     * @param projectId 项目ID
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 手动埋点统计列表 [{label: "埋点标签", value: 出现次数}]
+     */
+    @Select("""
+        SELECT
+          label,
+          SUM(value) AS value
+        FROM (
+          SELECT
+            crumb->>'message' AS label,
+            COUNT(*) AS value
+          FROM pmp.frontend_error,
+               jsonb_array_elements(breadcrumbs) AS crumb
+          WHERE
+            project_id = #{projectId}
+            AND timestamp BETWEEN #{startTime} AND #{endTime}
+            AND crumb->>'captureType' = 'manual'
+          GROUP BY label
+          
+          UNION ALL
+          
+          SELECT
+            crumb->>'message' AS label,
+            COUNT(*) AS value
+          FROM pmp.frontend_behavior,
+               jsonb_array_elements(breadcrumbs) AS crumb
+          WHERE
+            project_id = #{projectId}
+            AND timestamp BETWEEN #{startTime} AND #{endTime}
+            AND crumb->>'captureType' = 'manual'
+          GROUP BY label
+        ) AS combined
+        GROUP BY label
+        """)
+    List<ManualTrackingVO> queryManualTrackingStats(
+            @Param("projectId") String projectId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
+
+//    @Select("""
+//            SELECT
+//              (crumb->>'message') AS label,
+//              COUNT(*) AS value
+//            FROM pmp.frontend_error,
+//                 jsonb_array_elements(breadcrumbs) AS crumb
+//            WHERE
+//              project_id = #{projectId}
+//              AND timestamp BETWEEN #{startTime} AND #{endTime}
+//              AND crumb->>'captureType' = 'manual'
+//            GROUP BY label
+//            """)
+//    List<ManualTrackingVO> queryManualTrackingStats(
+//            @Param("projectId") String projectId,
+//            @Param("startTime") LocalDateTime startTime,
+//            @Param("endTime") LocalDateTime endTime);
 }

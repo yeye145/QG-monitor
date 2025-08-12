@@ -40,16 +40,14 @@ public class BackendLog {
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
     private Map<String, Object> environmentSnapshot;
 
-    private final AtomicInteger event = new AtomicInteger(0);
+    private Integer event = 0;
 
-    // 原子性递增
-    public void incrementEvent() {
-        event.incrementAndGet();
+    public synchronized void incrementEvent() {
+        event++;
     }
 
-    // 获取当前值
-    public int getEvent() {
-        return event.get();
+    public synchronized int getEvent() {
+        return event;
     }
 
 }

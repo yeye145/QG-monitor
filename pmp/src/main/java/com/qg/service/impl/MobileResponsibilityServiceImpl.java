@@ -2,6 +2,7 @@ package com.qg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.*;
+import com.qg.domain.MobileError;
 import com.qg.mapper.MobileErrorMapper;
 import com.qg.mapper.ResponsibilityMapper;
 import com.qg.mapper.UsersMapper;
@@ -14,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.qg.domain.Code.BAD_REQUEST;
 
 /**
  * @Description: // 类说明

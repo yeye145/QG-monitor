@@ -1,7 +1,6 @@
 package com.qg.controller;
 
 import cn.hutool.json.JSONUtil;
-import com.qg.domain.MobileError;
 import com.qg.domain.MobilePerformance;
 import com.qg.service.MobileErrorService;
 import com.qg.service.MobilePerformanceService;
