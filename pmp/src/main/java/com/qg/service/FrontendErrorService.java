@@ -20,5 +20,4 @@ public interface FrontendErrorService {
 
     Result addFrontendError(String errorData);
 
-    Object[] getErrorStats(String projectId);
 }

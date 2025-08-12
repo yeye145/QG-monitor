@@ -6,10 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
 import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * @Description: 移动错误类  // 类说明
@@ -33,6 +31,7 @@ public class MobileError {
     private String className;
 
     private Integer event = 0;
+
     public synchronized void incrementEvent() {
         event++;
     }

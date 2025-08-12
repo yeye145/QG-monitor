@@ -103,23 +103,4 @@ public class FrontendErrorServiceImpl implements FrontendErrorService {
         }
     }
 
-    /**
-     * 获取两种前端错误信息
-     * @param projectId
-     * @return
-     */
-    @Override
-    public Object[] getErrorStats(String projectId) {
-
-        List<UvBillDataVO> uvBillDataVOList = new ArrayList<>();
-        List<TransformDataVO> transformDataVOList = new ArrayList<>();
-        frontendErrorMapper
-                .getFrontendErrorStats(projectId)
-                .forEach(errorStat -> {
-                    uvBillDataVOList.add(new UvBillDataVO(errorStat.getErrorType(), errorStat.getCount()));
-                    transformDataVOList.add(new TransformDataVO(errorStat.getErrorType(), errorStat.getRatio()));
-                });
-
-        return new Object[]{uvBillDataVOList, transformDataVOList};
-    }
 }
