@@ -1,6 +1,10 @@
 package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.debugging.sourcemap.SourceMapConsumerV3;
+import com.google.debugging.sourcemap.SourceMapParseException;
+import com.google.debugging.sourcemap.proto.Mapping;
 import com.qg.domain.Code;
 import com.qg.domain.Result;
 import com.qg.service.FileUploadService;
@@ -8,13 +12,18 @@ import com.qg.utils.FileUploadHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static com.qg.utils.FileUploadHandler.determineSubDirectory;
 import static com.qg.utils.FileUploadHandler.isValidFile;
@@ -35,6 +44,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     /**
      * 上传文件
+     *
      * @param projectId
      * @param timestamp
      * @param version
@@ -77,6 +87,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     /**
      * 处理文件存储逻辑
+     *
      * @param files
      * @return
      * @throws IOException
@@ -109,6 +120,26 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
 
         return result;
+    }
+
+
+    /**
+     * 解析 SourceMap 获取原始位置信息
+     * @param mapFilePath SourceMap 文件路径
+     * @param line 压缩代码行号(从1开始)
+     * @param column 压缩代码列号(从0开始)
+     * @return Mapping.OriginalMapping 包含原始位置信息
+     */
+    public static Mapping.OriginalMapping parsePosition(String mapFilePath, int line, int column)
+            throws IOException, SourceMapParseException {
+
+        // 读取并解析 SourceMap 文件
+        String mapContent = Files.readString(Path.of(mapFilePath));
+        SourceMapConsumerV3 consumer = new SourceMapConsumerV3();
+        consumer.parse(mapContent);
+
+        // 获取原始映射
+        return consumer.getMappingForLine(line, column);
     }
 
 }
