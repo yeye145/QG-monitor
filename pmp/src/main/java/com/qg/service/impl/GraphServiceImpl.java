@@ -92,7 +92,6 @@ public class GraphServiceImpl implements GraphService {
      */
     @Override
     public Object[] getErrorStats(String projectId) {
-
         List<UvBillDataVO> uvBillDataVOList = new ArrayList<>();
         List<TransformDataVO> transformDataVOList = new ArrayList<>();
         frontendErrorMapper

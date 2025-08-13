@@ -124,13 +124,13 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @param timeType
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //访问量
      * @Date 17:23 2025/8/12
      * @Param
- * @param projectId
- * @param timeType
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getVisits")
     public Result getVisits(@RequestParam String projectId, @RequestParam String timeType) {
@@ -159,6 +159,7 @@ public class GraphController {
 
         try {
             List<ErrorTrendVO> list = graphService.getErrorTrend(projectId, startTime, endTime);
+            System.err.println("查询错误趋势成功");
             // 至少返回空集合
             return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "查询成功");
         } catch (Exception e) {
@@ -180,6 +181,7 @@ public class GraphController {
             return new Result(Code.BAD_REQUEST, "项目id不能为空");
         }
         try {
+            System.err.println("查询前端错误前10");
             return new Result(Code.SUCCESS,
                     graphService.getErrorStats(projectId), "查询近一周前端错误统计成功");
         } catch (Exception e) {
@@ -220,12 +222,12 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description // 查询近一周后端错误
      * @Date 17:25 2025/8/12
      * @Param
- * @param projectId
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getBackendErrorStats")
     public Result getBackendErrorStats(@RequestParam String projectId) {
@@ -243,12 +245,12 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //TODO 近一周移动端错
      * @Date 17:25 2025/8/12
      * @Param
- * @param projectId
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getMobileErrorStats")
     public Result getMobileErrorStats(@RequestParam String projectId) {
@@ -266,18 +268,18 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @param platform
+     * @param timeType
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //TODO api平均响应时间
      * @Date 17:26 2025/8/12
      * @Param
- * @param projectId
- * @param platform
- * @param timeType
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getAverageTime")
     public Result getAverageTime(@RequestParam String projectId, @RequestParam String platform,
-                               @RequestParam String timeType){
+                                 @RequestParam String timeType) {
         switch (platform) {
             case "frontend":
                 return new Result(Code.SUCCESS, null, "功能尚未实现，敬请期待");
@@ -291,9 +293,9 @@ public class GraphController {
     }
 
 
-
     /**
      * 查询查询前端性能数据-平均时间
+     *
      * @param projectId
      * @param startTime
      * @param endTime
