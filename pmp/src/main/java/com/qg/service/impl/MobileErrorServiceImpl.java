@@ -2,13 +2,15 @@ package com.qg.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.qg.domain.BackendError;
+
 import com.qg.domain.MobileError;
 import com.qg.domain.Result;
 import com.qg.mapper.MobileErrorMapper;
 import com.qg.repository.MobileErrorRepository;
 import com.qg.service.MobileErrorService;
 import com.qg.utils.MathUtil;
+import com.qg.vo.TransformDataVO;
+import com.qg.vo.UvBillDataVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,7 @@ public class MobileErrorServiceImpl implements MobileErrorService {
         }
 
         List<MobileError> mobileErrors = mobileErrorMapper.selectList(queryWrapper);
-        System.out.println("mobileErrors: " + mobileErrors);
+
 
         return new Result(200, mobileErrors, "查询成功");
     }
@@ -96,15 +98,65 @@ public class MobileErrorServiceImpl implements MobileErrorService {
         Integer finalCount = count;
 
         uvBillDataVOList.entrySet().removeIf(entry -> entry.getValue() == 0);
-        System.out.println("uvBillDataVOList: " + uvBillDataVOList);
-        System.out.println("finalCount: " + finalCount);
+
+
 
         uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
 
-        System.out.println("uvBillDataVOList after normalization: " + uvBillDataVOList);
 
 
         return new Object[]{transformDataVOList, uvBillDataVOList};
+    }
+
+
+    @Override
+    public Object[] getMobileErrorStatsPro(String projectId) {
+        LambdaQueryWrapper<MobileError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MobileError::getProjectId, projectId);
+
+        List<MobileError> mobileErrors = mobileErrorMapper.selectList(queryWrapper);
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        queryWrapper.ge(MobileError::getTimestamp, oneWeekAgo);
+
+        Map<String ,Double> transformDataVOList = new HashMap<>();
+        Map<String, Double>uvBillDataVOList = new HashMap<>();
+
+        Integer count = 0;
+
+        for (MobileError mobileError : mobileErrors) {
+            if (mobileError.getEvent() > 0 && mobileError.getErrorType() != null) {
+                addToMap(mobileError, transformDataVOList);
+                addToMap(mobileError, uvBillDataVOList);
+                count += mobileError.getEvent();
+            }
+
+        }
+
+        if (count == 0) {
+            return new Object[0]; // 如果没有数据，直接返回空数组
+        }
+
+        Integer finalCount = count;
+
+        uvBillDataVOList.entrySet().removeIf(entry -> entry.getValue() == 0);
+
+
+
+        uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
+
+
+        List<TransformDataVO> uvBillDataVOListPro = uvBillDataVOList.entrySet().stream()
+                .map(entry -> new TransformDataVO(entry.getKey(), entry.getValue()))
+                .toList();
+
+        List<UvBillDataVO> transformDataVOListPro = transformDataVOList.entrySet().stream()
+                .map(entry -> new UvBillDataVO(entry.getKey(), entry.getValue().intValue()))
+                .toList();
+
+
+
+        return new Object[]{transformDataVOListPro, uvBillDataVOListPro};
     }
 
     private static void addToMap(MobileError mobileError, Map<String, Double> transformDataVOList) {
@@ -113,10 +165,8 @@ public class MobileErrorServiceImpl implements MobileErrorService {
         }
         if (transformDataVOList.containsKey(mobileError.getErrorType()) ) {
             transformDataVOList.put(mobileError.getErrorType(), transformDataVOList.get(mobileError.getErrorType()) + mobileError.getEvent());
-            System.out.println("更新错误类型: " + mobileError.getErrorType() + ", 新的事件数: " + transformDataVOList.get(mobileError.getErrorType()));
         } else {
             transformDataVOList.put(mobileError.getErrorType(), Double.valueOf(mobileError.getEvent()));
-            System.out.println("添加新的错误类型: " + mobileError.getErrorType() + ", 事件数: " + mobileError.getEvent());
         }
     }
 
