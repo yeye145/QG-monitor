@@ -106,7 +106,36 @@ public class SourcemapParseTest2 {
         }
     }
 
+    @Test
+    public void testParseWithContext() {
+        // 使用示例
+        SourceMapService service = new SourceMapService();
+        SourceMapService.OriginalSourcePosition position = service.resolveSourcePosition(
+                "uploads/maps/4617c291-97a7-490e-b2ff-e07a94c3db82.map", 9, 1065);
 
+        if (position != null) {
+            System.out.println("=== 成功解析原始源码位置 ===");
+            System.out.println("  源文件: " + position.getSourceFile());
+            System.out.println("  行号: " + position.getLineNumber());
+            System.out.println("  列号: " + position.getColumnNumber());
+            System.out.println("  源码: " + position.getSourceCode());
+
+            // 打印上下文信息
+            if (position.getContextLines() != null && !position.getContextLines().isEmpty()) {
+                System.out.println("  上下文信息:");
+                List<String> contextLines = position.getContextLines();
+                int startLine = position.getContextStartLine();
+
+                for (int i = 0; i < contextLines.size(); i++) {
+                    int lineNumber = startLine + i;
+                    String prefix = (lineNumber == position.getLineNumber()) ? ">>> " : "    ";
+                    System.out.println(prefix + lineNumber + ": " + contextLines.get(i));
+                }
+            }
+            System.out.println("--------------------------------------------------------------------------------");
+            System.out.println(position.getFormattedContextCode());
+        }
+    }
 
 
 

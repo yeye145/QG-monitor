@@ -280,7 +280,8 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
 
                     FrontendErrorSourceCodeVO vo = new FrontendErrorSourceCodeVO();
                     BeanUtils.copyProperties(frontendError, vo);
-                    vo.setSourceCode(position.getSourceCode());
+                    // 获取上下文源码
+                    vo.setSourceCode(position.getFormattedContextCode());
 
                     yield new Result(SUCCESS, vo, "查询成功");
                 }
