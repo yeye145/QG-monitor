@@ -113,7 +113,7 @@ public class FrontendController {
      * @return
      */
     @PostMapping("/formData")
-    public Result getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
+    public Result uploadMapFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
                           @RequestParam(required = false) String buildVersion, @RequestParam("files") MultipartFile[] files,
                           @RequestParam String[] jsFilenames, @RequestParam String fileHashes) {
 

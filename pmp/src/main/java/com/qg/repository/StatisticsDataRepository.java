@@ -78,7 +78,7 @@ public abstract class StatisticsDataRepository<T> {
         incrementEvent(cached);
 
 
-        // 如果是MobileError类型，触发告警检查  ？
+        // 如果是MobileError类型，触发告警检查
         if (entity instanceof MobileError) {
             MobileErrorFatherRepository repository = (MobileErrorFatherRepository) this;
             repository.sendWechatAlert((MobileError) cached);

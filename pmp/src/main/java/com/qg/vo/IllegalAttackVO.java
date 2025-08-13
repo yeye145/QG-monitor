@@ -1,6 +1,5 @@
 package com.qg.vo;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MethodInvocationVO {
-    private String methodName;
+public class IllegalAttackVO {
     private Integer event;
+    private String ip;
 }

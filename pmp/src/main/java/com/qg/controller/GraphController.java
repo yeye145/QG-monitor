@@ -9,10 +9,8 @@ import com.qg.service.FrontendPerformanceService;
 import com.qg.service.*;
 
 import com.qg.service.GraphService;
-import com.qg.vo.ErrorTrendVO;
+import com.qg.vo.*;
 
-import com.qg.vo.FrontendBehaviorVO;
-import com.qg.vo.ManualTrackingVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,13 +125,13 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @param timeType
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //访问量
      * @Date 17:23 2025/8/12
      * @Param
- * @param projectId
- * @param timeType
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getVisits")
     public Result getVisits(@RequestParam String projectId, @RequestParam String timeType) {
@@ -162,6 +160,7 @@ public class GraphController {
 
         try {
             List<ErrorTrendVO> list = graphService.getErrorTrend(projectId, startTime, endTime);
+            System.err.println("查询错误趋势成功");
             // 至少返回空集合
             return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "查询成功");
         } catch (Exception e) {
@@ -183,6 +182,7 @@ public class GraphController {
             return new Result(Code.BAD_REQUEST, "项目id不能为空");
         }
         try {
+            System.err.println("查询前端错误前10");
             return new Result(Code.SUCCESS,
                     graphService.getErrorStats(projectId), "查询近一周前端错误统计成功");
         } catch (Exception e) {
@@ -223,12 +223,12 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description // 查询近一周后端错误
      * @Date 17:25 2025/8/12
      * @Param
- * @param projectId
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getBackendErrorStats")
     public Result getBackendErrorStats(@RequestParam String projectId) {
@@ -246,12 +246,12 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //TODO 近一周移动端错
      * @Date 17:25 2025/8/12
      * @Param
- * @param projectId
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getMobileErrorStats")
     public Result getMobileErrorStats(@RequestParam String projectId) {
@@ -269,18 +269,18 @@ public class GraphController {
 
 
     /**
+     * @param projectId
+     * @param platform
+     * @param timeType
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //TODO api平均响应时间
      * @Date 17:26 2025/8/12
      * @Param
- * @param projectId
- * @param platform
- * @param timeType
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getAverageTime")
     public Result getAverageTime(@RequestParam String projectId, @RequestParam String platform,
-                               @RequestParam String timeType){
+                                 @RequestParam String timeType) {
         switch (platform) {
             case "frontend":
                 return frontendErrorService.getAverageTime(projectId, timeType);
@@ -293,21 +293,22 @@ public class GraphController {
         }
     }
 
-
     /**
+     * @param projectId
+     * @return com.qg.domain.Result
      * @Author lrt
      * @Description //TODO 获取前端按钮数据
      * @Date 20:43 2025/8/12
      * @Param
- * @param projectId
-     * @return com.qg.domain.Result
      **/
     @GetMapping("/getFrontendButton")
-    public Result getFrontendButton(@RequestParam String projectId){
+    public Result getFrontendButton(@RequestParam String projectId) {
         return frontendBehaviorService.getFrontendButton(projectId);
     }
+
     /**
      * 查询查询前端性能数据-平均时间
+     *
      * @param projectId
      * @param startTime
      * @param endTime
@@ -343,6 +344,65 @@ public class GraphController {
     }
 
     /**
+     * 获取方法调用统计
+     *
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getMethodInvocationStats")
+    public Result getMethodInvocationStats(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        try {
+            List<MethodInvocationVO> list = graphService.getMethodInvocationStats(projectId, startTime, endTime);
+            // 至少返回空集合
+            return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "获取方法调用统计成功");
+        } catch (Exception e) {
+            log.error("获取方法调用统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "获取方法调用统计失败 ");
+        }
+    }
+
+    /**
+     * 获取非法攻击统计
+     *
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getIpInterceptionCount")
+    public Result getIpInterceptionCount(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        try {
+            List<IllegalAttackVO> list = graphService.getIpInterceptionCount(projectId, startTime, endTime);
+            // 至少返回空集合
+            return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "获取非法攻击统计成功");
+        } catch (Exception e) {
+            log.error("获取非法攻击统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "获取非法攻击统计失败 ");
+        }
+    }
+
+
+    /**
      * 判断项目id、时间是否为空
      *
      * @param projectId
@@ -360,7 +420,6 @@ public class GraphController {
         }
         return false;
     }
-
 
 
 }
