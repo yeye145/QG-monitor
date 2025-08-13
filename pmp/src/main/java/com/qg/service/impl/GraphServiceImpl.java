@@ -1,8 +1,6 @@
 package com.qg.service.impl;
 
-import com.qg.mapper.FrontendBehaviorMapper;
-import com.qg.mapper.FrontendErrorMapper;
-import com.qg.mapper.FrontendPerformanceMapper;
+import com.qg.mapper.*;
 import com.qg.service.GraphService;
 import com.qg.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +21,10 @@ public class GraphServiceImpl implements GraphService {
     private FrontendErrorMapper frontendErrorMapper;
     @Autowired
     private FrontendPerformanceMapper frontendPerformanceMapper;
+    @Autowired
+    private MethodInvocationMapper methodInvocationMapper;
+    @Autowired
+    private BackendLogMapper backendLogMapper;
 
     /**
      * 查询指定时间段内某项目中，用户页面停留《所有路由下》时间数据
@@ -115,6 +117,33 @@ public class GraphServiceImpl implements GraphService {
     public FrontendPerformanceAverageVO getAverageFrontendPerformanceTime
     (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
         return frontendPerformanceMapper.queryAverageFrontendPerformanceTime(projectId, startTime, endTime);
+    }
+
+
+    /**
+     * 获取方法调用统计
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<MethodInvocationVO> getMethodInvocationStats
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return methodInvocationMapper.queryMethodInvocationStats(projectId, startTime, endTime);
+    }
+
+    /**
+     * 获取非法攻击统计
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<IllegalAttackVO> getIpInterceptionCount
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return backendLogMapper.queryIpInterceptionCount(projectId, startTime, endTime);
     }
 
 }

@@ -9,10 +9,8 @@ import com.qg.service.FrontendPerformanceService;
 import com.qg.service.*;
 
 import com.qg.service.GraphService;
-import com.qg.vo.ErrorTrendVO;
+import com.qg.vo.*;
 
-import com.qg.vo.FrontendBehaviorVO;
-import com.qg.vo.ManualTrackingVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -329,6 +327,64 @@ public class GraphController {
         }
 
     }
+
+    /**
+     * 获取方法调用统计
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getMethodInvocationStats")
+    public Result getMethodInvocationStats(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        try {
+            List<MethodInvocationVO> list = graphService.getMethodInvocationStats(projectId, startTime, endTime);
+            // 至少返回空集合
+            return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "获取方法调用统计成功");
+        } catch (Exception e) {
+            log.error("获取方法调用统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "获取方法调用统计失败 ");
+        }
+    }
+
+    /**
+     * 获取非法攻击统计
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getIpInterceptionCount")
+    public Result getIpInterceptionCount(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        try {
+            List<IllegalAttackVO> list = graphService.getIpInterceptionCount(projectId, startTime, endTime);
+            // 至少返回空集合
+            return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "获取非法攻击统计成功");
+        } catch (Exception e) {
+            log.error("获取非法攻击统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "获取非法攻击统计失败 ");
+        }
+    }
+
+
 
     /**
      * 判断项目id、时间是否为空
