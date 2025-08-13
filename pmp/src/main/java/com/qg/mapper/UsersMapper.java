@@ -15,6 +15,6 @@ public interface UsersMapper extends BaseMapper<Users> {
      * @param avatarUrl
      * @return
      */
-    @Update("UPDATE `user` SET `avatar` = #{avatarUrl} WHERE id = #{userId}")
+    @Update("UPDATE users SET avatar = #{avatarUrl} WHERE id = #{userId}")
     Integer updateAvatar(@Param("userId") Long userId, @Param("avatarUrl") String avatarUrl);
 }

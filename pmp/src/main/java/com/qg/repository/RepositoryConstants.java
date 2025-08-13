@@ -5,7 +5,9 @@ package com.qg.repository;
  */
 public enum RepositoryConstants {
     // 默认阈值
-    DEFAULT_THRESHOLD(10),
+    DEFAULT_THRESHOLD(1),
+
+
 
     // RedisKey前缀
     BACKEND_LOG_PREFIX("backend:log"),
@@ -28,6 +30,11 @@ public enum RepositoryConstants {
     public static final int FIXED_RATE_DEFAULT = 6000;
     public static final int FIXED_RATE_METHOD = 12000;
 
+    //未处理
+    public static final int UN_HANDLED=0;
+
+    // 已处理
+    public static final int HANDLED = 1;
 
     private final Object value;
 

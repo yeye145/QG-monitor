@@ -34,12 +34,12 @@ public class FrontendError {
 
     private Integer event = 0;
 
-    @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Map<String, Object> requestInfo;
-    @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Map<String, Object> responseInfo;
-    @TableField(typeHandler = com.qg.handler.MapHandler.class)
-    private Map<String, Object> resourceInfo;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class, value = "request_info")
+    private Map<String, Object> request;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class, value = "response_info")
+    private Map<String, Object> response;
+    @TableField(typeHandler = com.qg.handler.MapHandler.class, value = "resource_info")
+    private Map<String, Object> resource;
     @TableField(typeHandler = com.qg.handler.ListHandler.class)
     private List<Map<String, Object>> breadcrumbs;
     @TableField(typeHandler = com.qg.handler.MapHandler.class)
@@ -48,6 +48,10 @@ public class FrontendError {
     private Map<String, Object> elementInfo;
     private String captureType;
     private Long duration;
+
+    private Integer colno;
+    private Integer lineno;
+    private String jsFilename;
 
 
     // 原子性递增

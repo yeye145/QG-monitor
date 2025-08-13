@@ -97,5 +97,4 @@ public interface FrontendBehaviorMapper extends BaseMapper<FrontendBehavior> {
             GROUP BY buttonId
             """)
     List<ButtonVO> queryFrontendButton(@Param("projectId") String projectId);
-
 }

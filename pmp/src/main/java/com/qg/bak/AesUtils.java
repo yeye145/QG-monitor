@@ -1,4 +1,4 @@
-package com.qg.utils;
+package com.qg.bak;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,6 @@ public class AesUtils {
         try {
             log.info("加密密钥： {}", keyBase64);
             // 1. Base64解码密钥（关键修改！）
-
             byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
             if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
                 throw new IllegalArgumentException("Invalid AES key length: " + keyBytes.length);
@@ -66,9 +65,7 @@ public class AesUtils {
         try {
 
             // 1. Base64解码密钥
-
             byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
-            log.info("解密密钥长度： {}", keyBytes.length);
             if (keyBytes.length != 32) {
                 throw new IllegalArgumentException("AES-256需要32字节密钥");
             }
