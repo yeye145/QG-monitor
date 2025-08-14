@@ -275,8 +275,6 @@ public class UserController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     @PostMapping("/password1")

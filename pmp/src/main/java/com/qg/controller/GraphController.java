@@ -371,6 +371,12 @@ public class GraphController {
 
     }
 
+
+    @GetMapping("/MobileOperationalPerformance")
+    public Result getMobileOperation(@RequestParam String projectId,@RequestParam String timeType){
+        return mobilePerformanceService.getMobileOperation(projectId,timeType);
+    }
+
     /**
      * 判断项目id、时间是否为空
      *
