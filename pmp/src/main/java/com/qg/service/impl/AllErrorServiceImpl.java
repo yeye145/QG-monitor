@@ -272,18 +272,30 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
                     LambdaQueryWrapper<SourcemapFiles> sourcemapQueryWrapper = new LambdaQueryWrapper<>();
                     sourcemapQueryWrapper.eq(SourcemapFiles::getJsFilename, jsFilename);
                     SourcemapFiles sourcemapFiles = sourcemapFilesMapper.selectOne(sourcemapQueryWrapper);
+                    if (sourcemapFiles == null) {
+                        log.info("未找到对应的sourcemap文件");
+                        yield new Result(SUCCESS, frontendError, "查询成功");
+                    }
                     String mapFilePath = sourcemapFiles.getFilePath();
+                    try {
+                        SourceMapService service = new SourceMapService();
+                        SourceMapService.OriginalSourcePosition position = service.resolveSourcePosition(
+                                mapFilePath, lineno, colno);
+                        if (position == null) {
+                            log.warn("无法解析原始源码位置");
+                            yield new Result(SUCCESS, frontendError, "查询成功");
+                        }
 
-                    SourceMapService service = new SourceMapService();
-                    SourceMapService.OriginalSourcePosition position = service.resolveSourcePosition(
-                            mapFilePath, lineno, colno);
+                        FrontendErrorSourceCodeVO vo = new FrontendErrorSourceCodeVO();
+                        BeanUtils.copyProperties(frontendError, vo);
+                        // 获取上下文源码
+                        vo.setSourceCode(position.getFormattedContextCode());
 
-                    FrontendErrorSourceCodeVO vo = new FrontendErrorSourceCodeVO();
-                    BeanUtils.copyProperties(frontendError, vo);
-                    // 获取上下文源码
-                    vo.setSourceCode(position.getFormattedContextCode());
-
-                    yield new Result(SUCCESS, vo, "查询成功");
+                        yield new Result(SUCCESS, vo, "查询成功");
+                    } catch (Exception e) {
+                        log.error("解析SourceMap失败: mapFilePath={}, lineno={}, colno={}", mapFilePath, lineno, colno, e);
+                        yield new Result(SUCCESS, frontendError, "查询成功");
+                    }
                 }
                 case "mobile" -> {
                     MobileError mobileError = mobileErrorMapper.selectById(errorId);

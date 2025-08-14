@@ -1,5 +1,7 @@
 package com.qg.parse;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -7,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class SourceMapService {
 
     /**
@@ -25,9 +28,9 @@ public class SourceMapService {
             SourceMapParser parser = new SourceMapParser(sourceMapContent);
 
             // 调试信息
-            System.out.println("=== 调试信息 ===");
-            parser.debugSourceMapInfo();
-            parser.debugSourceMapping();
+//            System.out.println("=== 调试信息 ===");
+//            parser.debugSourceMapInfo();
+//            parser.debugSourceMapping();
 
             // 验证 source map 是否有效
             if (parser.getMappings() == null || parser.getMappings().isEmpty()) {
@@ -35,7 +38,7 @@ public class SourceMapService {
                 return null;
             }
 
-            System.out.println("正在解析位置: 构建后 JS 文件第 " + generatedLine + " 行, 第 " + generatedColumn + " 列");
+            log.info("正在解析位置: 构建后 JS 文件第 {} 行, 第 {} 列", generatedLine, generatedColumn);
 
             // 查找映射关系
             SourceMapParser.OriginalPosition position = parser.findOriginalPosition(
@@ -84,22 +87,22 @@ public class SourceMapService {
                     }
                 }
 
-                System.out.println("目标源文件: " + targetSource);
-                System.out.println("在 sources 中的索引: " + sourceIndex);
+                log.info("目标源文件: {}", targetSource);
+                log.info("在 sources 中的索引: {}", sourceIndex);
 
                 // 检查索引是否有效且在 sourcesContent 范围内
                 if (sourceIndex != -1 && sourceIndex < parser.getSourcesContent().size()) {
                     String content = parser.getSourcesContent().get(sourceIndex);
-                    System.out.println("获取到的源文件内容长度: " + (content != null ? content.length() : "null"));
+                    log.info("获取到的源文件内容长度: {}", content != null ? content.length() : "null");
 
                     if (content != null) {
                         String[] lines = content.split("\n");
-                        System.out.println("源文件总行数: " + lines.length);
-                        System.out.println("请求的行号: " + position.line);
+                        log.info("源文件总行数: {}", lines.length);
+                        log.info("请求的行号: {}", position.line);
 
                         if (position.line > 0 && position.line <= lines.length) {
                             String sourceLine = lines[position.line - 1]; // 行号是1-based
-                            System.out.println("成功获取源码行: " + sourceLine);
+                            log.info("成功获取源码行: {}", sourceLine);
 
                             // 获取上下文行（前后各3行）
                             List<String> contextLines = new ArrayList<>();
@@ -115,7 +118,7 @@ public class SourceMapService {
 
                             return sourceLine;
                         } else {
-                            System.out.println("行号超出范围");
+                            log.warn("行号超出范围");
                             // 打印附近几行的内容用于调试
                             for (int i = Math.max(0, position.line - 3);
                                  i < Math.min(lines.length, position.line + 2); i++) {
@@ -124,14 +127,14 @@ public class SourceMapService {
                         }
                     }
                 } else {
-                    System.out.println("索引无效或超出 sourcesContent 范围");
-                    System.out.println("sourcesContent 数组大小: " + parser.getSourcesContent().size());
+                    log.error("索引无效或超出 sourcesContent 范围");
+                    log.error("sourcesContent 数组大小: {}", parser.getSourcesContent().size());
                 }
             }
 
             // 方法2: 如果 sourcesContent 为空或不匹配，尝试从 sources 中获取文件路径并读取文件
             if (position.source != null && !position.source.startsWith("webpack://")) {
-                System.out.println("尝试从文件系统读取源文件: " + position.source);
+                log.info("尝试从文件系统读取源文件: {}", position.source);
                 // 这里可以根据你的项目结构调整路径
                 String sourceCode = readSourceFileFromFileSystem(position.source);
                 if (sourceCode != null) {
@@ -158,7 +161,7 @@ public class SourceMapService {
 
             return null;
         } catch (Exception e) {
-            System.err.println("获取源码内容时出错: " + e.getMessage());
+            log.error("获取源码内容时出错: {}", e.getMessage());
             e.printStackTrace();
             return null;
         }

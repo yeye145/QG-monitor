@@ -23,6 +23,6 @@ public class SourcemapFiles {
     private String filePath;
     private String fileHash;
     private String jsFilename;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+    private LocalDateTime createdTime;
+    private LocalDateTime updatedTime;
 }
