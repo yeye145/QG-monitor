@@ -80,7 +80,7 @@ rsa:
         -----END PUBLIC KEY-----
 
 server:
-  port: 8081
+  port: 8080
 
 mybatis-plus:
   type-handlers-package: com.qg.handler
