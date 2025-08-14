@@ -31,6 +31,20 @@
     </properties>
     <dependencies>
 
+        <dependency>
+            <groupId>com.google.javascript</groupId>
+            <artifactId>closure-compiler</artifactId>
+            <version>v20230802</version>
+        </dependency>
+
+        <!-- Jackson (Spring Boot 默认) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+
         <!--apifox使用的依赖-->
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -119,7 +133,6 @@
         </dependency>
 
 
-
         <!--hutool-->
         <dependency>
             <groupId>cn.hutool</groupId>
@@ -144,6 +157,18 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!-- closure-compiler -->
+        <dependency>
+            <groupId>com.google.javascript</groupId>
+            <artifactId>closure-compiler</artifactId>
+            <version>v20231112</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
     </dependencies>
 

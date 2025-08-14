@@ -15,8 +15,9 @@ public class FileUploadHandler {
     public static final String UPLOAD_DIR = "uploads";
     public static final String IMAGE_DIR = "images";
     public static final String DOCUMENT_DIR = "documents";
+    public static final String MAP_DIR = "maps";
     public static final String INSTALL_DIR = "installs";
-    public static final String PUBLIC_URL = "http://47.113.224.195:30410";
+    public static final String PUBLIC_URL = "http://47.113.224.195:30420";
 
     // 保存文件到指定目录
     public static String saveFile(MultipartFile file, String subDir) throws IOException {
@@ -63,7 +64,16 @@ public class FileUploadHandler {
         if (fileName == null) return false;
 
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-        return fileExtension.matches("\\.(zip|tar|tar.gz|map|html|js)$");
+        return fileExtension.matches("\\.(zip|tar|tar.gz)$");
+    }
+
+    // 验证map文件类型
+    public static boolean isValidMapFile(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        if (fileName == null) return false;
+
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        return fileExtension.matches("\\.(map|html|js)$");
     }
 
     /**
@@ -81,9 +91,11 @@ public class FileUploadHandler {
             return FileUploadHandler.IMAGE_DIR;
         } else if (FileUploadHandler.isValidDocumentFile(file)) {
             return FileUploadHandler.DOCUMENT_DIR;
-        } else {
+        } else if (FileUploadHandler.isValidInstallFile(file)){
             return FileUploadHandler.INSTALL_DIR;
-        }
+        } else if (FileUploadHandler.isValidMapFile(file)){
+            return FileUploadHandler.MAP_DIR;
+        } else return null;
     }
 
 
