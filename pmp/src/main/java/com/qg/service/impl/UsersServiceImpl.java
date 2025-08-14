@@ -110,6 +110,20 @@ public class UsersServiceImpl implements UsersService {
             return new Result(CONFLICT, "该邮箱已被注册！");
         }
 
+        String phone = user.getPhone();
+        if (phone == null || phone.trim().isEmpty()) {
+            System.out.println("手机号不能为空");
+            return new Result(BAD_REQUEST, "手机号不能为空");
+        }
+
+        LambdaQueryWrapper<Users> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Users::getPhone, phone);
+
+        if (usersMapper.selectCount(queryWrapper) > 0) {
+            System.out.println("该手机号已被注册");
+            return new Result(CONFLICT, "该手机号已被注册！");
+        }
+
         // 再查看验证码是否正确
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + email);
         if (cacheCode == null || !cacheCode.equals(code)) {
