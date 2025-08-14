@@ -21,8 +21,9 @@ public class AlertRuleController {
      * @return
      */
     @GetMapping("/selectByTypeEnvProjectId")
-    public Result selectByType(@RequestParam String errorType, @RequestParam String env, @RequestParam String projectId) {
-        return alertRuleService.selectByType(errorType, env, projectId);
+    public Result selectByType(@RequestParam String errorType, @RequestParam(required = false) String env,
+                               @RequestParam String projectId, @RequestParam String platform) {
+        return alertRuleService.selectByType(errorType, env, projectId, platform);
     }
 
     /**

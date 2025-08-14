@@ -100,7 +100,8 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
         try {
             // 构建查询条件
             LambdaQueryWrapper<MobileError> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(MobileError::getProjectId, projectId);
+            queryWrapper.eq(MobileError::getProjectId, projectId)
+                    .orderByDesc(MobileError::getTimestamp);
 
             // 添加错误类型条件
             if (type != null && !type.isEmpty()) {
@@ -152,6 +153,7 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
                             if (responsibleUser != null) {
                                 vo.setName(responsibleUser.getUsername());
                                 vo.setAvatarUrl(responsibleUser.getAvatar());
+                                vo.setResponsibleId(responsibility.getResponsibleId());
                             }
                         }
                         return vo;

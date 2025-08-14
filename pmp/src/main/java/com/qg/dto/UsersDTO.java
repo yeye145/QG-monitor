@@ -14,5 +14,6 @@ public class UsersDTO {
     private String username;
     private String avatar;
     private String phone;
+    private String email;
     private LocalDateTime createdTime;
 }

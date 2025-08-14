@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qg.utils.Constants.*;
 import static com.qg.utils.RedisConstants.*;
 
 @Slf4j
@@ -295,9 +296,11 @@ public class NotificationServiceImpl implements NotificationService {
         // 提取所有需要查询的ID
         List<String> projectIds = new ArrayList<>();
         List<Long> senderIds = new ArrayList<>();
+        List<Long> responsibleIds = new ArrayList<>();
         List<String> backendErrorTypes = new ArrayList<>();
         List<String> frontendErrorTypes = new ArrayList<>();
         List<String> mobileErrorTypes = new ArrayList<>();
+
 
         for (Notification notification : notificationList) {
             // 收集项目ID
@@ -308,6 +311,10 @@ public class NotificationServiceImpl implements NotificationService {
             // 收集发送者ID
             if (notification.getSenderId() != null && !senderIds.contains(notification.getSenderId())) {
                 senderIds.add(notification.getSenderId());
+            }
+
+            if (notification.getResponsibleId() != null && !responsibleIds.contains(notification.getResponsibleId())) {
+                responsibleIds.add(notification.getResponsibleId());
             }
 
             // 根据类型分类错误类型
@@ -337,7 +344,8 @@ public class NotificationServiceImpl implements NotificationService {
 
         // 批量查询关联数据
         Map<String, Project> projectMap = getProjectMap(projectIds);
-        Map<Long, Users> userMap = getUserMap(senderIds);
+        Map<Long, Users> senderMap = getUserMap(senderIds);
+        Map<Long, Users> responsibleMap = getUserMap(responsibleIds);
         Map<String, BackendError> backendErrorMap = getBackendErrorMapByType(backendErrorTypes);
         Map<String, FrontendError> frontendErrorMap = getFrontendErrorMapByType(frontendErrorTypes);
         Map<String, MobileError> mobileErrorMap = getMobileErrorMapByType(mobileErrorTypes);
@@ -358,10 +366,19 @@ public class NotificationServiceImpl implements NotificationService {
 
             // 设置发送者信息
             if (notification.getSenderId() != null) {
-                Users sender = userMap.get(notification.getSenderId());
+                Users sender = senderMap.get(notification.getSenderId());
                 if (sender != null) {
                     notificationVO.setSenderName(sender.getUsername());
                     notificationVO.setSenderAvatar(sender.getAvatar());
+                }
+            }
+
+            // 设置负责人信息
+            if (notification.getResponsibleId() != null) {
+                Users responsible = responsibleMap.get(notification.getResponsibleId());
+                if (responsible != null) {
+                    notificationVO.setResponsibleName(responsible.getUsername());
+                    notificationVO.setResponsibleAvatar(responsible.getAvatar());
                 }
             }
 

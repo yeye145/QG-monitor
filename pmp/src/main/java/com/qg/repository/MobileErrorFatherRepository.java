@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -85,22 +87,94 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
             log.warn("未找到对应的企业微信群机器人Webhook地址, 告警失败");
             return;
         }
+        //查询同类错误的最新记录
+        LambdaQueryWrapper<MobileError> queryWrapper4 = new LambdaQueryWrapper<>();
+        queryWrapper4.eq(MobileError::getProjectId, error.getProjectId())
+                .eq(MobileError::getMessage,error.getMessage())
+                .eq(MobileError::getStack,error.getStack())
+                .eq(MobileError::getErrorType, error.getErrorType())
+                .eq(MobileError::getClassName, error.getClassName())
+                .orderByDesc(MobileError::getTimestamp)
+                .last("LIMIT 1");
+
+        MobileError latestError = mobileErrorMapper.selectOne(queryWrapper4);
+        // 如果存在同类错误记录，检查时间间隔
+        if (latestError != null) {
+            log.info("最新错误：{}", latestError);
+            long timeDiff = Timestamp.valueOf(error.getTimestamp()).getTime()
+                    - Timestamp.valueOf(latestError.getTimestamp()).getTime();
+            log.info("当前错误时间: {}, 最新错误时间: {}",
+                    error.getTimestamp(),
+                    latestError.getTimestamp());
+            long minutesDiff = timeDiff / (1000 * 60);
+            log.info("计算出的时间差(ms): {}, 分钟差: {}",
+                    timeDiff,
+                    minutesDiff);// 转换为分钟
+
+            // 如果时间间隔小于40分钟，只更新event次数
+            if (minutesDiff < 40) {
+                log.info("小于40分钟");
+                latestError.setEvent(latestError.getEvent() + error.getEvent());
+                //latestError.setTimestamp(error.getTimestamp()); // 更新时间戳为最新时间
+                mobileErrorMapper.updateById(latestError);
+                log.info("时间间隔小于40分钟，只更新错误次数，errorId:{}", latestError.getId());
+            }
+            else{
+                log.info("大于40分钟");
+                //插入新的错误信息
+                log.info("存储错误数据: {}",error);
+                mobileErrorMapper.insert(error);
+            }
+        }else{
+            log.info("没有找到错误信息，存储错误数据: {}",error);
+            mobileErrorMapper.insert(error);
+        }
+
+        //删除缓存数据
+        removeError(error);
+
+        //查询错误id
+        LambdaQueryWrapper<MobileError> queryWrapper2 = new LambdaQueryWrapper<>();
+        queryWrapper2.eq(MobileError::getProjectId,error.getProjectId())
+                .eq(MobileError::getErrorType,error.getErrorType())
+                .eq(MobileError::getMessage,error.getMessage())
+                .eq(MobileError::getStack,error.getStack())
+                .eq(MobileError::getClassName,error.getClassName())
+                .orderByDesc(MobileError::getTimestamp)
+                .last("LIMIT 1");  // 只取第一条记录
+
+        error = mobileErrorMapper.selectOne(queryWrapper2);
+        log.info("errorId:{}",error.getId());
+
+        //更新responsibility中的errorId
+        LambdaQueryWrapper<Responsibility> queryWrapper5 = new LambdaQueryWrapper<>();
+        queryWrapper5.eq(Responsibility::getProjectId, error.getProjectId())
+                .eq(Responsibility::getPlatform, "mobile")
+                .eq(Responsibility::getErrorType, error.getErrorType());
+        Responsibility responsibility1 = responsibilityMapper.selectOne(queryWrapper5);
+        responsibility1.setErrorId(error.getId());
+        responsibilityMapper.update(responsibility1, queryWrapper5);
+
+
         if (shouldAlert(generateUniqueKey(error), error)) {
-            log.info("告警id为: {}", error.getId());
+
             String message = generateAlertMessage(error);
-            if(error.getId() != null){
-                // TODO: 需要@的成员手机号列表
-                LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Responsibility::getErrorType,error.getErrorType())
-                        .eq(Responsibility::getProjectId,error.getProjectId());
 
-                Responsibility responsibility = responsibilityMapper.selectOne(queryWrapper);
+            //查看该错误类型是否被委派
+            LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Responsibility::getErrorType,error.getErrorType())
+                    .eq(Responsibility::getProjectId,error.getProjectId());
 
-                //TODO:标记该错误为未解决
+            Responsibility responsibility = responsibilityMapper.selectOne(queryWrapper);
+
+
+            if(responsibility != null){
+               log.info("该错误已经被委派" );
+
+                //标记该错误为未解决
                 responsibility.setIsHandle(UN_HANDLED);
+                responsibility.setUpdateTime(LocalDateTime.now());
                 responsibilityMapper.update(responsibility,queryWrapper);
-
-                //存储错误数据
 
                 //存储进通知表
                 List<Long> alertReceiverID = Arrays.asList(responsibility.getResponsibleId());
@@ -109,6 +183,7 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
                     log.error("保存通知进数据库失败！");
                 }
 
+                //获取负责人手机号码
                 LambdaQueryWrapper<Users> queryWrapper1 = new LambdaQueryWrapper<>();
                 queryWrapper1.eq(Users::getId,responsibility.getResponsibleId());
 
@@ -118,21 +193,29 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
 
                 List<String> alertReceiver = Arrays.asList(responsiblePhone);
 
-
                 // TODO: 实现从数据库查找负责人手机号逻辑
                 List<String> alertReceivers = Collections.singletonList("@all");
                 wechatAlertUtil.sendAlert(webhookUrl, message, alertReceiver);
             }else{
-                LambdaQueryWrapper<Role> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Role::getProjectId,error.getProjectId())
+                log.info("该错误未被委派！");
+                //未指派的错误找到管理员
+                LambdaQueryWrapper<Role> queryWrapper3 = new LambdaQueryWrapper<>();
+                queryWrapper3.eq(Role::getProjectId,error.getProjectId())
                             .eq(Role::getUserRole,USER_ROLE_ADMIN);
-                List<Role> roles = roleMapper.selectList(queryWrapper);
+                List<Role> roles = roleMapper.selectList(queryWrapper3);
 
                 // 2. 提取角色中的用户ID集合
                 List<Long> userIds = roles.stream()
                         .map(Role::getUserId)  // 假设Role中有getUserId()
                         .collect(Collectors.toList());
 
+                //3、保存通知进数据库
+                boolean success = saveNotification(userIds,error);
+                if(!success){
+                    log.error("保存通知进数据库失败！");
+                }
+
+                //4、获取电话号码 发送警告
                 LambdaQueryWrapper<Users> queryWrapper1 = new LambdaQueryWrapper<>();
                 queryWrapper1.in(Users::getId,userIds);
                 List<Users> users = usersMapper.selectList(queryWrapper1);
@@ -159,6 +242,18 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
     protected String getWebhookUrl(String projectId) {
         // 从数据库查询webhook
         return projectMapper.selectWebhookByProjectId(projectId);
+    }
+
+    protected void removeError(MobileError entity){
+        // 1. 生成唯一键(与statistics方法一致)
+        String key = generateUniqueKey(entity);
+
+        // 2. 从Redis删除
+        stringRedisTemplate.delete(key);
+
+        // 3. 从内存缓存删除
+        cacheMap.remove(key);
+        log.info("缓存已被删除！");
     }
 
 

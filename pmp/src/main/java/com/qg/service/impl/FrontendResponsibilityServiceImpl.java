@@ -117,7 +117,8 @@ public Result selectByCondition(String projectId, String type) {
     try {
         // 构建查询条件
         LambdaQueryWrapper<FrontendError> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FrontendError::getProjectId, projectId);
+        queryWrapper.eq(FrontendError::getProjectId, projectId)
+                .orderByDesc(FrontendError::getTimestamp);
 
         // 添加错误类型条件
         if (type != null && !type.isEmpty()) {
@@ -169,6 +170,7 @@ public Result selectByCondition(String projectId, String type) {
                         if (responsibleUser != null) {
                             vo.setName(responsibleUser.getUsername());
                             vo.setAvatarUrl(responsibleUser.getAvatar());
+                            vo.setResponsibleId(responsibility.getResponsibleId());
                         }
                     }
                     return vo;

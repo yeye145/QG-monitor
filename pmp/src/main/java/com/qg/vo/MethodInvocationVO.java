@@ -1,15 +1,14 @@
 package com.qg.vo;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@TableName("method_invocation")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MethodInvocationVO {
-    private String projectId;
     private String methodName;
     private Integer event;
-    private LocalDateTime createTime;
 }
