@@ -15,4 +15,8 @@ public interface ResponsibilityService {
     Result deleteResponsibility(Long id);
 
     Result selectResponsibleError(String projectId, Long responsibleId, String errorType, String platform);
+
+    Result updateHandleStatus(Responsibility responsibility);
+
+    Result selectHandleStatus(String projectId, String errorType, String platform);
 }

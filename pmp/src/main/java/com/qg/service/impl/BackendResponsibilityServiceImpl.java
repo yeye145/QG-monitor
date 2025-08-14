@@ -129,7 +129,8 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             }
 
             // 添加项目ID条件
-            queryWrapper.eq(BackendError::getProjectId, projectId);
+            queryWrapper.eq(BackendError::getProjectId, projectId)
+                    .orderByDesc(BackendError::getTimestamp);
 
             // 执行查询
             List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
@@ -180,6 +181,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
                             if (responsibleUser != null) {
                                 vo.setName(responsibleUser.getUsername());
                                 vo.setAvatarUrl(responsibleUser.getAvatar());
+                                vo.setResponsibleId(responsibility.getResponsibleId());
                             }
                         }
                         return vo;
