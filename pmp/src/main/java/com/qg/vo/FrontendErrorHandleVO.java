@@ -17,6 +17,7 @@ public class FrontendErrorHandleVO {
     private String errorType;
     private String message;
     private String stack;
+    private String network;
 
     private Integer event;
 
