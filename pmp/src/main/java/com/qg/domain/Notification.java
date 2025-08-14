@@ -24,6 +24,8 @@ public class Notification {
     private String platform;
     private String environment;
     private String errorType;
+    private String content;
+    private Long responsibleId;
 
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
