@@ -24,6 +24,7 @@ import static com.qg.domain.Code.INTERNAL_ERROR;
 import static com.qg.domain.Code.SUCCESS;
 import static com.qg.utils.Constants.IS_HANDLE;
 import static com.qg.utils.Constants.IS_NOT_HANDLE;
+import static com.qg.utils.Constants.ALERT_CONTENT_DELEGATE;
 
 @Service
 @Slf4j
@@ -188,6 +189,8 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         notification.setSenderId(responsibility.getDelegatorId());
         notification.setReceiverId(responsibility.getResponsibleId());
         notification.setPlatform(platform);
+        notification.setContent(ALERT_CONTENT_DELEGATE);
+        notification.setResponsibleId(responsibility.getResponsibleId());
 
         List<Notification> notificationList = new ArrayList<>();
         notificationList.add(notification);
