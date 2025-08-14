@@ -56,8 +56,20 @@ public class ErrorController {
         }
     }
 
+
     @GetMapping("/selectById/{id}")
     public Result selectById(@PathVariable Long id) {
         return allErrorService.selectById(id);
+    }
+
+    /**
+     * 根据id和platform查询错误信息详情
+     * @param errorId
+     * @param platform
+     * @return
+     */
+    @GetMapping("/selectErrorDetail")
+    public Result selectErrorDetail(@RequestParam Long errorId, @RequestParam String platform) {
+        return allErrorService.selectErrorDetail(errorId, platform);
     }
 }

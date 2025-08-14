@@ -238,7 +238,7 @@ public class UserController {
                 return new Result(BAD_REQUEST, "图片大小不能超过2MB");
             }
 
-            log.info("file ==> " + file.getOriginalFilename());
+            log.info("file ==> {}", file.getOriginalFilename());
             String avatarUrl = FileUploadHandler.saveFile(file, IMAGE_DIR);
 
             // 判断头像是否上传成功返回相应的结果

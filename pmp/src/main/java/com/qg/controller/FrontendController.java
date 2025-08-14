@@ -1,10 +1,7 @@
 package com.qg.controller;
 
 import com.qg.domain.*;
-import com.qg.service.FileUploadService;
-import com.qg.service.FrontendBehaviorService;
-import com.qg.service.FrontendErrorService;
-import com.qg.service.FrontendPerformanceService;
+import com.qg.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,6 +36,9 @@ public class FrontendController {
     private FrontendBehaviorService frontendBehaviorService;
     @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private SourcemapFilesService sourcemapFilesService;
 
 
 //    @PostMapping("/performance")
@@ -113,13 +113,13 @@ public class FrontendController {
      * @return
      */
     @PostMapping("/formData")
-    public Result getFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
+    public Result uploadMapFile(@RequestParam String projectId, @RequestParam String timestamp, @RequestParam String version,
                           @RequestParam(required = false) String buildVersion, @RequestParam("files") MultipartFile[] files,
                           @RequestParam String[] jsFilenames, @RequestParam String fileHashes) {
 
         log.info("\n项目ID: {}\n时间戳: {}\n版本: {}\n构建版本: {}\n文件数量: {}\nJS文件名: {}\n文件哈希: {}", projectId, timestamp, version, buildVersion, files.length, String.join(", ", jsFilenames), fileHashes);
 
-        return fileUploadService.uploadFile(projectId, timestamp
+        return sourcemapFilesService.uploadFile(projectId, timestamp
                 , version, buildVersion, files, jsFilenames, fileHashes);
     }
 

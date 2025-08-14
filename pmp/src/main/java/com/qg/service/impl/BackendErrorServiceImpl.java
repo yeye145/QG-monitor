@@ -65,7 +65,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
         List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
 
-        return new Result(SUCCESS, backendErrors,"查询成功");
+        return new Result(SUCCESS, backendErrors, "查询成功");
 
     }
 
@@ -73,7 +73,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
     public Integer saveBackendError(BackendError backendError) {
         String projectId = backendError.getProjectId();
         String moduleName = backendError.getModule();
-        if (backendError == null|| projectId == null) {
+        if (backendError == null || projectId == null) {
             return 0; // 返回0表示没有数据需要保存
         }
         moduleService.putModuleIfAbsent(moduleName, projectId);
@@ -92,8 +92,8 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         try {
             BackendError backendError = JSONUtil.toBean(errorData, BackendError.class);
             if (backendError.getProjectId() == null ||
-                    backendError.getErrorType() == null ||
-                    backendError.getEnvironment() == null) {
+                backendError.getErrorType() == null ||
+                backendError.getEnvironment() == null) {
                 log.error("参数错误");
                 return new Result(BAD_REQUEST, "参数错误");
             }
@@ -123,8 +123,8 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
         queryWrapper.ge(BackendError::getTimestamp, oneWeekAgo);
 
-        Map<String ,Double> transformDataVOList = new HashMap<>();
-        Map<String, Double>uvBillDataVOList = new HashMap<>();
+        Map<String, Double> transformDataVOList = new HashMap<>();
+        Map<String, Double> uvBillDataVOList = new HashMap<>();
 
         Integer count = 0;
 
@@ -137,6 +137,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
         }
 
+
         if (count == 0) {
             return new Object[0]; // 如果没有数据，直接返回空数组
         }
@@ -145,11 +146,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
         uvBillDataVOList.entrySet().removeIf(entry -> entry.getValue() == 0);
 
-
         uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
-
-
-
 
         return new Object[]{transformDataVOList, uvBillDataVOList};
     }
@@ -158,7 +155,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         if (backendError.getErrorType() == null || backendError.getEvent() == null) {
             return; // 如果错误类型或事件为空，则不处理
         }
-        if (transformDataVOList.containsKey(backendError.getErrorType()) ) {
+        if (transformDataVOList.containsKey(backendError.getErrorType())) {
             transformDataVOList.put(backendError.getErrorType(), transformDataVOList.get(backendError.getErrorType()) + backendError.getEvent());
 
         } else {

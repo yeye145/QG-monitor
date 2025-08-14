@@ -8,6 +8,9 @@ import com.qg.domain.MobileError;
 import com.qg.mapper.*;
 import com.qg.service.NotificationService;
 import com.qg.service.ResponsibilityService;
+import com.qg.vo.BackendErrorHandleVO;
+import com.qg.vo.FrontendErrorHandleVO;
+import com.qg.vo.MobileErrorHandleVO;
 import com.qg.vo.ResponsibilityVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.qg.domain.Code.INTERNAL_ERROR;
 import static com.qg.domain.Code.SUCCESS;
 import static com.qg.utils.Constants.ALERT_CONTENT_DELEGATE;
 
@@ -67,10 +71,10 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
                     return new Result(Code.BAD_REQUEST, "平台类型错误");
             }
         } catch (Exception e) {
-            log.error("处理责任链失败: projectId={}, errorType={}, platform={}",
-                    responsibility.getProjectId(), responsibility.getErrorType(),
+            log.error("处理责任链失败: projectId={}, errorId={}, platform={}",
+                    responsibility.getProjectId(), responsibility.getErrorId(),
                     responsibility.getPlatform(), e);
-            return new Result(Code.INTERNAL_ERROR, "处理责任链失败: " + e.getMessage());
+            return new Result(INTERNAL_ERROR, "处理责任链失败: " + e.getMessage());
         }
     }
 
@@ -172,7 +176,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
 
             return new Result(Code.SUCCESS, "委派任务成功");
         } else {
-            return new Result(Code.INTERNAL_ERROR, "委派任务失败");
+            return new Result(INTERNAL_ERROR, "委派任务失败");
         }
     }
 
@@ -254,7 +258,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         queryWrapper.eq(Responsibility::getProjectId, responsibility.getProjectId())
                 .eq(Responsibility::getErrorId, responsibility.getErrorId());
 
-        return responsibilityMapper.update(responsibility,queryWrapper) > 0 ? new Result(SUCCESS, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
+        return responsibilityMapper.update(responsibility,queryWrapper) > 0 ? new Result(SUCCESS, "更新成功") : new Result(INTERNAL_ERROR, "更新失败");
     }
 
     @Override
@@ -262,7 +266,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         if(id == null){
             return new Result(Code.BAD_REQUEST, "参数不能为空");
         }
-        return responsibilityMapper.deleteById(id) > 0 ? new Result(SUCCESS, "删除成功") : new Result(Code.INTERNAL_ERROR, "删除失败");
+        return responsibilityMapper.deleteById(id) > 0 ? new Result(SUCCESS, "删除成功") : new Result(INTERNAL_ERROR, "删除失败");
     }
 
     @Override
@@ -270,113 +274,157 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         if (projectId == null || projectId.isEmpty() || responsibleId == null) {
             return new Result(Code.BAD_REQUEST, "参数不能为空");
         }
-        LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Responsibility::getProjectId, projectId)
-                .eq(Responsibility::getResponsibleId, responsibleId);
+        try {
+            LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Responsibility::getProjectId, projectId)
+                    .eq(Responsibility::getResponsibleId, responsibleId);
 
-        if (errorType != null &&  !errorType.isEmpty()) {
-            queryWrapper.eq(Responsibility::getErrorType, errorType);
+            if (errorType != null && !errorType.isEmpty()) {
+                queryWrapper.eq(Responsibility::getErrorType, errorType);
+            }
+            if (platform == null || platform.isEmpty()) {
+                // 查询所有
+                List<BackendErrorHandleVO> backendErrorList = getBackendErrorsWithHandleStatus(queryWrapper, projectId);
+                List<FrontendErrorHandleVO> frontendErrorList = getFrontendErrorsWithHandleStatus(queryWrapper, projectId);
+                List<MobileErrorHandleVO> mobileErrorList = getMobileErrorsWithHandleStatus(queryWrapper, projectId);
+
+//                Map<String, Object> resultData = new LinkedHashMap<>();
+//                resultData.put("backend", backendErrorList);
+//                resultData.put("frontend", frontendErrorList);
+//                resultData.put("mobile", mobileErrorList);
+
+                return new Result(Code.SUCCESS, Arrays.asList(backendErrorList, frontendErrorList, mobileErrorList), "查询成功");
+            }
+            return switch (platform) {
+                case "backend" -> {
+                    // 查询后端
+                    List<BackendErrorHandleVO> backendErrors = getBackendErrorsWithHandleStatus(queryWrapper, projectId);
+                    yield new Result(Code.SUCCESS, backendErrors, "查询成功");
+                }
+                case "frontend" -> {
+                    // 查询前端
+                    List<FrontendErrorHandleVO> frontendErrors = getFrontendErrorsWithHandleStatus(queryWrapper, projectId);
+                    yield new Result(Code.SUCCESS, frontendErrors, "查询成功");
+                }
+                case "mobile" -> {
+                    // 查询移动端
+                    List<MobileErrorHandleVO> mobileErrors = getMobileErrorsWithHandleStatus(queryWrapper, projectId);
+                    yield new Result(Code.SUCCESS, mobileErrors, "查询成功");
+                }
+                default -> new Result(Code.BAD_REQUEST, "平台参数错误");
+            };
+        } catch (Exception e) {
+            log.error("查询错误失败，参数: {}", projectId, e);
+            return new Result(INTERNAL_ERROR, "查询所负责错误类型失败: " + e.getMessage());
         }
-        if (platform == null || platform.isEmpty()) {
-            // 查询所有
-            List<BackendError> backendErrorList = getBackendErrors(queryWrapper, projectId);
-            List<FrontendError> frontendErrorList = getFrontendErrors(queryWrapper, projectId);
-            List<MobileError> mobileErrorList = getMobileErrors(queryWrapper, projectId);
-            return new Result(Code.SUCCESS,
-                    Arrays.asList(backendErrorList, frontendErrorList, mobileErrorList),
-                    "查询成功");
-        }
-        return switch (platform) {
-            case "backend" -> {
-                // 查询后端
-                List<BackendError> backendErrors = getBackendErrors(queryWrapper, projectId);
-                yield new Result(Code.SUCCESS, backendErrors, "查询成功");
-            }
-            case "frontend" -> {
-                // 查询前端
-                List<FrontendError> frontendErrors = getFrontendErrors(queryWrapper, projectId);
-                yield new Result(Code.SUCCESS, frontendErrors, "查询成功");
-            }
-            case "mobile" -> {
-                // 查询移动端
-                List<MobileError> mobileErrors = getMobileErrors(queryWrapper, projectId);
-                yield new Result(Code.SUCCESS, mobileErrors, "查询成功");
-            }
-            default -> new Result(Code.BAD_REQUEST, "平台参数错误");
-        };
     }
 
     /**
-     * 获取后端错误数据
+     * 获取后端错误数据（带处理状态）
      */
-    private List<BackendError> getBackendErrors(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
+    private List<BackendErrorHandleVO> getBackendErrorsWithHandleStatus(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
         LambdaQueryWrapper<Responsibility> queryWrapper = baseQueryWrapper.clone();
         queryWrapper.eq(Responsibility::getPlatform, "backend");
         List<Responsibility> backendResponsibilities = responsibilityMapper.selectList(queryWrapper);
         if (backendResponsibilities.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
 
-        List<String> errorTypes = backendResponsibilities.stream()
-                .map(Responsibility::getErrorType)
-                .collect(Collectors.toList());
+        // 创建错误类型到处理状态的映射
+        Map<String, Integer> errorTypeToHandleStatus = backendResponsibilities.stream()
+                .collect(Collectors.toMap(Responsibility::getErrorType, Responsibility::getIsHandle, (existing, replacement) -> existing));
+
+        List<String> errorTypes = new ArrayList<>(errorTypeToHandleStatus.keySet());
 
         LambdaQueryWrapper<BackendError> backendErrorQueryWrapper = new LambdaQueryWrapper<>();
         backendErrorQueryWrapper.in(BackendError::getErrorType, errorTypes)
                 .eq(BackendError::getProjectId, projectId)
                 .orderByDesc(BackendError::getTimestamp);
 
-        return backendErrorMapper.selectList(backendErrorQueryWrapper);
+        List<BackendError> backendErrors = backendErrorMapper.selectList(backendErrorQueryWrapper);
+
+        // 转换为BackendErrorHandleVO并设置处理状态
+        return backendErrors.stream().map(backendError -> {
+            BackendErrorHandleVO vo = new BackendErrorHandleVO();
+            BeanUtils.copyProperties(backendError, vo);
+            vo.setId(backendError.getId());
+            // 设置处理状态，如果没有对应的Responsibility记录，默认为0（未处理）
+            vo.setIsHandle(errorTypeToHandleStatus.getOrDefault(backendError.getErrorType(), 0));
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**
-     * 获取前端错误数据
+     * 获取前端错误数据（带处理状态）
      */
-    private List<FrontendError> getFrontendErrors(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
+    private List<FrontendErrorHandleVO> getFrontendErrorsWithHandleStatus(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
         LambdaQueryWrapper<Responsibility> queryWrapper = baseQueryWrapper.clone();
         queryWrapper.eq(Responsibility::getPlatform, "frontend");
         List<Responsibility> frontendResponsibilities = responsibilityMapper.selectList(queryWrapper);
 
         if (frontendResponsibilities.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
 
-        List<String> errorTypes = frontendResponsibilities.stream()
-                .map(Responsibility::getErrorType)
-                .collect(Collectors.toList());
+        // 创建错误类型到处理状态的映射
+        Map<String, Integer> errorTypeToHandleStatus = frontendResponsibilities.stream()
+                .collect(Collectors.toMap(Responsibility::getErrorType, Responsibility::getIsHandle, (existing, replacement) -> existing));
+
+        List<String> errorTypes = new ArrayList<>(errorTypeToHandleStatus.keySet());
 
         LambdaQueryWrapper<FrontendError> frontendErrorQueryWrapper = new LambdaQueryWrapper<>();
         frontendErrorQueryWrapper.in(FrontendError::getErrorType, errorTypes)
                 .eq(FrontendError::getProjectId, projectId)
                 .orderByDesc(FrontendError::getTimestamp);
 
-        return frontendErrorMapper.selectList(frontendErrorQueryWrapper);
+        List<FrontendError> frontendErrors = frontendErrorMapper.selectList(frontendErrorQueryWrapper);
+
+        // 转换为FrontendErrorHandleVO并设置处理状态
+        return frontendErrors.stream().map(frontendError -> {
+            FrontendErrorHandleVO vo = new FrontendErrorHandleVO();
+            BeanUtils.copyProperties(frontendError, vo);
+            vo.setId(frontendError.getId());
+            // 设置处理状态，如果没有对应的Responsibility记录，默认为0（未处理）
+            vo.setIsHandle(errorTypeToHandleStatus.getOrDefault(frontendError.getErrorType(), 0));
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**
-     * 获取移动端错误数据
+     * 获取移动端错误数据（带处理状态）
      */
-    private List<MobileError> getMobileErrors(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
+    private List<MobileErrorHandleVO> getMobileErrorsWithHandleStatus(LambdaQueryWrapper<Responsibility> baseQueryWrapper, String projectId) {
         LambdaQueryWrapper<Responsibility> queryWrapper = baseQueryWrapper.clone();
         queryWrapper.eq(Responsibility::getPlatform, "mobile");
         List<Responsibility> mobileResponsibilities = responsibilityMapper.selectList(queryWrapper);
 
         if (mobileResponsibilities.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
 
-        List<String> errorTypes = mobileResponsibilities.stream()
-                .map(Responsibility::getErrorType)
-                .collect(Collectors.toList());
+        // 创建错误类型到处理状态的映射
+        Map<String, Integer> errorTypeToHandleStatus = mobileResponsibilities.stream()
+                .collect(Collectors.toMap(Responsibility::getErrorType, Responsibility::getIsHandle, (existing, replacement) -> existing));
+
+        List<String> errorTypes = new ArrayList<>(errorTypeToHandleStatus.keySet());
 
         LambdaQueryWrapper<MobileError> mobileErrorQueryWrapper = new LambdaQueryWrapper<>();
         mobileErrorQueryWrapper.in(MobileError::getErrorType, errorTypes)
                 .eq(MobileError::getProjectId, projectId)
                 .orderByDesc(MobileError::getTimestamp);
 
-        return mobileErrorMapper.selectList(mobileErrorQueryWrapper);
-    }
+        List<MobileError> mobileErrors = mobileErrorMapper.selectList(mobileErrorQueryWrapper);
 
+        // 转换为MobileErrorHandleVO并设置处理状态
+        return mobileErrors.stream().map(mobileError -> {
+            MobileErrorHandleVO vo = new MobileErrorHandleVO();
+            BeanUtils.copyProperties(mobileError, vo);
+            vo.setId(mobileError.getId());
+            // 设置处理状态，如果没有对应的Responsibility记录，默认为0（未处理）
+            vo.setIsHandle(errorTypeToHandleStatus.getOrDefault(mobileError.getErrorType(), 0));
+            return vo;
+        }).collect(Collectors.toList());
+    }
     //填充VO
     public ResponsibilityVO fillResponsibilityVO(ResponsibilityVO responsibilityVO) {
         // 批量收集ID

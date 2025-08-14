@@ -56,12 +56,12 @@ public class FrontendDataTest {
         requestInfo.put("url", "https://example.com/api/users");
         requestInfo.put("method", "GET");
         requestInfo.put("headers", Map.of("Authorization", "Bearer token123"));
-        error.setRequestInfo(requestInfo);
+        error.setRequest(requestInfo);
 
         Map<String, Object> responseInfo = new HashMap<>();
         responseInfo.put("status", 500);
         responseInfo.put("statusText", "Internal Server Error");
-        error.setResponseInfo(responseInfo);
+        error.setResponse(responseInfo);
 
         List<Map<String, Object>> breadcrumbs = new ArrayList<>();
         Map<String, Object> breadcrumb1 = new HashMap<>();
@@ -82,7 +82,7 @@ public class FrontendDataTest {
 
         // 查询
         FrontendError saved = frontendErrorMapper.selectById(error.getId());
-        System.out.println("请求信息: " + saved.getRequestInfo());
+        System.out.println("请求信息: " + saved.getRequest());
         System.out.println("面包屑: " + saved.getBreadcrumbs());
         System.out.println("标签: " + saved.getTags());
     }

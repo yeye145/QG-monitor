@@ -31,6 +31,7 @@ public class FrontendError {
     private String errorType;
     private String message;
     private String stack;
+    private String network;
 
     private Integer event = 0;
 
@@ -48,6 +49,10 @@ public class FrontendError {
     private Map<String, Object> elementInfo;
     private String captureType;
     private Long duration;
+
+    private Integer colno;
+    private Integer lineno;
+    private String jsFilename;
 
 
     // 原子性递增

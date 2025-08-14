@@ -2,7 +2,7 @@ package com.qg.repository;
 
 import com.qg.domain.MethodInvocation;
 import com.qg.mapper.MethodInvocationMapper;
-import com.qg.vo.MethodInvocationVO;
+import com.qg.dto.MethodInvocationDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
@@ -67,8 +67,8 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
     @Override
     protected void saveToDatabase(MethodInvocation entity) {
         try {
-            MethodInvocationVO methodInvocationVO = convertToVO(entity);
-            methodInvocationMapper.insert(methodInvocationVO);
+            MethodInvocationDTO methodInvocationDTO = convertToVO(entity);
+            methodInvocationMapper.insert(methodInvocationDTO);
         } catch (Exception e) {
             log.error("方法调用统计失败,项目ID: {}: {}", entity.getProjectId(), e.getMessage());
         }
@@ -105,8 +105,8 @@ public class MethodInvocationRepository extends StatisticsDataRepository<MethodI
      * @param entity
      * @return
      */
-    private MethodInvocationVO convertToVO(MethodInvocation entity) {
-        MethodInvocationVO vo = new MethodInvocationVO();
+    private MethodInvocationDTO convertToVO(MethodInvocation entity) {
+        MethodInvocationDTO vo = new MethodInvocationDTO();
         vo.setProjectId(entity.getProjectId());
         vo.setMethodName(entity.getMethodName());
         vo.setEvent(entity.getEventCount());
