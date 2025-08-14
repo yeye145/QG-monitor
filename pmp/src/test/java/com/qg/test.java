@@ -175,6 +175,23 @@ public class test {
         });
     }
 
+    @Test
+    public void parsePosition()
+            throws IOException, SourceMapParseException {
+
+        String mapFilePath = "uploads/documents/5ce99897-596c-4201-83b0-6ca1cb1ad784.map";
+
+        int line = 9;
+        int column = 1065;
+
+        // 读取并解析 SourceMap 文件
+        String mapContent = Files.readString(Path.of(mapFilePath));
+        SourceMapConsumerV3 consumer = new SourceMapConsumerV3();
+        consumer.parse(mapContent);
+
+        System.err.println(consumer.getMappingForLine(line, column));
+
+    }
 
 }
 

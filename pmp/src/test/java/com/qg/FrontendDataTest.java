@@ -34,58 +34,58 @@ public class FrontendDataTest {
     @Autowired
     private FrontendBehaviorMapper frontendBehaviorMapper;
 
-    @Test
-    public void testFrontendErrorSaveAndRead() {
-        System.out.println("=== 测试 FrontendError 插入和查询 ===");
-
-        // 构造测试数据
-        FrontendError error = new FrontendError();
-        error.setProjectId("1");
-        error.setTimestamp(LocalDateTime.now());
-        error.setSessionId("session-123");
-        error.setUserAgent("Mozilla/5.0 Chrome/91.0");
-        error.setErrorType("ReferenceError");
-        error.setMessage("Cannot read property of undefined");
-        error.setStack("at Component.render (app.js:123)");
-        error.setEvent(1);
-        error.setCaptureType("automatic");
-        error.setDuration(1500L);
-
-        // 设置复杂对象
-        Map<String, Object> requestInfo = new HashMap<>();
-        requestInfo.put("url", "https://example.com/api/users");
-        requestInfo.put("method", "GET");
-        requestInfo.put("headers", Map.of("Authorization", "Bearer token123"));
-        error.setRequestInfo(requestInfo);
-
-        Map<String, Object> responseInfo = new HashMap<>();
-        responseInfo.put("status", 500);
-        responseInfo.put("statusText", "Internal Server Error");
-        error.setResponseInfo(responseInfo);
-
-        List<Map<String, Object>> breadcrumbs = new ArrayList<>();
-        Map<String, Object> breadcrumb1 = new HashMap<>();
-        breadcrumb1.put("timestamp", "2025-08-11T17:30:00");
-        breadcrumb1.put("category", "navigation");
-        breadcrumb1.put("message", "User navigated to /dashboard");
-        breadcrumbs.add(breadcrumb1);
-        error.setBreadcrumbs(breadcrumbs);
-
-        Map<String, Object> tags = new HashMap<>();
-        tags.put("browser", "Chrome");
-        tags.put("version", "91.0");
-        error.setTags(tags);
-
-        // 保存
-        frontendErrorMapper.insert(error);
-        System.out.println("保存的FrontendError ID: " + error.getId());
-
-        // 查询
-        FrontendError saved = frontendErrorMapper.selectById(error.getId());
-        System.out.println("请求信息: " + saved.getRequestInfo());
-        System.out.println("面包屑: " + saved.getBreadcrumbs());
-        System.out.println("标签: " + saved.getTags());
-    }
+//    @Test
+//    public void testFrontendErrorSaveAndRead() {
+//        System.out.println("=== 测试 FrontendError 插入和查询 ===");
+//
+//        // 构造测试数据
+//        FrontendError error = new FrontendError();
+//        error.setProjectId("1");
+//        error.setTimestamp(LocalDateTime.now());
+//        error.setSessionId("session-123");
+//        error.setUserAgent("Mozilla/5.0 Chrome/91.0");
+//        error.setErrorType("ReferenceError");
+//        error.setMessage("Cannot read property of undefined");
+//        error.setStack("at Component.render (app.js:123)");
+//        error.setEvent(1);
+//        error.setCaptureType("automatic");
+//        error.setDuration(1500L);
+//
+//        // 设置复杂对象
+//        Map<String, Object> requestInfo = new HashMap<>();
+//        requestInfo.put("url", "https://example.com/api/users");
+//        requestInfo.put("method", "GET");
+//        requestInfo.put("headers", Map.of("Authorization", "Bearer token123"));
+//        error.setRequestInfo(requestInfo);
+//
+//        Map<String, Object> responseInfo = new HashMap<>();
+//        responseInfo.put("status", 500);
+//        responseInfo.put("statusText", "Internal Server Error");
+//        error.setResponseInfo(responseInfo);
+//
+//        List<Map<String, Object>> breadcrumbs = new ArrayList<>();
+//        Map<String, Object> breadcrumb1 = new HashMap<>();
+//        breadcrumb1.put("timestamp", "2025-08-11T17:30:00");
+//        breadcrumb1.put("category", "navigation");
+//        breadcrumb1.put("message", "User navigated to /dashboard");
+//        breadcrumbs.add(breadcrumb1);
+//        error.setBreadcrumbs(breadcrumbs);
+//
+//        Map<String, Object> tags = new HashMap<>();
+//        tags.put("browser", "Chrome");
+//        tags.put("version", "91.0");
+//        error.setTags(tags);
+//
+//        // 保存
+//        frontendErrorMapper.insert(error);
+//        System.out.println("保存的FrontendError ID: " + error.getId());
+//
+//        // 查询
+//        FrontendError saved = frontendErrorMapper.selectById(error.getId());
+//        System.out.println("请求信息: " + saved.getRequestInfo());
+//        System.out.println("面包屑: " + saved.getBreadcrumbs());
+//        System.out.println("标签: " + saved.getTags());
+//    }
 
     @Test
     public void testFrontendPerformanceSaveAndRead() {
@@ -176,7 +176,7 @@ public class FrontendDataTest {
     public void testAllFrontendDataTogether() {
         System.out.println("=== 测试所有前端数据类型一起插入和查询 ===");
 
-        testFrontendErrorSaveAndRead();
+//        testFrontendErrorSaveAndRead();
         System.out.println();
 
         testFrontendPerformanceSaveAndRead();

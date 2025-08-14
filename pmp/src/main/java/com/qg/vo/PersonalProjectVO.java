@@ -17,7 +17,7 @@ public class PersonalProjectVO {
     private LocalDateTime createTime;
     private Boolean isPublic;
 
-    private Long id;
+//    private Long id;
     private Long userId;
 
     private Integer power;
