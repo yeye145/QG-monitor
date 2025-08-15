@@ -75,9 +75,11 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
 
     protected abstract String generateAlertMessage(MobileError error);
 
-    protected abstract boolean saveNotification(List<Long> alertReceiverID,MobileError error);
+    protected abstract boolean saveNotification(List<Long> alertReceiverID, MobileError error);
+
     /**
      * 发送微信企业机器人告警
+     *
      * @param error
      */
     protected void sendWechatAlert(MobileError error) {
@@ -87,11 +89,12 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
             log.warn("未找到对应的企业微信群机器人Webhook地址, 告警失败");
             return;
         }
+
         //查询同类错误的最新记录
         LambdaQueryWrapper<MobileError> queryWrapper4 = new LambdaQueryWrapper<>();
         queryWrapper4.eq(MobileError::getProjectId, error.getProjectId())
-                .eq(MobileError::getMessage,error.getMessage())
-                .eq(MobileError::getStack,error.getStack())
+                .eq(MobileError::getMessage, error.getMessage())
+                .eq(MobileError::getStack, error.getStack())
                 .eq(MobileError::getErrorType, error.getErrorType())
                 .eq(MobileError::getClassName, error.getClassName())
                 .orderByDesc(MobileError::getTimestamp)
@@ -102,7 +105,7 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
         if (latestError != null) {
             log.info("最新错误：{}", latestError);
             long timeDiff = Timestamp.valueOf(error.getTimestamp()).getTime()
-                    - Timestamp.valueOf(latestError.getTimestamp()).getTime();
+                            - Timestamp.valueOf(latestError.getTimestamp()).getTime();
             log.info("当前错误时间: {}, 最新错误时间: {}",
                     error.getTimestamp(),
                     latestError.getTimestamp());
@@ -118,15 +121,14 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
                 //latestError.setTimestamp(error.getTimestamp()); // 更新时间戳为最新时间
                 mobileErrorMapper.updateById(latestError);
                 log.info("时间间隔小于40分钟，只更新错误次数，errorId:{}", latestError.getId());
-            }
-            else{
+            } else {
                 log.info("大于40分钟");
                 //插入新的错误信息
-                log.info("存储错误数据: {}",error);
+                log.info("存储错误数据: {}", error);
                 mobileErrorMapper.insert(error);
             }
-        }else{
-            log.info("没有找到错误信息，存储错误数据: {}",error);
+        } else {
+            log.info("没有找到错误信息，存储错误数据: {}", error);
             mobileErrorMapper.insert(error);
         }
 
@@ -135,16 +137,16 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
 
         //查询错误id
         LambdaQueryWrapper<MobileError> queryWrapper2 = new LambdaQueryWrapper<>();
-        queryWrapper2.eq(MobileError::getProjectId,error.getProjectId())
-                .eq(MobileError::getErrorType,error.getErrorType())
-                .eq(MobileError::getMessage,error.getMessage())
-                .eq(MobileError::getStack,error.getStack())
-                .eq(MobileError::getClassName,error.getClassName())
+        queryWrapper2.eq(MobileError::getProjectId, error.getProjectId())
+                .eq(MobileError::getErrorType, error.getErrorType())
+                .eq(MobileError::getMessage, error.getMessage())
+                .eq(MobileError::getStack, error.getStack())
+                .eq(MobileError::getClassName, error.getClassName())
                 .orderByDesc(MobileError::getTimestamp)
                 .last("LIMIT 1");  // 只取第一条记录
 
         error = mobileErrorMapper.selectOne(queryWrapper2);
-        log.info("errorId:{}",error.getId());
+        log.info("errorId:{}", error.getId());
 
         //更新responsibility中的errorId
         LambdaQueryWrapper<Responsibility> queryWrapper5 = new LambdaQueryWrapper<>();
@@ -162,46 +164,44 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
 
             //查看该错误类型是否被委派
             LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Responsibility::getErrorType,error.getErrorType())
-                    .eq(Responsibility::getProjectId,error.getProjectId());
+            queryWrapper.eq(Responsibility::getErrorType, error.getErrorType())
+                    .eq(Responsibility::getProjectId, error.getProjectId());
 
             Responsibility responsibility = responsibilityMapper.selectOne(queryWrapper);
 
 
-            if(responsibility != null){
-               log.info("该错误已经被委派" );
+            if (responsibility != null) {
+                log.info("该错误已经被委派");
 
                 //标记该错误为未解决
                 responsibility.setIsHandle(UN_HANDLED);
                 responsibility.setUpdateTime(LocalDateTime.now());
-                responsibilityMapper.update(responsibility,queryWrapper);
+                responsibilityMapper.update(responsibility, queryWrapper);
 
                 //存储进通知表
                 List<Long> alertReceiverID = Arrays.asList(responsibility.getResponsibleId());
-                boolean success = saveNotification(alertReceiverID,error);
-                if(!success){
+                boolean success = saveNotification(alertReceiverID, error);
+                if (!success) {
                     log.error("保存通知进数据库失败！");
                 }
 
                 //获取负责人手机号码
                 LambdaQueryWrapper<Users> queryWrapper1 = new LambdaQueryWrapper<>();
-                queryWrapper1.eq(Users::getId,responsibility.getResponsibleId());
+                queryWrapper1.eq(Users::getId, responsibility.getResponsibleId());
 
                 Users responsibleUser = usersMapper.selectOne(queryWrapper1);
                 String responsiblePhone = responsibleUser.getPhone();
                 log.info("发送告警给: {}", responsiblePhone);
 
                 List<String> alertReceiver = Arrays.asList(responsiblePhone);
-
-                // TODO: 实现从数据库查找负责人手机号逻辑
-                List<String> alertReceivers = Collections.singletonList("@all");
+                ;
                 wechatAlertUtil.sendAlert(webhookUrl, message, alertReceiver);
-            }else{
+            } else {
                 log.info("该错误未被委派！");
                 //未指派的错误找到管理员
                 LambdaQueryWrapper<Role> queryWrapper3 = new LambdaQueryWrapper<>();
-                queryWrapper3.eq(Role::getProjectId,error.getProjectId())
-                            .eq(Role::getUserRole,USER_ROLE_ADMIN);
+                queryWrapper3.eq(Role::getProjectId, error.getProjectId())
+                        .eq(Role::getUserRole, USER_ROLE_ADMIN);
                 List<Role> roles = roleMapper.selectList(queryWrapper3);
 
                 // 2. 提取角色中的用户ID集合
@@ -210,14 +210,14 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
                         .collect(Collectors.toList());
 
                 //3、保存通知进数据库
-                boolean success = saveNotification(userIds,error);
-                if(!success){
+                boolean success = saveNotification(userIds, error);
+                if (!success) {
                     log.error("保存通知进数据库失败！");
                 }
 
                 //4、获取电话号码 发送警告
                 LambdaQueryWrapper<Users> queryWrapper1 = new LambdaQueryWrapper<>();
-                queryWrapper1.in(Users::getId,userIds);
+                queryWrapper1.in(Users::getId, userIds);
                 List<Users> users = usersMapper.selectList(queryWrapper1);
 
                 List<String> alertReceivers = users.stream()
@@ -230,12 +230,12 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
             }
 
 
-
         }
     }
 
     /**
      * 获取企业机器人webhook
+     *
      * @param projectId
      * @return
      */
@@ -244,7 +244,7 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
         return projectMapper.selectWebhookByProjectId(projectId);
     }
 
-    protected void removeError(MobileError entity){
+    protected void removeError(MobileError entity) {
         // 1. 生成唯一键(与statistics方法一致)
         String key = generateUniqueKey(entity);
 

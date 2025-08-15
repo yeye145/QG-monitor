@@ -436,6 +436,35 @@ public class GraphController {
         }
     }
 
+    /**
+     * 获取外网非法攻击统计
+     *
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getForeignIpInterception")
+    public Result getForeignIpInterception(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        try {
+            List<EarthVO> list = graphService.getForeignIpInterception(projectId, startTime, endTime);
+            // 至少返回空集合
+            return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "获取外网非法攻击统计成功");
+        } catch (Exception e) {
+            log.error("获取外网非法攻击统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "获取外网非法攻击统计失败 ");
+        }
+    }
+
 
     /**
      * 判断项目id、时间是否为空
