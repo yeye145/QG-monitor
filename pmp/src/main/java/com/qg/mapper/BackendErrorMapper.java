@@ -23,4 +23,6 @@ public interface BackendErrorMapper extends BaseMapper<BackendError> {
     @Select("select * from backend_error where backend_error.project_id = '1'")
     List<BackendError> getBy1();
 
+
+
 }

@@ -21,4 +21,6 @@ public interface BackendErrorService {
     Result addBackendError(String errorData);
 
     Object[] getBackendErrorStats(String projectId);
+
+    Object[] getBackendErrorStatsPro(String projectId);
 }
