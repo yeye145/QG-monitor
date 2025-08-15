@@ -4,6 +4,7 @@ import com.qg.domain.Message;
 import com.qg.domain.Result;
 import com.qg.service.MessageService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,19 +21,30 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/messages")
 @RestController
+@Tag(name = "消息")
 public class MessageController {
 
     @Autowired
     private MessageService messageService;
 
 
-    @PostMapping("/sendMessages")
+    /**
+     * 提交消息
+     * @param messages
+     * @return
+     */
+    @PostMapping("/submitMessages")
     public Result sendMessage(@RequestBody List<Message> messages) {
         System.out.println("Sending messages: " + messages);
         log.info("Sending message: {}", messages);
         return messageService.sendMessage(messages);
     }
 
+    /**
+     * 获取消息
+     * @param userId
+     * @return
+     */
     @GetMapping("/getMessages")
     public Result getMessages(@RequestParam Long userId) {
         System.out.println("Fetching messages for user ID: " + userId);
