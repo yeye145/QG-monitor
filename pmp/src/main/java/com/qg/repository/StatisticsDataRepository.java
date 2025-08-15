@@ -77,8 +77,6 @@ public abstract class StatisticsDataRepository<T> {
         T cached = cacheMap.computeIfAbsent(key, k -> entity);
         incrementEvent(cached);
 
-
-        // 如果是MobileError类型，触发告警检查
         if (entity instanceof MobileError) {
             MobileErrorFatherRepository repository = (MobileErrorFatherRepository) this;
             repository.sendWechatAlert((MobileError) cached);
@@ -111,6 +109,10 @@ public abstract class StatisticsDataRepository<T> {
                 BATCH_CHECK_SCRIPT,
                 keys
         );
+
+        if (checkResults.isEmpty()) {
+            return;
+        }
 
         // 处理需要保存的数据
         for (int i = 0; i < checkResults.size(); i++) {
