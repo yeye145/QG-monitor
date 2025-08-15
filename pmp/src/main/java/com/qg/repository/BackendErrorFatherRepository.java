@@ -98,8 +98,6 @@ public abstract class BackendErrorFatherRepository extends StatisticsDataReposit
 
             List<String> alertReceiver = Arrays.asList(responsiblePhone);
 
-            // TODO: 实现从数据库查找负责人手机号逻辑
-            List<String> alertReceivers = Collections.singletonList("@all");
             wechatAlertUtil.sendAlert(webhookUrl, message, alertReceiver);
         }
     }

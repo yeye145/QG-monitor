@@ -52,7 +52,7 @@ public class SourcemapParseTest2 {
     @Test
     public void testParse() {
         // 使用示例
-        processFrontendError("uploads/maps/4617c291-97a7-490e-b2ff-e07a94c3db82.map", 9, 1065);
+        processFrontendError("uploads/maps/1adfdbb9-38da-436a-a7ad-ba5e8c5a4baf.map", 9, 1208);
     }
 
     // 在你的测试类中添加这个方法
@@ -111,7 +111,7 @@ public class SourcemapParseTest2 {
         // 使用示例
         SourceMapService service = new SourceMapService();
         SourceMapService.OriginalSourcePosition position = service.resolveSourcePosition(
-                "uploads/maps/4617c291-97a7-490e-b2ff-e07a94c3db82.map", 9, 1065);
+                "uploads/maps/1adfdbb9-38da-436a-a7ad-ba5e8c5a4baf.map", 9, 1208);
 
         if (position != null) {
             System.out.println("=== 成功解析原始源码位置 ===");
