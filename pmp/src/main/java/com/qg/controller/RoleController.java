@@ -80,4 +80,18 @@ public class RoleController {
         return roleService.updateUserRole(role);
     }
 
+
+    /**
+     * @Author lrt
+     * @Description //TODO 查看可管理项目的人数
+     * @Date 21:40 2025/8/14
+     * @Param
+ * @param projectId
+     * @return com.qg.domain.Result
+     **/
+    @GetMapping("/getBossCountByProjectId")
+    public Result getBossCountByProjectId(@RequestParam String projectId) {
+        return roleService.getBossCountByProjectId(projectId);
+    }
+
 }

@@ -231,4 +231,35 @@ public class RoleServiceImpl implements RoleService {
             return roleMapper.updateById(role) == 1 ? new Result(Code.CREATED, "更新成功") : new Result(Code.INTERNAL_ERROR, "更新失败");
         }
     }
+
+    @Override
+    public Result getBossCountByProjectId(String projectId) {
+        // 参数校验
+        if (projectId == null || projectId.isEmpty()) {
+            return new Result(Code.BAD_REQUEST, "项目ID不能为空");
+        }
+
+        try {
+            // 查询项目中的所有成员
+            LambdaQueryWrapper<Role> roleQueryWrapper = new LambdaQueryWrapper<>();
+            roleQueryWrapper.eq(Role::getProjectId, projectId);
+            List<Role> roles = roleMapper.selectList(roleQueryWrapper);
+
+            if (roles.isEmpty()) {
+                return new Result(Code.NOT_FOUND, "该项目下无成员或项目不存在");
+            }
+
+            // 统计Boss数量
+            int bossCount = (int) roles.stream()
+                    .filter(role -> role.getUserRole() == USER_ROLE_BOSS || role.getUserRole() == USER_ROLE_ADMIN)
+                    .count();
+
+            log.info("项目 {} 中的可以管理的数量: {}", projectId, bossCount);
+            return new Result(Code.SUCCESS, bossCount, "查询成功");
+
+        } catch (Exception e) {
+            log.error("查询Boss数量时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询失败: " + e.getMessage());
+        }
+    }
 }
