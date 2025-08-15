@@ -243,6 +243,13 @@ public class ProjectServiceImpl implements ProjectService {
             return new Result(BAD_REQUEST, "获取项目邀请码失败，参数为空");
         }
         try {
+            LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(Project::getUuid, projectId).eq(Project::getIsDeleted, false);
+            Project project = projectMapper.selectOne(lqw);
+            if (project == null) {
+                log.error("项目不存在或已被删除: projectId={}", projectId);
+                return new Result(Code.NOT_FOUND, "项目不存在或已被删除");
+            }
             //随机生成12位的邀请码
             String inviteCode = RandomStringUtils.randomAlphanumeric(12);
             stringRedisTemplate.opsForValue().set(INVITE_CODE_KEY + inviteCode, projectId);
