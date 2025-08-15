@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,12 +82,7 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
      * @param error
      */
     protected void sendWechatAlert(MobileError error) {
-        log.info("发送告警");
-        String webhookUrl = getWebhookUrl(error.getProjectId());
-        if (StrUtil.isBlank(webhookUrl)) {
-            log.warn("未找到对应的企业微信群机器人Webhook地址, 告警失败");
-            return;
-        }
+        log.info("发送移动端告警");
 
         //查询同类错误的最新记录
         LambdaQueryWrapper<MobileError> queryWrapper4 = new LambdaQueryWrapper<>();
@@ -148,15 +142,12 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
         error = mobileErrorMapper.selectOne(queryWrapper2);
         log.info("errorId:{}", error.getId());
 
-        //更新responsibility中的errorId
-        LambdaQueryWrapper<Responsibility> queryWrapper5 = new LambdaQueryWrapper<>();
-        queryWrapper5.eq(Responsibility::getProjectId, error.getProjectId())
-                .eq(Responsibility::getPlatform, "mobile")
-                .eq(Responsibility::getErrorType, error.getErrorType());
-        Responsibility responsibility1 = responsibilityMapper.selectOne(queryWrapper5);
-        responsibility1.setErrorId(error.getId());
-        responsibilityMapper.update(responsibility1, queryWrapper5);
 
+        String webhookUrl = getWebhookUrl(error.getProjectId());
+        if (StrUtil.isBlank(webhookUrl)) {
+            log.warn("未找到对应的企业微信群机器人Webhook地址, 告警失败");
+            return;
+        }
 
         if (shouldAlert(generateUniqueKey(error), error)) {
 
@@ -172,6 +163,15 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
 
             if (responsibility != null) {
                 log.info("该错误已经被委派");
+
+                //更新responsibility中的errorId
+                LambdaQueryWrapper<Responsibility> queryWrapper5 = new LambdaQueryWrapper<>();
+                queryWrapper5.eq(Responsibility::getProjectId, error.getProjectId())
+                        .eq(Responsibility::getPlatform, "mobile")
+                        .eq(Responsibility::getErrorType, error.getErrorType());
+                Responsibility responsibility1 = responsibilityMapper.selectOne(queryWrapper5);
+                responsibility1.setErrorId(error.getId());
+                responsibilityMapper.update(responsibility1, queryWrapper5);
 
                 //标记该错误为未解决
                 responsibility.setIsHandle(UN_HANDLED);
@@ -230,12 +230,32 @@ public abstract class MobileErrorFatherRepository extends StatisticsDataReposito
             }
 
 
+
+        }else {
+            //查看该错误类型是否被委派
+            LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Responsibility::getErrorType, error.getErrorType())
+                    .eq(Responsibility::getProjectId, error.getProjectId());
+
+            Responsibility responsibility = responsibilityMapper.selectOne(queryWrapper);
+
+            if (responsibility != null) {
+                log.info("该错误已经被委派");
+
+                //更新responsibility中的errorId
+                LambdaQueryWrapper<Responsibility> queryWrapper6 = new LambdaQueryWrapper<>();
+                queryWrapper6.eq(Responsibility::getProjectId, error.getProjectId())
+                        .eq(Responsibility::getPlatform, "backend")
+                        .eq(Responsibility::getErrorType, error.getErrorType());
+                Responsibility responsibility2 = responsibilityMapper.selectOne(queryWrapper6);
+                responsibility2.setErrorId(error.getId());
+                responsibilityMapper.update(responsibility2, queryWrapper6);
+            }
         }
     }
 
     /**
      * 获取企业机器人webhook
-     *
      * @param projectId
      * @return
      */

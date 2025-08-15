@@ -1,17 +1,33 @@
 package com.qg.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.BackendError;
 import com.qg.domain.Notification;
+import com.qg.domain.Responsibility;
+import com.qg.mapper.NotificationMapper;
+import com.qg.service.NotificationService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.qg.repository.RepositoryConstants.DEFAULT_THRESHOLD;
+import static com.qg.utils.Constants.ALERT_CONTENT_NEW;
 
+@Slf4j
 @Repository
 public class BackendErrorRepository extends BackendErrorFatherRepository {
+
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private NotificationMapper notificationMapper;
 
     // TODO: 告警升级前先查看《前一毫秒》是否已经解决了
 
@@ -24,24 +40,19 @@ public class BackendErrorRepository extends BackendErrorFatherRepository {
     @Override
     protected boolean shouldAlert(String redisKey, BackendError error) {
         String[] data = redisKey.split(":");
+
         HashMap<String, Integer> alertRuleMap = alertRuleMapper
-                .selectByBackendRedisKeyToMap(data[1], data[2], data[3]);
+                .selectByBackendRedisKeyToMap(data[2], data[3], data[4]);
 
         int currentCount = error.getEvent();
         int threshold = alertRuleMap.getOrDefault(redisKey, DEFAULT_THRESHOLD.getAsInt());
 
         // TODO: 如果达到阈值，先检查10分钟内是否已经有相同的告警
         if(currentCount >= threshold) {
-            if(checkNotificationNoExist("backend", error.getProjectId()
-                    , error.getId(), LocalDateTime.now())) {
+            if(checkNotificationNoExist(error, LocalDateTime.now())) {
                 return false;
             } else {
-                // TODO: 如果没有相同的告警，创建Notification对象，存入缓存
-                Notification notification = new Notification();
-                notification.setProjectId(error.getProjectId());
-                notification.setErrorId(error.getId());
-                notification.setPlatform("backend");
-                notification.setTimestamp(LocalDateTime.now());
+
                 // TODO: 根据项目配置设置发送人和接收人ID
                 // TODO: 问题1：先企业微信告警，同时异常发送到平台，管理员委派人去解决？
                 // TODO: 问题2：我怎么知道前端后端异常《最近的连续10分钟内》有没有相同异常
@@ -50,20 +61,61 @@ public class BackendErrorRepository extends BackendErrorFatherRepository {
                 // TODO: 问题5：现在发送信息是不是指定在《企业微信》中发送，如果不是，我应该怎么发
                 // TODO: 问题6：（如果不是《全》发企业微信的话跳过此问题）我怎么知道通知已读？
                 // TODO: 问题7：委派表没有逻辑删，通知表有逻辑删，以通知表逻辑删为标记解决？
-                notification.setSenderId(1L); // 系统用户
-                notification.setReceiverId(1L); // 默认接收人
-
-
+                log.info("消息不存在，可以发送！");
                 return true;
             }
         }
         return false;
     }
 
-    protected boolean checkNotificationNoExist(String type
-            , String projectId, Long errorId, LocalDateTime timestamp) {
+    // TODO: 检测通知是否已存在,同时要检测他是否被解决
+    protected boolean checkNotificationNoExist(BackendError error, LocalDateTime timestamp) {
+        //检测通知是否已存在
+        log.info("错误信息：{}", error);
+        LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Notification::getErrorType, error.getErrorType())
+                .eq(Notification::getProjectId, error.getProjectId())
+                .eq(Notification::getErrorId, error.getId())
+                .eq(Notification::getPlatform, "backend")
+                .orderByDesc(Notification::getTimestamp)  // 按时间倒序排序
+                .last("LIMIT 1");  // 限制只取第一条记录
+        Notification notification = notificationMapper.selectOne(queryWrapper);
+        log.info("notification:{}", notification);
 
-        return true;
+
+        if (notification == null) {
+            log.info("该错误没有通知记录");
+            return false;
+        } else {
+            log.info("最新一条信息：{}",notification);
+
+            // 获取notification的时间戳
+            LocalDateTime notificationTime = notification.getTimestamp();
+            // 计算与当前时间的差值
+            Duration duration = Duration.between(notificationTime, LocalDateTime.now());
+            // 判断是否超过40分钟(2400秒)
+            if (duration.getSeconds() < 300) {
+                log.info("该错误5分钟内有通知记录");
+                //检测该错误是否未被解决 （未解决在该时间段内无需重发）
+                LambdaQueryWrapper<Responsibility> queryWrapper1 = new LambdaQueryWrapper<>();
+                queryWrapper1.eq(Responsibility::getErrorType, error.getErrorType())
+                        .eq(Responsibility::getProjectId, error.getProjectId());
+                Responsibility responsibility1 = responsibilityMapper.selectOne(queryWrapper1);
+                //若该错误未被指派、则发送警告
+                if (responsibility1 == null) {
+                    log.info("该错误未被指派");
+                    return true;
+                } else {
+                    //已解决就要发
+                    if (responsibility1.getIsHandle() == RepositoryConstants.HANDLED) {
+                        log.info("该错误40分钟内又报错，但其显示已解决");
+                        return false;
+                    } else return true;
+                }
+            }
+            log.info("该错误40分钟内无消息记录");
+            return false;
+        }
     }
 
     /**
@@ -81,12 +133,44 @@ public class BackendErrorRepository extends BackendErrorFatherRepository {
                         "错误类型：%s\n" +
                         "发生次数：%d\n" +
                         "触发时间：%s\n" +
-                        "请及时处理！",
+                        ALERT_CONTENT_NEW,
                 error.getProjectId(),
                 error.getErrorType(),
                 error.getEvent(),
                 LocalDateTime.now()
                         .format(DateTimeFormatter
                                 .ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+    /**
+     * 构建通知信息
+     */
+    @Override
+    protected boolean saveNotification(List<Long> alertReceiverID, BackendError error) {
+        log.info("存进通知表！");
+        List<Notification> notifications = new ArrayList<>();
+        int count = 0;
+        for(Long receiverID : alertReceiverID){
+            Notification notification = new Notification();
+            notification.setProjectId(error.getProjectId());
+            notification.setErrorType(error.getErrorType());
+            notification.setErrorId(error.getId());
+            notification.setPlatform("backend");
+            notification.setTimestamp(LocalDateTime.now());
+            notification.setReceiverId(receiverID);
+            notification.setContent(ALERT_CONTENT_NEW);
+            count++;
+            notifications.add(notification);
+
+        }
+        if(count == alertReceiverID.size()){
+            notificationService.add(notifications);
+            log.info("已全部通知发送！");
+            return true;
+        }
+        log.info("已通知{}个用户！",count);
+        notificationService.add(notifications);
+        return false;
+
     }
 }
