@@ -33,7 +33,7 @@ public class BackendError {
     private String stack;
     @TableField(value = "environment_snapshot", typeHandler = com.qg.handler.MapHandler.class,jdbcType = JdbcType.OTHER)
     private Map<String, Object> environmentSnapshot;
-    private Integer event = 0;
+    private Integer event = 1;
 
     // 原子性递增
     public synchronized void incrementEvent() {

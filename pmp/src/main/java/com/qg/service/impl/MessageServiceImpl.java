@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.qg.domain.Code.*;
+
 /**
  * @Description: // 类说明
  * @ClassName: MessageServiceImpl    // 类名
@@ -29,7 +31,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Result sendMessage(List<Message> messages) {
         if (messages == null || messages.isEmpty()) {
-            return new Result(400, "消息列表不能为空");
+            return new Result(BAD_REQUEST, "消息列表不能为空");
         }
         int totalMessages = messages.size();
         int count = 0;
@@ -38,16 +40,16 @@ public class MessageServiceImpl implements MessageService {
         }
 
         if (count == totalMessages) {
-            return new Result(200, "消息发送成功");
+            return new Result(SUCCESS, "消息发送成功");
         } else {
-            return new Result(500, "部分消息发送失败");
+            return new Result(INTERNAL_ERROR, "部分消息发送失败");
         }
     }
 
     @Override
     public Result getAllMessages(Long userId) {
         if (userId == null) {
-            return new Result(400, "用户ID不能为空");
+            return new Result(NOT_FOUND, "用户ID不能为空");
         }
         LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Message::getSendId, userId)
@@ -57,9 +59,9 @@ public class MessageServiceImpl implements MessageService {
 
         List<Message> messages = messageMapper.selectList(queryWrapper);
         if (messages != null && !messages.isEmpty()) {
-            return new Result(200, messages, "查询成功");
+            return new Result(SUCCESS, messages, "查询成功");
         } else {
-            return new Result(201, null,"没有找到相关消息");
+            return new Result(SUCCESS, "没有找到相关消息");
         }
 
     }

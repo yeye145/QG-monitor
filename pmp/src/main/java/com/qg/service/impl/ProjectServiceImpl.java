@@ -238,7 +238,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result getInviteDCode(String projectId) {
-        if (projectId == null) {
+        if (projectId == null || projectId.isEmpty()) {
             log.error("获取项目邀请码失败，参数为空");
             return new Result(BAD_REQUEST, "获取项目邀请码失败，参数为空");
         }
