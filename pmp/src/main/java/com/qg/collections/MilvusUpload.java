@@ -45,7 +45,7 @@ public class MilvusUpload {
         // 1. 初始化 Milvus 客户端
         MilvusServiceClient client = new MilvusServiceClient(
                 ConnectParam.newBuilder()
-                        .withDatabaseName("PMPdb")
+                        .withDatabaseName("default")
                         .withHost("47.113.224.195")
                         .withPort(34530)
                         .build()
