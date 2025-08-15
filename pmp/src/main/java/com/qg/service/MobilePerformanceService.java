@@ -14,7 +14,7 @@ public interface MobilePerformanceService {
     Integer saveMobilePerformance(MobilePerformance mobilePerformance);
 
 
-    Result selectByCondition(String projectId, String deviceModel, String osVersion);
+    Result selectByCondition(String projectId,  String osVersion);
 
     Result getAverageTime(String projectId, String timeType);
 

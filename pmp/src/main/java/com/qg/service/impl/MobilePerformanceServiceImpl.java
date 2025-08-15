@@ -41,7 +41,7 @@ public class MobilePerformanceServiceImpl implements MobilePerformanceService {
     }
 
     @Override
-    public Result selectByCondition(String projectId, String deviceModel, String osVersion) {
+    public Result selectByCondition(String projectId, String osVersion) {
 
         if (projectId == null || projectId.isEmpty()) {
             return new Result(400, "项目ID不能为空");
@@ -50,12 +50,10 @@ public class MobilePerformanceServiceImpl implements MobilePerformanceService {
         LambdaQueryWrapper<MobilePerformance> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MobilePerformance::getProjectId, projectId);
 
-        if (deviceModel != null && !deviceModel.isEmpty()) {
-            queryWrapper.eq(MobilePerformance::getDeviceModel, deviceModel);
-        }
+
 
         if (osVersion != null && !osVersion.isEmpty()) {
-            queryWrapper.eq(MobilePerformance::getOsVersion, osVersion);
+            queryWrapper.like(MobilePerformance::getOsVersion, osVersion);
         }
 
         List<MobilePerformance> mobilePerformances = mobilePerformanceMapper.selectList(queryWrapper);

@@ -38,15 +38,15 @@ public class ErrorController {
      * @return
      */
     @GetMapping("/selectByCondition")
-    public Result selectByCondition(@RequestParam String projectId, @RequestParam(required = false) Long moduleId,
+    public Result selectByCondition(@RequestParam String projectId,
                                     @RequestParam(required = false) String errorType, @RequestParam(required = false) String platform) {
 
         if (platform == null || platform.isEmpty()) {
-            return allErrorService.selectByCondition(projectId, moduleId, errorType);
+            return allErrorService.selectByCondition(projectId, errorType);
         }
         switch (platform) {
             case "backend":
-                return backendResponsibilityService.selectByCondition(projectId, moduleId, errorType);
+                return backendResponsibilityService.selectByCondition(projectId, errorType);
             case "frontend":
                 return frontendResponsibilityService.selectByCondition(projectId, errorType);
             case "mobile":

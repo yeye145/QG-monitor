@@ -105,7 +105,7 @@ public class MobileResponsibilityServiceImpl implements MobileResponsibilityServ
 
             // 添加错误类型条件
             if (type != null && !type.isEmpty()) {
-                queryWrapper.eq(MobileError::getErrorType, type);
+                queryWrapper.like(MobileError::getErrorType, type);
             }
 
             // 执行查询

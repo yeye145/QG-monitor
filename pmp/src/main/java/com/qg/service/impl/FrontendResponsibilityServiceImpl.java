@@ -122,7 +122,7 @@ public Result selectByCondition(String projectId, String type) {
 
         // 添加错误类型条件
         if (type != null && !type.isEmpty()) {
-            queryWrapper.eq(FrontendError::getErrorType, type);
+            queryWrapper.like(FrontendError::getErrorType, type);
         }
 
         // 执行查询

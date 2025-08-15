@@ -10,5 +10,5 @@ import com.qg.domain.Result;
  * @Version: 1.0     // 版本
  */
 public interface AllPerformanceService {
-    Result selectByCondition(String projectId, Long moduleId, String api, String environment, String capture, String deviceModel, String osVersion);
+    Result selectByCondition(String projectId, String api, String capture, String osVersion);
 }
