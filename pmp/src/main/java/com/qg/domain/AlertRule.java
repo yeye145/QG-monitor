@@ -15,5 +15,6 @@ public class AlertRule {
     private Integer threshold;
     private String env;
     private String projectId;
+    private String platform;
 
 }

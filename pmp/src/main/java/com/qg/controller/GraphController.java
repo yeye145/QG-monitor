@@ -244,6 +244,20 @@ public class GraphController {
         }
     }
 
+    @GetMapping("/getBackendErrorStatsPro")
+    public Result getBackendErrorStatsPro(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    backendErrorService.getBackendErrorStatsPro(projectId), "查询近一周后端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询后端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周后端错误统计失败");
+        }
+    }
+
 
     /**
      * @param projectId
@@ -261,6 +275,21 @@ public class GraphController {
         try {
             return new Result(Code.SUCCESS,
                     mobileErrorService.getMobileErrorStats(projectId), "查询近一周移动端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询移动端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
+        }
+    }
+
+
+    @GetMapping("/getMobileErrorStatsPro")
+    public Result getMobileErrorStatsPro(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    mobileErrorService.getMobileErrorStatsPro(projectId), "查询近一周移动端错误统计成功");
         } catch (Exception e) {
             log.error("查询移动端错误统计时发生异常: projectId={}", projectId, e);
             return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
@@ -343,6 +372,12 @@ public class GraphController {
 
     }
 
+
+    @GetMapping("/MobileOperationalPerformance")
+    public Result getMobileOperation(@RequestParam String projectId,@RequestParam String timeType){
+        return mobilePerformanceService.getMobileOperation(projectId,timeType);
+    }
+
     /**
      * 获取方法调用统计
      *
@@ -398,6 +433,35 @@ public class GraphController {
         } catch (Exception e) {
             log.error("获取非法攻击统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
             return new Result(Code.INTERNAL_ERROR, "获取非法攻击统计失败 ");
+        }
+    }
+
+    /**
+     * 获取外网非法攻击统计
+     *
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @GetMapping("/getForeignIpInterception")
+    public Result getForeignIpInterception(
+            @RequestParam("projectId") String projectId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
+
+        // 参数合法性校验
+        if (isProjectIdAndTimeNull(projectId, startTime, endTime)) {
+            return new Result(Code.BAD_REQUEST, "必需参数存在空");
+        }
+
+        try {
+            List<EarthVO> list = graphService.getForeignIpInterception(projectId, startTime, endTime);
+            // 至少返回空集合
+            return new Result(Code.SUCCESS, !list.isEmpty() ? list : Collections.emptyList(), "获取外网非法攻击统计成功");
+        } catch (Exception e) {
+            log.error("获取外网非法攻击统计时发生异常: projectId={}, startTime={}, endTime={}:{}", projectId, startTime, endTime, e.getMessage());
+            return new Result(Code.INTERNAL_ERROR, "获取外网非法攻击统计失败 ");
         }
     }
 

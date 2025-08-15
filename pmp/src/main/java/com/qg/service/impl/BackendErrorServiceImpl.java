@@ -151,6 +151,68 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         return new Object[]{transformDataVOList, uvBillDataVOList};
     }
 
+    @Override
+    public Object[] getBackendErrorStatsPro(String projectId) {
+        LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BackendError::getProjectId, projectId);
+
+        List<BackendError> backendErrors = backendErrorMapper.selectList(queryWrapper);
+
+
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        queryWrapper.ge(BackendError::getTimestamp, oneWeekAgo);
+
+        Map<String ,Double> transformDataVOList = new HashMap<>();
+        Map<String, Double>uvBillDataVOList = new HashMap<>();
+
+        Integer count = 0;
+
+        for (BackendError backendError : backendErrors) {
+            if (backendError.getEvent() != null && backendError.getErrorType() != null) {
+                addToMap(backendError, transformDataVOList);
+                addToMap(backendError, uvBillDataVOList);
+                count += backendError.getEvent();
+            }
+
+        }
+
+        if (count == 0) {
+            return new Object[0]; // 如果没有数据，直接返回空数组
+        }
+
+        Integer finalCount = count;
+
+        uvBillDataVOList.entrySet().removeIf(entry -> entry.getValue() == 0);
+
+
+        uvBillDataVOList.replaceAll((k, v) -> MathUtil.truncate(v / finalCount, 3));
+
+
+        List<UvBillDataVO> uvBillDataVOs = new ArrayList<>();
+        List<TransformDataVO> transformDataVOs = new ArrayList<>();
+
+        transformDataVOList.forEach((key, value) -> {
+            UvBillDataVO uvBillDataVO = new UvBillDataVO();
+            uvBillDataVO.setErrorType(key);
+            uvBillDataVO.setCount(value.intValue());
+            uvBillDataVOs.add(uvBillDataVO);
+        });
+
+
+        uvBillDataVOList.forEach((key, value) -> {
+            TransformDataVO transformDataVO = new TransformDataVO();
+            transformDataVO.setErrorType(key);
+            transformDataVO.setRatio(value);
+            transformDataVOs.add(transformDataVO);
+        });
+
+
+
+
+
+        return new Object[]{uvBillDataVOs,transformDataVOs};
+    }
+
     private static void addToMap(BackendError backendError, Map<String, Double> transformDataVOList) {
         if (backendError.getErrorType() == null || backendError.getEvent() == null) {
             return; // 如果错误类型或事件为空，则不处理

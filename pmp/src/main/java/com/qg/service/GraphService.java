@@ -30,4 +30,7 @@ public interface GraphService {
 
     List<IllegalAttackVO> getIpInterceptionCount
             (String projectId, LocalDateTime startTime, LocalDateTime endTime);
+
+    List<EarthVO> getForeignIpInterception
+            (String projectId, LocalDateTime startTime, LocalDateTime endTime);
 }

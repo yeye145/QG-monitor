@@ -29,15 +29,5 @@ public class RedisConstants {
     public static final String INVITE_CODE_KEY = "inviteCode:";
     public static final Long INVITE_CODE_TTL = 10L;
 
-    /**
-     * 通知是否已读
-     */
-    public static final Integer IS_READ = 1;
-    public static final Integer IS_NOT_READ = 0;
 
-    /**
-     * 通知发送者是否存在
-     */
-    public static final Integer IS_SENDER_EXIST = 1;
-    public static final Integer IS_SENDER_NOT_EXIST = 0;
 }

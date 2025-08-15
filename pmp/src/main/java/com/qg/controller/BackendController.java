@@ -92,7 +92,6 @@ public class BackendController {
      */
     @PostMapping("/performance")
     public void getPerformanceData(@RequestBody String performanceData) {
-        System.out.println("***********接收到了后端性能数据***********");
         backendPerformanceService.addPerformance(performanceData);
     }
 
@@ -102,7 +101,6 @@ public class BackendController {
      */
     @PostMapping("/error")
     public void getErrorData(@RequestBody String errorData) {
-        log.info("***********接收到了后端错误信息***********");
         log.info(errorData);
         backendErrorService.addBackendError(errorData);
     }

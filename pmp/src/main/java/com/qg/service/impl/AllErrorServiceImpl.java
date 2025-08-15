@@ -76,9 +76,12 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
         }
 
         // 添加项目ID条件
-        backendQueryWrapper.eq(BackendError::getProjectId, projectId);
-        frontendQueryWrapper.eq(FrontendError::getProjectId, projectId);
-        mobileQueryWrapper.eq(MobileError::getProjectId, projectId);
+        backendQueryWrapper.eq(BackendError::getProjectId, projectId)
+                .orderByDesc(BackendError::getTimestamp);
+        frontendQueryWrapper.eq(FrontendError::getProjectId, projectId)
+                .orderByDesc(FrontendError::getTimestamp);
+        mobileQueryWrapper.eq(MobileError::getProjectId, projectId)
+                .orderByDesc(MobileError::getTimestamp);
 
         // 添加错误类型条件
         if (type != null && !type.isEmpty()) {
@@ -157,6 +160,7 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
                 if (responsibleUser != null) {
                     vo.setName(responsibleUser.getUsername());
                     vo.setAvatarUrl(responsibleUser.getAvatar());
+                    vo.setResponsibleId(responsibility.getResponsibleId());
                 }
             }
             return vo;
@@ -184,6 +188,7 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
                 if (responsibleUser != null) {
                     vo.setName(responsibleUser.getUsername());
                     vo.setAvatarUrl(responsibleUser.getAvatar());
+                    vo.setResponsibleId(responsibility.getResponsibleId());
                 }
             }
             return vo;
@@ -211,6 +216,7 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
                 if (responsibleUser != null) {
                     vo.setName(responsibleUser.getUsername());
                     vo.setAvatarUrl(responsibleUser.getAvatar());
+                    vo.setResponsibleId(responsibility.getResponsibleId());
                 }
             }
             return vo;

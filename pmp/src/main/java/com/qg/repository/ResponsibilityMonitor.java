@@ -49,7 +49,7 @@ public class ResponsibilityMonitor {
     private UsersMapper usersMapper;
 
     // 每1分钟检查一次(可根据需要调整)
-    @Scheduled(fixedRate = 1 * 60 * 1000)
+    //@Scheduled(fixedRate = 1 * 60 * 1000)
     @Transactional
     public void checkUnhandledResponsibilities() {
         log.info("开始检查未处理的责任项...");

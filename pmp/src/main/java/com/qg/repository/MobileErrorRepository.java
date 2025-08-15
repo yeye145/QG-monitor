@@ -47,8 +47,8 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
         int threshold = alertRuleMap.getOrDefault(redisKey, DEFAULT_THRESHOLD.getAsInt());
 
         // TODO: 如果达到阈值，先检查40分钟内是否已经有相同的告警
-        if(currentCount >= threshold) {
-            if(checkNotificationExist(error, LocalDateTime.now())) {
+        if (currentCount >= threshold) {
+            if (checkNotificationExist(error, LocalDateTime.now())) {
                 log.info("消息已存在或仍未被解决！");
                 return false;
             } else {
@@ -70,22 +70,22 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
     // TODO: 检测通知是否已存在,同时要检测他是否被解决
     protected boolean checkNotificationExist(MobileError error, LocalDateTime timestamp) {
         //检测通知是否已存在
-        log.info("错误信息：{}",error);
+        log.info("错误信息：{}", error);
         LambdaQueryWrapper<Notification> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Notification::getErrorType, error.getErrorType())
                 .eq(Notification::getProjectId, error.getProjectId())
                 .eq(Notification::getErrorId, error.getId())
-                .eq(Notification::getPlatform,"mobile")
+                .eq(Notification::getPlatform, "mobile")
                 .orderByDesc(Notification::getTimestamp)  // 按时间倒序排序
                 .last("LIMIT 1");  // 限制只取第一条记录
         Notification notification = notificationMapper.selectOne(queryWrapper);
-        log.info("notification:{}",notification);
+        log.info("notification:{}", notification);
 
 
         if (notification == null) {
             log.info("该错误没有通知记录");
             return false;
-        }else{
+        } else {
             // 获取notification的时间戳
             LocalDateTime notificationTime = notification.getTimestamp();
             // 计算与当前时间的差值
@@ -105,11 +105,10 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
                 }
                 else{
                     //已解决就要发
-                    if(responsibility1.getIsHandle() == RepositoryConstants.HANDLED){
+                    if (responsibility1.getIsHandle() == RepositoryConstants.HANDLED) {
                         log.info("该错误40分钟内又报错，但其显示已解决");
                         return false;
-                    }
-                    else return true;
+                    } else return true;
                 }
             }
             log.info("该错误40分钟内无消息记录");
@@ -150,7 +149,7 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
         log.info("存进通知表！");
         List<Notification> notifications = new ArrayList<>();
         int count = 0;
-        for(Long receiverID : alertReceiverID){
+        for (Long receiverID : alertReceiverID) {
             Notification notification = new Notification();
             notification.setProjectId(error.getProjectId());
             notification.setErrorType(error.getErrorType());
@@ -163,12 +162,12 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
             notifications.add(notification);
 
         }
-        if(count == alertReceiverID.size()){
+        if (count == alertReceiverID.size()) {
             notificationService.add(notifications);
             log.info("已全部通知发送！");
             return true;
         }
-        log.info("已通知{}个用户！",count);
+        log.info("已通知{}个用户！", count);
         notificationService.add(notifications);
         return false;
 

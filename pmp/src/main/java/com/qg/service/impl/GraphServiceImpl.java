@@ -146,4 +146,16 @@ public class GraphServiceImpl implements GraphService {
         return backendLogMapper.queryIpInterceptionCount(projectId, startTime, endTime);
     }
 
+    /**
+     * 获取非法攻击外网IP数据
+     * @param projectId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<EarthVO> getForeignIpInterception
+    (String projectId, LocalDateTime startTime, LocalDateTime endTime) {
+        return backendLogMapper.queryForeignIpInterceptions(projectId, startTime, endTime);
+    }
 }

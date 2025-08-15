@@ -15,4 +15,6 @@ public interface RoleService {
     Result getRole(Long userId, String projectId);
 
     Result updateUserRole(Role role);
+
+    Result getBossCountByProjectId(String projectId);
 }
