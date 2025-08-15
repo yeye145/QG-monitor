@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import static com.qg.domain.Code.INTERNAL_ERROR;
 import static com.qg.domain.Code.SUCCESS;
+import static com.qg.utils.Constants.IS_HANDLE;
+import static com.qg.utils.Constants.IS_NOT_HANDLE;
 import static com.qg.utils.Constants.ALERT_CONTENT_DELEGATE;
 
 @Service
@@ -317,6 +319,95 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
             log.error("查询错误失败，参数: {}", projectId, e);
             return new Result(INTERNAL_ERROR, "查询所负责错误类型失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Result updateHandleStatus(Responsibility responsibility) {
+        // 参数校验
+        if (responsibility == null) {
+            return new Result(Code.BAD_REQUEST, "参数不能为空");
+        }
+
+        if (isNullOrEmpty(responsibility.getErrorType())
+                || isNullOrEmpty(responsibility.getProjectId())
+                || isNullOrEmpty(responsibility.getPlatform())) {
+            return new Result(Code.BAD_REQUEST, "参数缺失");
+        }
+
+        try {
+            // 查询现有的责任链记录
+            LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Responsibility::getProjectId, responsibility.getProjectId())
+                    .eq(Responsibility::getErrorType, responsibility.getErrorType())
+                    .eq(Responsibility::getPlatform, responsibility.getPlatform());
+
+            Responsibility existingResponsibility = responsibilityMapper.selectOne(queryWrapper);
+            if (existingResponsibility == null) {
+                log.warn("未找到责任链记录: projectId={}, errorType={}, platform={}",
+                        responsibility.getProjectId(), responsibility.getErrorType(), responsibility.getPlatform());
+                return new Result(Code.NOT_FOUND, "未找到该责任链");
+            }
+
+            // 构建更新条件
+            LambdaUpdateWrapper<Responsibility> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Responsibility::getProjectId, responsibility.getProjectId())
+                    .eq(Responsibility::getErrorType, responsibility.getErrorType())
+                    .eq(Responsibility::getPlatform, responsibility.getPlatform());
+
+            // 切换处理状态
+            Integer newHandleStatus = IS_HANDLE.equals(existingResponsibility.getIsHandle())
+                    ? IS_NOT_HANDLE : IS_HANDLE;
+            updateWrapper.set(Responsibility::getIsHandle, newHandleStatus);
+
+            // 执行更新
+            int updateResult = responsibilityMapper.update(null, updateWrapper);
+            if (updateResult > 0) {
+                log.info("更新处理状态成功: projectId={}, errorType={}, platform={}, oldStatus={}, newStatus={}",
+                        responsibility.getProjectId(), responsibility.getErrorType(), responsibility.getPlatform(),
+                        existingResponsibility.getIsHandle(), newHandleStatus);
+                return new Result(Code.SUCCESS, "更新成功");
+            } else {
+                log.warn("更新处理状态失败: projectId={}, errorType={}, platform={}",
+                        responsibility.getProjectId(), responsibility.getErrorType(), responsibility.getPlatform());
+                return new Result(INTERNAL_ERROR, "更新失败");
+            }
+
+        } catch (Exception e) {
+            log.error("更新处理状态失败，参数: projectId={}, errorType={}, platform={}",
+                    responsibility.getProjectId(), responsibility.getErrorType(), responsibility.getPlatform(), e);
+            return new Result(INTERNAL_ERROR, "更新处理状态失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Result selectHandleStatus(String projectId, String errorType, String platform) {
+        if (isNullOrEmpty(projectId) || isNullOrEmpty(errorType) || isNullOrEmpty(platform)) {
+            return new Result(Code.BAD_REQUEST, "参数不能为空");
+        }
+        try {
+            LambdaQueryWrapper<Responsibility> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Responsibility::getProjectId, projectId)
+                    .eq(Responsibility::getErrorType, errorType)
+                    .eq(Responsibility::getPlatform, platform);
+            Responsibility responsibility = responsibilityMapper.selectOne(queryWrapper);
+            if (responsibility == null) {
+                Responsibility defaultResponsibility = new Responsibility();
+                defaultResponsibility.setIsHandle(-1);
+                return new Result(SUCCESS, defaultResponsibility, "查询成功");
+            }
+            return new Result(SUCCESS, responsibility, "查询成功");
+        } catch (Exception e) {
+            log.error("查询处理状态失败，参数: projectId={}, errorType={}, platform={}",
+                    projectId, errorType, platform, e);
+            return new Result(INTERNAL_ERROR, "查询处理状态失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 检查字符串是否为空或空字符串
+     */
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
     }
 
     /**

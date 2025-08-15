@@ -244,6 +244,20 @@ public class GraphController {
         }
     }
 
+    @GetMapping("/getBackendErrorStatsPro")
+    public Result getBackendErrorStatsPro(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    backendErrorService.getBackendErrorStatsPro(projectId), "查询近一周后端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询后端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周后端错误统计失败");
+        }
+    }
+
 
     /**
      * @param projectId
@@ -261,6 +275,21 @@ public class GraphController {
         try {
             return new Result(Code.SUCCESS,
                     mobileErrorService.getMobileErrorStats(projectId), "查询近一周移动端错误统计成功");
+        } catch (Exception e) {
+            log.error("查询移动端错误统计时发生异常: projectId={}", projectId, e);
+            return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
+        }
+    }
+
+
+    @GetMapping("/getMobileErrorStatsPro")
+    public Result getMobileErrorStatsPro(@RequestParam String projectId) {
+        if (StrUtil.isBlank(projectId)) {
+            return new Result(Code.BAD_REQUEST, "项目id不能为空");
+        }
+        try {
+            return new Result(Code.SUCCESS,
+                    mobileErrorService.getMobileErrorStatsPro(projectId), "查询近一周移动端错误统计成功");
         } catch (Exception e) {
             log.error("查询移动端错误统计时发生异常: projectId={}", projectId, e);
             return new Result(Code.INTERNAL_ERROR, "查询近一周移动端错误统计失败");
@@ -341,6 +370,12 @@ public class GraphController {
             return new Result(Code.INTERNAL_ERROR, "查询查询前端性能数据-平均时间,失败");
         }
 
+    }
+
+
+    @GetMapping("/MobileOperationalPerformance")
+    public Result getMobileOperation(@RequestParam String projectId,@RequestParam String timeType){
+        return mobilePerformanceService.getMobileOperation(projectId,timeType);
     }
 
     /**

@@ -78,4 +78,26 @@ public class ResponsibilityController {
        return responsibilityService.selectResponsibleError(projectId, responsibleId, errorType, platform);
    }
 
+    /**
+     * 修改处理状态
+     * @param responsibility
+     * @return
+     */
+   @PutMapping("/updateHandleStatus")
+    public Result updateHandleStatus(@RequestBody Responsibility responsibility) {
+       return responsibilityService.updateHandleStatus(responsibility);
+   }
+
+    /**
+     * 查询处理状态
+     * @param projectId
+     * @param errorType
+     * @param platform
+     * @return
+     */
+   @GetMapping("/selectHandleStatus")
+    public Result selectHandleStatus(@RequestParam String projectId, @RequestParam String errorType, @RequestParam String platform) {
+       return responsibilityService.selectHandleStatus(projectId, errorType, platform);
+   }
+
 }

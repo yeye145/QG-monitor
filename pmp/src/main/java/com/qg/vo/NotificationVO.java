@@ -19,6 +19,7 @@ public class NotificationVO {
     private Integer isRead;
     private String platform;
     private String environment;
+    private String content;
 
     private String projectName;//项目名
 

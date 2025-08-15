@@ -14,7 +14,7 @@ public class PersonalProjectVO {
     private String uuid;
     private String name;
     private String description;
-    private LocalDateTime createTime;
+    private LocalDateTime createdTime;
     private Boolean isPublic;
 
 //    private Long id;

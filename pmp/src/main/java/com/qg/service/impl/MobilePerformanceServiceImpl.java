@@ -1,11 +1,13 @@
 package com.qg.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.BackendPerformance;
 import com.qg.domain.MobilePerformance;
 import com.qg.domain.Result;
 import com.qg.mapper.MobilePerformanceMapper;
 import com.qg.service.MobilePerformanceService;
+import com.qg.vo.MobileOperationVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -118,5 +120,45 @@ public class MobilePerformanceServiceImpl implements MobilePerformanceService {
         }
 
         return new Result(SUCCESS, averageTimeMap, "查询成功");
+    }
+
+    @Override
+    public Result getMobileOperation(String projectId, String timeType) {
+        if (projectId == null || projectId.isEmpty()) {
+            return new Result(BAD_REQUEST, "项目ID不能为空");
+        }
+
+        if (timeType == null || timeType.isEmpty()) {
+            return new Result(BAD_REQUEST, "时间类型不能为空");
+        }
+
+        LambdaQueryWrapper<MobilePerformance> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MobilePerformance::getProjectId, projectId);
+
+        LocalDateTime passTime;
+
+        switch (timeType) {
+            case "day":
+                passTime = LocalDateTime.now().minusDays(1);
+                break;
+            case "week":
+                passTime = LocalDateTime.now().minusWeeks(1);
+                break;
+            case "month":
+                passTime = LocalDateTime.now().minusMonths(1);
+                break;
+            default:
+                return new Result(BAD_REQUEST, "不支持的时间类型");
+        }
+
+        queryWrapper.ge(MobilePerformance::getTimestamp, passTime);
+        List<MobileOperationVO> mobileOperationVOList = new ArrayList<>();
+        List<MobilePerformance> mobilePerformanceList = mobilePerformanceMapper.selectList(queryWrapper);
+        for (MobilePerformance mobilePerformance : mobilePerformanceList) {
+            MobileOperationVO mobileOperationVO = BeanUtil.copyProperties(mobilePerformance,MobileOperationVO.class);
+            mobileOperationVOList.add(mobileOperationVO);
+        }
+
+        return new Result(SUCCESS, mobileOperationVOList,"查询成功");
     }
 }

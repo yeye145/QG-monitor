@@ -72,6 +72,7 @@ public class UserController {
             if (map == null) {
                 return new Result(NOT_FOUND, "用户未注册或密码错误");
             }
+            log.info("用户信息: {}", map);
             Users user = (Users) map.get("user");
             if (user == null) {
                 return new Result(BAD_REQUEST, "未注册");
@@ -275,8 +276,6 @@ public class UserController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     @PostMapping("/password1")

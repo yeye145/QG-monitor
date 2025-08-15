@@ -30,7 +30,7 @@ public class BackendResponsibilityVO {
     private String errorType;
     private String stack;
     @TableField(value = "environment_snapshot", typeHandler = com.qg.handler.MapHandler.class)
-    private Object environmentSnapshot;
+    private Map<String, Object> environmentSnapshot;
     private String name;
     private Long delegatorId;
     private Long responsibleId;

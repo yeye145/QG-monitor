@@ -15,4 +15,6 @@ public interface MobileErrorService {
     void receiveErrorFromSDK(String mobileErrorJSON);
 
     Object[] getMobileErrorStats(String projectId);
+
+    Object[] getMobileErrorStatsPro(String projectId);
 }
