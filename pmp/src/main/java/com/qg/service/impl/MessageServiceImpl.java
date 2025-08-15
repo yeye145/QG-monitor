@@ -52,13 +52,14 @@ public class MessageServiceImpl implements MessageService {
         LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Message::getSendId, userId)
                 .or()
-                .eq(Message::getReceiverId, userId);
+                .eq(Message::getReceiverId, userId)
+                .orderByDesc(Message::getTimestamp); // 按时间降序排列
 
         List<Message> messages = messageMapper.selectList(queryWrapper);
         if (messages != null && !messages.isEmpty()) {
             return new Result(200, messages, "查询成功");
         } else {
-            return new Result(404, "没有找到相关消息");
+            return new Result(201, null,"没有找到相关消息");
         }
 
     }

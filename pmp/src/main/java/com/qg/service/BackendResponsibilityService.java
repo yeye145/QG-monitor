@@ -10,6 +10,6 @@ import com.qg.domain.Result;
  * @Version: 1.0     // 版本
  */
 public interface BackendResponsibilityService {
-    Result selectByCondition(String projectId, Long moduleId, String type);
+    Result selectByCondition(String projectId, String type);
 
 }

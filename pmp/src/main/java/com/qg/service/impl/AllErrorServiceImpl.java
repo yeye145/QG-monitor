@@ -55,7 +55,7 @@ public class AllErrorServiceImpl implements AllErrorService {
 
 
 @Override
-public Result selectByCondition(String projectId, Long moduleId, String type) {
+public Result selectByCondition(String projectId, String type) {
     // 参数校验
     if (projectId == null || projectId.isEmpty()) {
         return new Result(BAD_REQUEST, "项目ID不能为空");
@@ -67,13 +67,6 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
         LambdaQueryWrapper<FrontendError> frontendQueryWrapper = new LambdaQueryWrapper<>();
         LambdaQueryWrapper<MobileError> mobileQueryWrapper = new LambdaQueryWrapper<>();
 
-        // 处理模块条件
-        if (moduleId != null) {
-            Module module = moduleMapper.selectById(moduleId);
-            if (module != null) {
-                backendQueryWrapper.eq(BackendError::getModule, module.getModuleName());
-            }
-        }
 
         // 添加项目ID条件
         backendQueryWrapper.eq(BackendError::getProjectId, projectId)
@@ -85,9 +78,9 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
 
         // 添加错误类型条件
         if (type != null && !type.isEmpty()) {
-            backendQueryWrapper.eq(BackendError::getErrorType, type);
-            frontendQueryWrapper.eq(FrontendError::getErrorType, type);
-            mobileQueryWrapper.eq(MobileError::getErrorType, type);
+            backendQueryWrapper.like(BackendError::getErrorType, type);
+            frontendQueryWrapper.like(FrontendError::getErrorType, type);
+            mobileQueryWrapper.like(MobileError::getErrorType, type);
         }
 
         // 执行查询
@@ -134,7 +127,7 @@ public Result selectByCondition(String projectId, Long moduleId, String type) {
                 "查询成功");
 
     } catch (Exception e) {
-        log.error("查询错误信息时发生异常: projectId={}, moduleId={}, type={}", projectId, moduleId, type, e);
+        log.error("查询错误信息时发生异常: projectId={}, type={}", projectId, type, e);
         return new Result(INTERNAL_ERROR, "查询失败: " + e.getMessage());
     }
 }

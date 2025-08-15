@@ -80,7 +80,7 @@ public class FrontendPerformanceServiceImpl implements FrontendPerformanceServic
         queryWrapper.eq(FrontendPerformance::getProjectId, projectId);
 
         if (capture != null && !capture.isEmpty()) {
-            queryWrapper.eq(FrontendPerformance::getCaptureType, capture);
+            queryWrapper.like(FrontendPerformance::getCaptureType, capture);
         }
 
         List<FrontendPerformance> frontendPerformances = frontendPerformanceMapper.selectList(queryWrapper);

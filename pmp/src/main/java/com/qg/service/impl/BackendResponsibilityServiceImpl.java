@@ -105,7 +105,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
 //    }
 
     @Override
-    public Result selectByCondition(String projectId, Long moduleId, String type) {
+    public Result selectByCondition(String projectId, String type) {
         // 参数校验
         if (projectId == null || projectId.isEmpty()) {
             return new Result(Code.BAD_REQUEST, "项目ID不能为空");
@@ -115,17 +115,10 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
             // 构建查询条件
             LambdaQueryWrapper<BackendError> queryWrapper = new LambdaQueryWrapper<>();
 
-            // 处理模块条件
-            if (moduleId != null) {
-                Module module = moduleMapper.selectById(moduleId);
-                if (module != null) {
-                    queryWrapper.eq(BackendError::getModule, module.getModuleName());
-                }
-            }
 
             // 添加错误类型条件
             if (type != null && !type.isEmpty()) {
-                queryWrapper.eq(BackendError::getErrorType, type);
+                queryWrapper.like(BackendError::getErrorType, type);
             }
 
             // 添加项目ID条件
@@ -197,7 +190,7 @@ public class BackendResponsibilityServiceImpl implements BackendResponsibilitySe
                     "查询成功");
 
         } catch (Exception e) {
-            log.error("查询后端责任人信息时发生异常: projectId={}, moduleId={}, type={}", projectId, moduleId, type, e);
+            log.error("查询后端责任人信息时发生异常: projectId={},  type={}", projectId, type, e);
             return new Result(Code.INTERNAL_ERROR, "查询失败: " + e.getMessage());
         }
     }
