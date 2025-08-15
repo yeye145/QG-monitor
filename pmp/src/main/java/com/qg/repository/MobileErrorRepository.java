@@ -32,7 +32,6 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
 
     /**
      * 判断是否需要启用企业机器人发送告警
-     *
      * @param redisKey
      * @param error
      * @return
@@ -92,18 +91,19 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
             // 计算与当前时间的差值
             Duration duration = Duration.between(notificationTime, LocalDateTime.now());
             // 判断是否超过40分钟(2400秒)
-            if (duration.getSeconds() < 2400) {
-                log.info("该错误40分钟内有通知记录");
+            if(duration.getSeconds() < 300){
+                 log.info("该错误40分钟内有通知记录");
                 //检测该错误是否未被解决 （未解决在该时间段内无需重发）
                 LambdaQueryWrapper<Responsibility> queryWrapper1 = new LambdaQueryWrapper<>();
-                queryWrapper1.eq(Responsibility::getErrorType, error.getErrorType())
-                        .eq(Responsibility::getProjectId, error.getProjectId());
+                queryWrapper1.eq(Responsibility::getErrorType,error.getErrorType())
+                        .eq(Responsibility::getProjectId,error.getProjectId());
                 Responsibility responsibility1 = responsibilityMapper.selectOne(queryWrapper1);
                 //若该错误未被指派、则发送警告
-                if (responsibility1 == null) {
+                if(responsibility1 == null) {
                     log.info("该错误未被指派");
-                    return false;
-                } else {
+                    return true;
+                }
+                else{
                     //已解决就要发
                     if (responsibility1.getIsHandle() == RepositoryConstants.HANDLED) {
                         log.info("该错误40分钟内又报错，但其显示已解决");
@@ -120,19 +120,18 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
 
     /**
      * 发送消息模板
-     *
      * @param error
      * @return
      */
     @Override
     protected String generateAlertMessage(MobileError error) {
         return String.format("【移动端错误告警】\n" +
-                             "项目ID：%s\n" +
-                             "错误类型：%s\n" +
-                             "类名：%s\n" +
-                             "发生次数：%d\n" +
-                             "触发时间：%s\n" +
-                             ALERT_CONTENT_NEW,
+                        "项目ID：%s\n" +
+                        "错误类型：%s\n" +
+                        "类名：%s\n" +
+                        "发生次数：%d\n" +
+                        "触发时间：%s\n" +
+                        ALERT_CONTENT_NEW,
                 error.getProjectId(),
                 error.getErrorType(),
                 error.getClassName(),
@@ -158,7 +157,6 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
             notification.setPlatform("mobile");
             notification.setTimestamp(LocalDateTime.now());
             notification.setReceiverId(receiverID);
-            notification.setResponsibleId(receiverID);
             notification.setContent(ALERT_CONTENT_NEW);
             count++;
             notifications.add(notification);

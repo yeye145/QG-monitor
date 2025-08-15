@@ -33,7 +33,7 @@ public class FrontendError {
     private String stack;
     private String network;
 
-    private Integer event = 0;
+    private Integer event = 1;
 
     @TableField(typeHandler = com.qg.handler.MapHandler.class, value = "request_info")
     private Map<String, Object> request;
