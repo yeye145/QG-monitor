@@ -11,7 +11,7 @@ import com.qg.domain.Result;
  */
 public interface AllErrorService {
 
-    Result selectByCondition(String projectId, Long moduleId, String type);
+    Result selectByCondition(String projectId, String type);
 
     Result selectById(Long id);
 

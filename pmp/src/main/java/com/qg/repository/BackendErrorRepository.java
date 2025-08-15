@@ -77,6 +77,7 @@ public class BackendErrorRepository extends BackendErrorFatherRepository {
                 .eq(Notification::getProjectId, error.getProjectId())
                 .eq(Notification::getErrorId, error.getId())
                 .eq(Notification::getPlatform, "backend")
+                .eq(Notification::getContent, ALERT_CONTENT_NEW)
                 .orderByDesc(Notification::getTimestamp)  // 按时间倒序排序
                 .last("LIMIT 1");  // 限制只取第一条记录
         Notification notification = notificationMapper.selectOne(queryWrapper);

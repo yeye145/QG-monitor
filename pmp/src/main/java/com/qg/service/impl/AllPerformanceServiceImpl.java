@@ -37,7 +37,7 @@ public class AllPerformanceServiceImpl implements AllPerformanceService {
     private FrontendPerformanceMapper frontendPerformanceMapper;
 
     @Override
-    public Result selectByCondition(String projectId, Long moduleId, String api, String environment, String capture, String deviceModel, String osVersion) {
+    public Result selectByCondition(String projectId, String api, String capture, String osVersion) {
         if (projectId == null || projectId.isEmpty()) {
             return new Result(400, "项目ID不能为空");
         }
@@ -52,25 +52,12 @@ public class AllPerformanceServiceImpl implements AllPerformanceService {
         FrontendQueryWrapper.eq(FrontendPerformance::getProjectId, projectId);
         MobileQueryWrapper.eq(MobilePerformance::getProjectId, projectId);
 
-        Module module = moduleMapper.selectById(moduleId);
-        if (module != null) {
-            String moduleName = module.getModuleName();
-            BackendQueryWrapper.eq(BackendPerformance::getModule, moduleName);
-        } else {
-            return new Result(400, "模块不存在");
-        }
 
         if (api != null && !api.isEmpty()) {
-            BackendQueryWrapper.eq(BackendPerformance::getApi, api);
-        }
-
-        if (environment != null && !environment.isEmpty()) {
-            BackendQueryWrapper.eq(BackendPerformance::getEnvironment, environment);
+            BackendQueryWrapper.like(BackendPerformance::getApi, api);
         }
 
         List<BackendPerformance> backendPerformances = backendPerformanceMapper.selectList(BackendQueryWrapper);
-
-
 
 
 
@@ -83,12 +70,10 @@ public class AllPerformanceServiceImpl implements AllPerformanceService {
 
 
 
-        if (deviceModel != null && !deviceModel.isEmpty()) {
-            MobileQueryWrapper.eq(MobilePerformance::getDeviceModel, deviceModel);
-        }
+
 
         if (osVersion != null && !osVersion.isEmpty()) {
-            MobileQueryWrapper.eq(MobilePerformance::getOsVersion, osVersion);
+            MobileQueryWrapper.like(MobilePerformance::getOsVersion, osVersion);
         }
 
         List<MobilePerformance> mobilePerformances = mobilePerformanceMapper.selectList(MobileQueryWrapper);

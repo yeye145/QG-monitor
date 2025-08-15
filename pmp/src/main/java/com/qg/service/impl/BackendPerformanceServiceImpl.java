@@ -57,30 +57,18 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
     }
 
     @Override
-    public Result selectByCondition(String projectId, Long moduleId, String api, String environment) {
+    public Result selectByCondition(String projectId, String api) {
         if (projectId == null || projectId.isEmpty()) {
             return new Result(400, "项目ID不能为空");
         }
         LambdaQueryWrapper<BackendPerformance> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BackendPerformance::getProjectId, projectId);
 
-        if (moduleId != null) {
-            Module module = moduleMapper.selectById(moduleId);
-            if (module != null) {
-                String moduleName = module.getModuleName();
-                queryWrapper.eq(BackendPerformance::getModule, moduleName);
-            } else {
-                return new Result(400, "模块不存在");
-            }
-        }
 
         if (api != null && !api.isEmpty()) {
-            queryWrapper.eq(BackendPerformance::getApi, api);
+            queryWrapper.like(BackendPerformance::getApi, api);
         }
 
-        if (environment != null && !environment.isEmpty()) {
-            queryWrapper.eq(BackendPerformance::getEnvironment, environment);
-        }
 
         List<BackendPerformance> backendPerformances = backendPerformanceMapper.selectList(queryWrapper);
 

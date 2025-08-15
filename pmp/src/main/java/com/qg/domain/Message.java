@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description: 消息类  // 类说明
  * @ClassName: Message    // 类名
@@ -24,4 +26,5 @@ public class Message {
     private Long receiverId;
     private String context;
     private String type; // 消息类型
+    private LocalDateTime timestamp; // 消息发送时间
 }

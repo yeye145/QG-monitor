@@ -54,7 +54,8 @@ public class MessageServiceImpl implements MessageService {
         LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Message::getSendId, userId)
                 .or()
-                .eq(Message::getReceiverId, userId);
+                .eq(Message::getReceiverId, userId)
+                .orderByDesc(Message::getTimestamp); // 按时间降序排列
 
         List<Message> messages = messageMapper.selectList(queryWrapper);
         if (messages != null && !messages.isEmpty()) {
