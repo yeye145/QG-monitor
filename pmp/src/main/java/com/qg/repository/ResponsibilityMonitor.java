@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.qg.utils.Constants.*;
 
@@ -82,8 +84,6 @@ public class ResponsibilityMonitor {
                     if (notificationList2.isEmpty()){
                         log.warn("该项目无成员，无法再发送！");
                     }
-                    //发信息
-                    notificationService.add(notificationList2);
                     //发微信
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_MEMBER));
@@ -97,18 +97,31 @@ public class ResponsibilityMonitor {
                         log.warn("该项目无老板，无法再发送！上报给管理员");
                         List<Notification> notificationList1 = buildResponsibilityList( item, USER_ROLE_ADMIN);
                         //发信息
-                        notificationService.add(notificationList1);
+
+                        List<Notification> allNotifications = Stream.concat(
+                                notificationList2.stream(),
+                                notificationList1.stream()
+                        ).collect(Collectors.toList());
+                        //发信息
+                        notificationService.add(allNotifications);
+
                         //发微信
                         wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                                 , buildMentionedMobileList(item, USER_ROLE_ADMIN));
                     }
                     //发信息
-                    notificationService.add(notificationList);
+                    List<Notification> allNotifications = Stream.concat(
+                            notificationList2.stream(),
+                            notificationList.stream()
+                    ).collect(Collectors.toList());
+                    //发信息
+                    notificationService.add(allNotifications);
                     //发微信
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_BOSS));
 
                 }else if(userRole.equals(USER_ROLE_ADMIN)){
+
                     log.info("获取信息成功，上次发给了管理员，升级报警，发送给老板");
                     //TODO:发送信息
                     //发送给成员
@@ -116,8 +129,6 @@ public class ResponsibilityMonitor {
                     if (notificationList2.isEmpty()){
                         log.warn("该项目无成员，无法再发送！");
                     }
-                    //发信息
-                    notificationService.add(notificationList2);
                     //发微信
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_MEMBER));
@@ -127,14 +138,24 @@ public class ResponsibilityMonitor {
                     if(notificationList.isEmpty()){
                         log.warn("该项目无老板，无法再发送！上报给管理员");
                         List<Notification> notificationList1 = buildResponsibilityList( item, USER_ROLE_ADMIN);
+                        List<Notification> allNotifications = Stream.concat(
+                                notificationList1.stream(),
+                                notificationList.stream()
+                        ).collect(Collectors.toList());
                         //发信息
-                        notificationService.add(notificationList1);
+                        notificationService.add(allNotifications);
+
                         //发微信
                         wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                                 , buildMentionedMobileList(item, USER_ROLE_ADMIN));
                     }
+                    List<Notification> allNotifications = Stream.concat(
+                            notificationList2.stream(),
+                            notificationList.stream()
+                    ).collect(Collectors.toList());
+                    notificationService.add(allNotifications);
                     //发信息
-                    notificationService.add(notificationList);
+
                     //发微信
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_BOSS));
@@ -153,30 +174,40 @@ public class ResponsibilityMonitor {
                 if(userRole == null){
                     log.info("获取信息失败，直接发给管理员");
                     //TODO:发送信息
-                    notificationService.add(buildResponsibilityList(item,USER_ROLE_ADMIN));
+                    List<Notification> allNotifications = Stream.concat(
+                            buildResponsibilityList(item, USER_ROLE_MEMBER).stream(),
+                            buildResponsibilityList(item, USER_ROLE_ADMIN).stream()
+                    ).collect(Collectors.toList());
+
+                    notificationService.add(allNotifications);
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_ADMIN));
 
-                    notificationService.add(buildResponsibilityList(item,USER_ROLE_MEMBER));
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_MEMBER));
                 }else if(userRole.equals(USER_ROLE_MEMBER)){
                     log.info("获取信息成功，上次发给了普通员工，升级报警，发送给管理员");
-                    //发送给成员
                     List<Notification> notificationList2 = buildResponsibilityList(item, USER_ROLE_MEMBER);
                     if (notificationList2.isEmpty()){
                         log.warn("该项目无成员，无法再发送！");
                     }
-                    notificationService.add(notificationList2);
-                    wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
-                            , buildMentionedMobileList(item, USER_ROLE_MEMBER));
 
-                    //发送给管理员
                     List<Notification> notificationList = buildResponsibilityList(item,USER_ROLE_ADMIN);
                     if(notificationList.isEmpty()){
                         log.error("获取信息失败!");
                     }
-                    notificationService.add(notificationList);
+                    //结合起来
+                    List<Notification> allNotifications = Stream.concat(
+                            notificationList2.stream(),
+                            notificationList.stream()
+                    ).collect(Collectors.toList());
+                    notificationService.add(allNotifications);
+
+                    //发送给成员
+                    wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
+                            , buildMentionedMobileList(item, USER_ROLE_MEMBER));
+
+                    //发送给管理员
                     wechatAlertUtil.sendAlert(getWebhookUrl(item.getProjectId()),generateAlertMessage(item)
                             , buildMentionedMobileList(item, USER_ROLE_ADMIN));
 
@@ -202,13 +233,14 @@ public class ResponsibilityMonitor {
                 .eq(Notification::getProjectId, responsibility.getProjectId())
                 .eq(Notification::getErrorType, responsibility.getErrorType())
                 .eq(Notification::getPlatform, responsibility.getPlatform())
-                .eq(Notification::getContent, ALERT_CONTENT_HANDLE)
                 .orderByDesc(Notification::getTimestamp)
                 .last("limit 1");
 
         Notification existNotification = notificationMapper.selectOne(queryWrapper);
         log.info("existNotification:{}", existNotification);
-
+        if(existNotification.getContent().equals(ALERT_CONTENT_NEW)){
+            return null;
+        }
         if (existNotification == null) {
             log.warn("未查询到相关信息！");
             return null;
@@ -238,10 +270,19 @@ public class ResponsibilityMonitor {
     //构建发送信息的列表
     private List<Notification> buildResponsibilityList (Responsibility item,Integer userRole) {
         List<Notification> result = new ArrayList<>();
-        LambdaQueryWrapper<Role> qw = new LambdaQueryWrapper<>();
-        qw.eq(Role::getUserRole, userRole).eq(Role::getProjectId, item.getProjectId());
-        List<Role> roles = roleMapper.selectList(qw);
+        List<Role> roles =new ArrayList<>();
+        if (userRole == USER_ROLE_MEMBER) {
+            LambdaQueryWrapper<Role> qw = new LambdaQueryWrapper<>();
+            qw.eq(Role::getUserId, item.getResponsibleId())
+                    .eq(Role::getProjectId, item.getProjectId());
+            Role role = roleMapper.selectOne(qw);
+            roles.add(role);
 
+        } else {
+            LambdaQueryWrapper<Role> qw = new LambdaQueryWrapper<>();
+            qw.eq(Role::getUserRole, userRole).eq(Role::getProjectId, item.getProjectId());
+            roles = roleMapper.selectList(qw);
+        }
         for (Role role : roles) {
             Notification notification = new Notification();
             notification.setProjectId(item.getProjectId());
@@ -253,28 +294,38 @@ public class ResponsibilityMonitor {
             notification.setContent(ALERT_CONTENT_HANDLE);
             result.add(notification);
         }
-
         return result;
     }
-
     /**
      * 构建发送微信接收者的手机号码
      */
-    protected List<String> buildMentionedMobileList(Responsibility responsibility,Integer userRole){
+    protected List<String> buildMentionedMobileList(Responsibility responsibility,Integer userRole) {
+        List<Role> roleList = new ArrayList<>();
         List<String> mobileList = new ArrayList<>();
-        LambdaQueryWrapper<Role> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Role::getProjectId,responsibility.getProjectId())
-                    .eq(Role::getUserRole,userRole);
-        List<Role> roleList = roleMapper.selectList(queryWrapper);
-        for(Role role:roleList){
+
+        if (userRole == USER_ROLE_MEMBER) {
+            LambdaQueryWrapper<Role> qw = new LambdaQueryWrapper<>();
+            qw.eq(Role::getUserId, responsibility.getResponsibleId())
+                    .eq(Role::getProjectId, responsibility.getProjectId());
+            Role role = roleMapper.selectOne(qw);
+            roleList.add(role);
+        } else {
+
+            LambdaQueryWrapper<Role> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Role::getProjectId, responsibility.getProjectId())
+                    .eq(Role::getUserRole, userRole);
+            roleList = roleMapper.selectList(queryWrapper);
+        }
+        for (Role role : roleList) {
             LambdaQueryWrapper<Users> queryWrapper1 = new LambdaQueryWrapper<>();
-            queryWrapper1.eq(Users::getId,role.getUserId());
+            queryWrapper1.eq(Users::getId, role.getUserId());
             Users user = usersMapper.selectOne(queryWrapper1);
             mobileList.add(user.getPhone());
+
+
         }
         return mobileList;
     }
-
     /**
      * 获取企业机器人webhook
      * @param projectId

@@ -6,6 +6,7 @@ import com.qg.domain.BackendError;
 import com.qg.domain.Project;
 import com.qg.mapper.BackendErrorMapper;
 import com.qg.mapper.ProjectMapper;
+import com.qg.repository.BackendErrorFatherRepository;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,12 @@ import java.util.concurrent.*;
 @Slf4j
 public class BackendErrorAggregator {
 
-    private static final String ERROR_CACHE_KEY_PREFIX = "backend_error:";
+    private static final String ERROR_CACHE_KEY_PREFIX = "backend:error:";
     private static final String BATCH_COUNTER_KEY = "backend_error_batch_counter";
+
+    @Autowired
+    private BackendErrorFatherRepository backendErrorFatherRepository;
+
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -45,8 +50,11 @@ public class BackendErrorAggregator {
     public void addErrorToCache(BackendError backendError) {
         // 构建 Redis key，包含 environment
         String key = generateRedisKey(backendError.getProjectId(),
-                backendError.getModule(),
+                backendError.getErrorType(),
                 backendError.getEnvironment());
+
+        //触发告警
+        triggerImmediateAlert(backendError);
 
         // 使用错误类型作为 field
         String field = backendError.getErrorType();
@@ -115,6 +123,18 @@ public class BackendErrorAggregator {
     }
 
     /**
+     * 新增：立即触发告警
+     */
+    private void triggerImmediateAlert(BackendError error) {
+        try {
+            // 调用仓库的告警逻辑
+            backendErrorFatherRepository.sendWechatAlert(error);
+        } catch (Exception e) {
+            log.error("即时告警发送失败: {}", e.getMessage());
+        }
+    }
+
+    /**
      * 处理并保存指定key的错误信息
      * @param key Redis key
      */
@@ -175,10 +195,10 @@ public class BackendErrorAggregator {
      * @return 项目ID
      */
     private String extractProjectIdFromKey(String key) {
-        // key格式: backend_error:projectId:module:environment
+        // key格式: backend:error:projectId:errorType:environment
         String[] parts = key.split(":");
         if (parts.length >= 3) {
-            return parts[1]; // 第二个部分是projectId
+            return parts[3]; // 第三个部分是projectId
         }
         return null;
     }
@@ -203,8 +223,8 @@ public class BackendErrorAggregator {
         }
     }
 
-    private String generateRedisKey(String projectId, String module, String environment) {
-        return ERROR_CACHE_KEY_PREFIX + projectId + ":" + module + ":" + environment;
+    private String generateRedisKey(String projectId, String errorType, String environment) {
+        return ERROR_CACHE_KEY_PREFIX + projectId + ":" + errorType + ":" + environment;
     }
 
     /**

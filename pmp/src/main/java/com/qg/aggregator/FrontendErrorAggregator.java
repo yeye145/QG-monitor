@@ -6,6 +6,7 @@ import com.qg.domain.FrontendError;
 import com.qg.domain.Project;
 import com.qg.mapper.FrontendErrorMapper;
 import com.qg.mapper.ProjectMapper;
+import com.qg.repository.FrontendErrorFatherRepository;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,11 @@ import java.util.concurrent.*;
 public class FrontendErrorAggregator {
 
     // 使用 Redis 的 key 前缀
-    private static final String ERROR_CACHE_KEY_PREFIX = "frontend_error:";
+    private static final String ERROR_CACHE_KEY_PREFIX = "frontend:error:";
     private static final String BATCH_COUNTER_KEY = "frontend_error_batch_counter";
+
+    @Autowired
+    private FrontendErrorFatherRepository frontendErrorFatherRepository;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -47,6 +51,9 @@ public class FrontendErrorAggregator {
         // 构建 Redis key，不包含 module 字段
         String key = generateRedisKey(frontendError.getProjectId(),
                 frontendError.getMessage());
+
+        //触发告警
+        triggerImmediateAlert(frontendError);
 
         // 使用错误类型作为 field
         String field = frontendError.getErrorType();
@@ -85,6 +92,18 @@ public class FrontendErrorAggregator {
 
         // 设置过期时间，防止内存泄漏
         stringRedisTemplate.expire(key, 60, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 新增：立即触发告警
+     */
+    private void triggerImmediateAlert(FrontendError error) {
+        try {
+            // 调用仓库的告警逻辑
+            frontendErrorFatherRepository.sendWechatAlert(error);
+        } catch (Exception e) {
+            log.error("即时告警发送失败: {}", e.getMessage());
+        }
     }
 
     /**

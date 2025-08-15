@@ -25,7 +25,7 @@ public interface AlertRuleMapper extends BaseMapper<AlertRule> {
             @Param("className") String className);
 
     @Select("SELECT " +
-            "'frontend:error:' || project_id || ':' || session_id || ':' || error_type AS redis_key, " +
+            "'frontend:error:' || project_id || ':' || error_type AS redis_key, " +
             "ar.threshold " +
             "FROM alert_rule ar " +
             "WHERE project_id = #{projectId,jdbcType=VARCHAR} " +
@@ -33,11 +33,10 @@ public interface AlertRuleMapper extends BaseMapper<AlertRule> {
     @MapKey("redis_key")
     HashMap<String, Integer> selectByFrontendRedisKeyToMap(
             @Param("projectId") String projectId,
-            @Param("errorType") String errorType,
-            @Param("sessionId") String sessionId);
+            @Param("errorType") String errorType);
 
     @Select("SELECT " +
-            "'backend:error:' || project_id || ':' || session_id || ':' || error_type AS redis_key, " +
+            "'backend:error:' || project_id || ':' || error_type || ':' || #{environment,jdbcType=VARCHAR} AS redis_key, " +
             "ar.threshold " +
             "FROM alert_rule ar " +
             "WHERE project_id = #{projectId,jdbcType=VARCHAR} " +
@@ -46,5 +45,5 @@ public interface AlertRuleMapper extends BaseMapper<AlertRule> {
     HashMap<String, Integer> selectByBackendRedisKeyToMap(
             @Param("projectId") String projectId,
             @Param("errorType") String errorType,
-            @Param("sessionId") String sessionId);
+            @Param("environment") String environment);
 }

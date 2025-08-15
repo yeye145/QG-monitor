@@ -91,7 +91,7 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
             // 计算与当前时间的差值
             Duration duration = Duration.between(notificationTime, LocalDateTime.now());
             // 判断是否超过40分钟(2400秒)
-            if(duration.getSeconds() < 2400){
+            if(duration.getSeconds() < 300){
                  log.info("该错误40分钟内有通知记录");
                 //检测该错误是否未被解决 （未解决在该时间段内无需重发）
                 LambdaQueryWrapper<Responsibility> queryWrapper1 = new LambdaQueryWrapper<>();
@@ -101,7 +101,7 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
                 //若该错误未被指派、则发送警告
                 if(responsibility1 == null) {
                     log.info("该错误未被指派");
-                    return false;
+                    return true;
                 }
                 else{
                     //已解决就要发
@@ -158,7 +158,6 @@ public class MobileErrorRepository extends MobileErrorFatherRepository {
             notification.setPlatform("mobile");
             notification.setTimestamp(LocalDateTime.now());
             notification.setReceiverId(receiverID);
-            notification.setResponsibleId(receiverID);
             notification.setContent(ALERT_CONTENT_NEW);
             count++;
             notifications.add(notification);
