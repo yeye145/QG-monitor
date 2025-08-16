@@ -3,6 +3,7 @@ package com.qg.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -304,6 +305,13 @@ public class UsersServiceImpl implements UsersService {
         if(existingUser == null) {
             return new Result(NOT_FOUND, "用户不存在");
         }
+
+        users.setUsername(users.getUsername().trim());
+
+        if (!StrUtil.isBlank(users.getUsername()) && users.getUsername().length() > 10) {
+            return new Result(BAD_REQUEST, "用户名不能为空且长度不能大于10");
+        }
+
 
         LambdaQueryWrapper<Users> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Users::getId, id);
