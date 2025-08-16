@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.aggregator.BackendErrorAggregator;
 import com.qg.domain.BackendError;
 import com.qg.domain.Module;
+import com.qg.domain.Project;
 import com.qg.domain.Result;
 import com.qg.mapper.BackendErrorMapper;
 import com.qg.mapper.ModuleMapper;
 import com.qg.service.BackendErrorService;
 import com.qg.service.ModuleService;
+import com.qg.service.ProjectService;
 import com.qg.utils.MathUtil;
 import com.qg.vo.TransformDataVO;
 import com.qg.vo.UvBillDataVO;
@@ -43,6 +45,8 @@ public class BackendErrorServiceImpl implements BackendErrorService {
     private BackendErrorAggregator backendErrorAggregator;
     @Autowired
     private ModuleService moduleService;
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public Result selectByCondition(String projectId, Long moduleId, String type) {
@@ -92,6 +96,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         try {
             BackendError backendError = JSONUtil.toBean(errorData, BackendError.class);
             if (backendError.getProjectId() == null ||
+                !projectService.checkProjectIdExist(backendError.getProjectId()) ||
                 backendError.getErrorType() == null ||
                 backendError.getEnvironment() == null) {
                 log.error("参数错误");
@@ -162,8 +167,8 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
         queryWrapper.ge(BackendError::getTimestamp, oneWeekAgo);
 
-        Map<String ,Double> transformDataVOList = new HashMap<>();
-        Map<String, Double>uvBillDataVOList = new HashMap<>();
+        Map<String, Double> transformDataVOList = new HashMap<>();
+        Map<String, Double> uvBillDataVOList = new HashMap<>();
 
         Integer count = 0;
 
@@ -207,10 +212,7 @@ public class BackendErrorServiceImpl implements BackendErrorService {
         });
 
 
-
-
-
-        return new Object[]{uvBillDataVOs,transformDataVOs};
+        return new Object[]{uvBillDataVOs, transformDataVOs};
     }
 
     private static void addToMap(BackendError backendError, Map<String, Double> transformDataVOList) {
@@ -225,5 +227,6 @@ public class BackendErrorServiceImpl implements BackendErrorService {
 
         }
     }
+
 
 }
