@@ -111,7 +111,7 @@ public class SourcemapParseTest2 {
         // 使用示例
         SourceMapService service = new SourceMapService();
         SourceMapService.OriginalSourcePosition position = service.resolveSourcePosition(
-                "uploads/maps/1adfdbb9-38da-436a-a7ad-ba5e8c5a4baf.map", 9, 1208);
+                "http://47.113.224.195:30420/uploads/maps/f97366b4-d3ef-417b-858b-c6e0dd5ffc9b.map", 9, 1065);
 
         if (position != null) {
             System.out.println("=== 成功解析原始源码位置 ===");

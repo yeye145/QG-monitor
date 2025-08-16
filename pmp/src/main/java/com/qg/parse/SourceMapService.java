@@ -440,11 +440,19 @@ public class SourceMapService {
                     sourceFile, lineNumber, columnNumber, sourceCode);
         }
     }
-    
-    private String readFileContent(String filePath) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
-    }
 
+    // 在 SourceMapService.java 中修改 readFileContent 方法
+    private String readFileContent(String filePath) throws IOException {
+        if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+            // 处理 HTTP URL
+            try (java.io.InputStream in = new java.net.URL(filePath).openStream()) {
+                return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        } else {
+            // 处理本地文件路径
+            return Files.readString(Paths.get(filePath), StandardCharsets.UTF_8);
+        }
+    }
 
 
 

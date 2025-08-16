@@ -188,6 +188,7 @@ public class ResponsibilityServiceImpl implements ResponsibilityService {
         notification.setErrorType(responsibility.getErrorType());
         notification.setSenderId(responsibility.getDelegatorId());
         notification.setReceiverId(responsibility.getResponsibleId());
+        notification.setErrorId(responsibility.getErrorId());
         notification.setPlatform(platform);
         notification.setContent(ALERT_CONTENT_DELEGATE);
         notification.setResponsibleId(responsibility.getResponsibleId());
