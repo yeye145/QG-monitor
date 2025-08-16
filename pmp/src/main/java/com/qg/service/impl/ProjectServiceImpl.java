@@ -10,9 +10,6 @@ import com.qg.dto.InviteDto;
 import com.qg.mapper.ProjectMapper;
 import com.qg.mapper.RoleMapper;
 import com.qg.service.ProjectService;
-import com.qg.service.RoleService;
-import com.qg.utils.Constants;
-import com.qg.utils.RedisConstants;
 import com.qg.vo.PersonalProjectVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -363,5 +360,16 @@ public class ProjectServiceImpl implements ProjectService {
             log.error("查询项目失败", e);
             return new Result(INTERNAL_ERROR, "查询项目失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 检查项目ID是否存在
+     *
+     * @param projectId
+     * @return
+     */
+    @Override
+    public boolean checkProjectIdExist(String projectId) {
+        return projectMapper.exists(new LambdaQueryWrapper<Project>().eq(Project::getUuid, projectId));
     }
 }

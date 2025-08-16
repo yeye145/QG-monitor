@@ -75,6 +75,7 @@ public class FrontendErrorRepository extends FrontendErrorFatherRepository {
         queryWrapper.eq(Notification::getErrorType, error.getErrorType())
                 .eq(Notification::getProjectId, error.getProjectId())
                 .eq(Notification::getErrorId, error.getId())
+                .eq(Notification::getContent, ALERT_CONTENT_NEW)
                 .eq(Notification::getPlatform,"frontend")
                 .orderByDesc(Notification::getTimestamp)  // 按时间倒序排序
                 .last("LIMIT 1");  // 限制只取第一条记录
