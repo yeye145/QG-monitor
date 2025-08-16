@@ -3,19 +3,17 @@ package com.qg.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qg.domain.*;
-import com.qg.domain.Module;
 import com.qg.mapper.BackendPerformanceMapper;
-import com.qg.mapper.ModuleMapper;
+import com.qg.mapper.ProjectMapper;
 import com.qg.service.BackendPerformanceService;
 import com.qg.service.ModuleService;
+import com.qg.service.ProjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +35,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
     private BackendPerformanceMapper backendPerformanceMapper;
 
     @Autowired
-    private ModuleMapper moduleMapper;
+    private ProjectService projectService;
 
     @Autowired
     private ModuleService moduleService;
@@ -53,7 +51,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
             count += backendPerformanceMapper.insert(backendPerformance);
         }
 
-        return backendPerformances.size()==count ? count : 0 ; // 返回保存的记录数
+        return backendPerformances.size() == count ? count : 0; // 返回保存的记录数
     }
 
     @Override
@@ -73,7 +71,7 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
         List<BackendPerformance> backendPerformances = backendPerformanceMapper.selectList(queryWrapper);
 
 
-        return new Result(SUCCESS, List.of(backendPerformances,new ArrayList<>(),new ArrayList<>()), "查询成功" );
+        return new Result(SUCCESS, List.of(backendPerformances, new ArrayList<>(), new ArrayList<>()), "查询成功");
     }
 
     @Override
@@ -91,6 +89,13 @@ public class BackendPerformanceServiceImpl implements BackendPerformanceService 
             if (backendPerformances == null || backendPerformances.isEmpty()) {
                 log.warn("解析后端性能数据为空");
                 return new Result(BAD_REQUEST, "解析后端性能数据为空");
+            }
+
+            // 检查项目ID是否存在
+            String projectId = backendPerformances.getFirst().getProjectId();
+            if (!projectService.checkProjectIdExist(projectId)) {
+                log.warn("项目ID:{}不存在", projectId);
+                return new Result(BAD_REQUEST, "项目ID不存在");
             }
 
             // 过滤掉 projectId 为空的数据

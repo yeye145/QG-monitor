@@ -20,4 +20,5 @@ public interface BackendPerformanceService {
     Result addPerformance(String performanceData);
 
     Result getAverageTime(String projectId, String timeType);
+
 }

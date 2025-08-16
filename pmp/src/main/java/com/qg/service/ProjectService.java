@@ -27,4 +27,6 @@ public interface ProjectService {
     Result selectProjectByName(String name);
 
     Result getPrivateProjectList();
+
+    boolean checkProjectIdExist(String projectId);
 }
