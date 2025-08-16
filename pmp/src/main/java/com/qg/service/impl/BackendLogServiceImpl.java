@@ -4,6 +4,8 @@ package com.qg.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.qg.domain.BackendLog;
 
+import com.qg.domain.Project;
+import com.qg.mapper.ProjectMapper;
 import com.qg.repository.BackendLogRepository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -11,6 +13,7 @@ import com.qg.mapper.BackendLogMapper;
 
 import com.qg.service.BackendLogService;
 import com.qg.service.ModuleService;
+import com.qg.service.ProjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,8 @@ public class BackendLogServiceImpl implements BackendLogService {
     private BackendLogMapper backendLogMapper;
     @Autowired
     private ModuleService moduleService;
+    @Autowired
+    private ProjectService projectService;
 
 
     @Override
@@ -58,11 +63,18 @@ public class BackendLogServiceImpl implements BackendLogService {
     public void receiveLogFromSDK(String logJSON) {
         // 转换数据，进行缓存交互
         try {
-            JSONUtil.toList(logJSON, BackendLog.class)
-                    .forEach(log -> {
-                        moduleService.putModuleIfAbsent(log.getModule(), log.getProjectId());
-                        backendLogRepository.statistics(log);
-                    });
+            List<BackendLog> logs = JSONUtil.toList(logJSON, BackendLog.class);
+
+            // 检验项目id是否存在
+            String projectId = logs.getFirst().getProjectId();
+            if (!projectService.checkProjectIdExist(projectId)) {
+                log.warn("项目ID不存在:{}", projectId);
+                return;
+            }
+            logs.forEach(log -> {
+                moduleService.putModuleIfAbsent(log.getModule(), log.getProjectId());
+                backendLogRepository.statistics(log);
+            });
             log.info("backend-info-log存入缓存成功");
         } catch (Exception e) {
             log.warn("backend-info-log存入缓存失败:{}", e.getMessage());
@@ -86,4 +98,5 @@ public class BackendLogServiceImpl implements BackendLogService {
 
         return backendLogMapper.selectList(queryWrapper);
     }
+
 }
