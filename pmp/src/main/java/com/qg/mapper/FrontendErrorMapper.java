@@ -149,21 +149,4 @@ public interface FrontendErrorMapper extends BaseMapper<FrontendError> {
             @Param("projectId") String projectId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
-
-//    @Select("""
-//            SELECT
-//              (crumb->>'message') AS label,
-//              COUNT(*) AS value
-//            FROM pmp.frontend_error,
-//                 jsonb_array_elements(breadcrumbs) AS crumb
-//            WHERE
-//              project_id = #{projectId}
-//              AND timestamp BETWEEN #{startTime} AND #{endTime}
-//              AND crumb->>'captureType' = 'manual'
-//            GROUP BY label
-//            """)
-//    List<ManualTrackingVO> queryManualTrackingStats(
-//            @Param("projectId") String projectId,
-//            @Param("startTime") LocalDateTime startTime,
-//            @Param("endTime") LocalDateTime endTime);
 }
