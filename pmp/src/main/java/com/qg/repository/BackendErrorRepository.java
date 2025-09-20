@@ -83,7 +83,6 @@ public class BackendErrorRepository extends BackendErrorFatherRepository {
         Notification notification = notificationMapper.selectOne(queryWrapper);
         log.info("notification:{}", notification);
 
-
         if (notification == null) {
             log.info("该错误没有通知记录");
             return false;
